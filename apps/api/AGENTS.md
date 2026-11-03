@@ -41,6 +41,15 @@ on every call.
   `CRON_SECRET` and POSTs `DEPLOY_HOOK_URL?buildCache=false`. Its route sits
   before the `/api/(.*)` catch-all. Keep `typescript` below 7 (Vercel's
   builder crashes on TS 7).
+- `bus/`: the bus GPS Function (`api/vehicles/bus.ts`, Node.js, TypeScript),
+  the pnpm workspace `@express/bus` (listed in `pnpm-workspace.yaml` by its own
+  path, since it sits one level below `apps/*`). Logic lives in `lib/`, tests
+  in `test/` (Vitest). It is routed by the
+  `/api/vehicles/bus` rewrite ahead of the catch-all. The service needs
+  `"framework": "node"` and its `entrypoint` in `vercel.json`: with `root`
+  alone Vercel builds nothing. Keep TypeScript below 7: Vercel's Node builder
+  type-checks with the local `typescript` package, and TypeScript 7 lacks the
+  JavaScript API it calls.
 
 ## Build and run locally
 
@@ -83,6 +92,9 @@ Cron function checks (CI runs them through `scripts/ci/node.sh`):
 pnpm turbo run lint typecheck test --filter=@express/cron
 ```
 
+Bus Function: `pnpm turbo run lint typecheck test --filter=@express/bus` from the
+repository root. CI runs the same through `scripts/ci/node.sh` (`make ci-server`).
+
 ## Deploy
 
 The project is linked to GitHub with Root Directory `apps/api`: pushes to a
@@ -102,8 +114,10 @@ new builds are not promoted until someone runs `vercel promote`.
 ## Environment variables
 
 - `PORT`: port MOTIS listens on (container default `80`, Vercel's default).
-- `MTA_BUS_TIME_KEY`: MTA Bus Time key, read by the adapter only (MOTIS never
-  sees it). Without it, bus realtime is off and the bus feeds answer 404.
+- `MTA_BUS_TIME_KEY`: MTA Bus Time key, read by the motis adapter (MOTIS never
+  sees it; without it, bus realtime is off and the bus feeds answer 404) and by
+  the `bus` Function (`/api/vehicles/bus`), which answers 503 without it.
+  Never send it to the app or log it.
 - `CRON_SECRET` (sensitive): bearer token Vercel Cron sends to
   `/api/cron/rebuild`.
 - `DEPLOY_HOOK_URL` (sensitive): the project's Deploy Hook for `main`.
