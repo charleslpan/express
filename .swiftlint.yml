@@ -36,3 +36,8 @@ identifier_name:
     - x
     - y
     - to # PlanRequest.to, after MOTIS's fromPlace/toPlace
+    - xs # GlassUI's Spacing and Radius scales
+    - sm
+    - md
+    - lg
+    - xl
