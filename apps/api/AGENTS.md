@@ -27,10 +27,11 @@ on every call.
   query time).
 - `motis/smoke-build.sh`: runs `smoke.sh` inside the Docker build (`smoke`
   stage) against the freshly imported data; a failure fails the deployment.
-- `cron/index.js`: the daily Vercel Cron target. Checks
-  `CRON_SECRET`, POSTs `DEPLOY_HOOK_URL?buildCache=false`. The `cron` service
-  is a plain Node function with no dependencies; its route sits before the
-  `/api/(.*)` catch-all.
+- `cron/`: the daily Vercel Cron target, a self-contained TypeScript package.
+  `api/cron/rebuild.ts` is the entrypoint; `lib/rebuild.ts` checks
+  `CRON_SECRET` and POSTs `DEPLOY_HOOK_URL?buildCache=false`. Its route sits
+  before the `/api/(.*)` catch-all. Keep `typescript` below 7 (Vercel's
+  builder crashes on TS 7).
 
 ## Build and run locally
 
@@ -52,6 +53,10 @@ apps/api/motis/smoke.sh https://express-server-cyan-zeta.vercel.app
 
 Needs `curl` and `jq`. CI runs `scripts/ci/server.sh`, which builds the image,
 starts it, and runs the smoke test; run it locally the same way with Docker.
+
+```sh
+cd apps/api/cron && npm ci && npm run typecheck && npm test
+```
 
 ## Deploy
 

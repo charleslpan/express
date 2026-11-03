@@ -5,7 +5,7 @@ the developer's personal account "charlespan's projects", Hobby plan).
 
 | Path | Service | What |
 | --- | --- | --- |
-| `/api/cron/(.*)` | `cron` (Node function) | Daily rebuild trigger, called by Vercel Cron only. |
+| `/api/cron/(.*)` | `cron` (Node function, TypeScript) | Daily rebuild trigger, called by Vercel Cron only. |
 | `/api/(.*)` | `motis` (container) | [MOTIS 2](https://github.com/motis-project/motis) v2.11.4 routing for NYC: subway with SIR, and MTA buses. Timetables only for now. |
 
 Production: <https://express-server-cyan-zeta.vercel.app> (also
@@ -45,7 +45,7 @@ The MTA's supplemented subway feed changes hourly and covers planned work only
 1. **Vercel Cron** calls `GET /api/cron/rebuild` on the production deployment
    at `0 9 * * *` (09:00 UTC: 4 am EST, 5 am EDT). Hobby runs it once a day
    somewhere inside that hour (±59 min). Configured in [`vercel.json`](vercel.json).
-2. The function ([`cron/index.js`](cron/index.js)) checks
+2. The function ([`cron/lib/rebuild.ts`](cron/lib/rebuild.ts)) checks
    `Authorization: Bearer $CRON_SECRET` and POSTs the project's Deploy Hook
    with `?buildCache=false`, so the Docker build downloads fresh feeds and
    re-imports them.
@@ -77,7 +77,7 @@ Without either, the function answers 401 or 500 and nothing rebuilds.
   "Use existing Build Cache".
 - Or POST the hook: `curl -X POST "$DEPLOY_HOOK_URL?buildCache=false"`.
 - Or run the cron now: Settings → Cron Jobs → **Run**, or
-  `vercel crons run /api/cron/rebuild --scope charlespan-projects` from `server/`.
+  `vercel crons run /api/cron/rebuild --scope charlespan-projects` from `apps/api/`.
 
 ### Roll back
 

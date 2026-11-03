@@ -1,5 +1,15 @@
 {
   "name": "express-cron",
   "private": true,
-  "type": "module"
+  "description": "Daily Vercel Cron target: triggers a cache-free production rebuild via the Deploy Hook.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.0"
+  }
 }

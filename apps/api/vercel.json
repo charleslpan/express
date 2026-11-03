@@ -8,7 +8,8 @@
     },
     "cron": {
       "root": "cron/",
-      "entrypoint": "index.js"
+      "framework": "node",
+      "entrypoint": "api/cron/rebuild.ts"
     }
   },
   "crons": [
