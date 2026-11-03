@@ -29,6 +29,8 @@ targets:
     deploymentTarget: "27.0"
     sources:
       - path: App
+        excludes:
+          - "**/.gitkeep"
     dependencies:
       - package: TransitKit
       - package: GlassUI
