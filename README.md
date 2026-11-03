@@ -21,6 +21,14 @@ change the placeholder bundle id `com.charleslpan.express` if you need to).
 
 Run every test that applies on your machine with `pnpm turbo run test`.
 
+## TestFlight
+
+Every push to `main` builds the app and uploads it to TestFlight through the **TestFlight** GitHub Actions workflow;
+run it by hand from the Actions tab too. It needs the app record in App Store Connect (bundle id
+`com.charleslpan.express`) and four repository secrets: `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store
+Connect API key with the Admin role, its `.p8` file base64-encoded), and `APPLE_TEAM_ID`. Without them it skips the
+upload. `GOOGLE_MAPS_IOS_API_KEY` adds the Google Maps key to the build. See [AGENTS.md](AGENTS.md#testflight).
+
 ## Repository
 
 A [Turborepo](https://turborepo.com) monorepo over pnpm workspaces:
