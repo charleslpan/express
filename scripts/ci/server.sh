@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
-# CI for apps/api/: build the MOTIS image (downloads feeds, runs the import),
-# start it, and run the smoke test. Needs docker, curl, and jq.
+# CI for apps/api/: test the realtime adapter, build the MOTIS image (downloads
+# feeds, runs the import), start it, and run the smoke test. Needs docker,
+# curl, jq, and python3 with pip.
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 IMAGE="${IMAGE:-express-motis}"
 PORT="${PORT:-8080}"
 NAME="express-motis-ci"
+
+# Realtime adapter unit tests, with the bindings and protobuf the image runs.
+deps="$(mktemp -d)"
+python3 -m pip install --quiet --target "$deps" \
+  gtfs-realtime-bindings==2.0.0 protobuf==5.29.4
+(cd apps/api/motis/adapter && PYTHONPATH="$deps" python3 -m unittest discover -s tests)
 
 docker build -t "$IMAGE" apps/api/motis
 docker image ls "$IMAGE"
