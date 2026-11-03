@@ -1,4 +1,5 @@
 packages:
   - apps/*
   - apps/api/bus
+  - apps/api/cron
   - packages/*

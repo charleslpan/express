@@ -39,4 +39,4 @@ ci-ios:
 	scripts/ci/ios.sh test
 
 testflight:
-	@echo "testflight: placeholder until F4 adds the TestFlight upload"
+	scripts/ci/testflight.sh

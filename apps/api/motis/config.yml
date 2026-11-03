@@ -2,11 +2,20 @@
 # directory the Dockerfile imports and serves from (/srv/motis).
 # Dataset names match Transitous (feeds/us-ny.json, prefixed "us-ny-") so
 # stop and trip ids are the same on both servers.
+# Bus realtime is MTA Bus Time, split per dataset by the adapter, which holds
+# MTA_BUS_TIME_KEY; MOTIS itself never sees the key.
 server:
   # The entrypoint rewrites this port to $PORT at start.
   port: 8080
+  # After a cold start, answer 503 until the first realtime update is in, so
+  # no first answer is timetable-only. /metrics and /api/v1/health still answer.
+  when_unhealthy_return_error: true
 osm: input/nyc.osm.pbf
 timetable:
+  # Realtime polls every 30 s (no faster: the MTA's limit for Bus Time's
+  # fleet-wide feed). A paused instance's overdue poll fires on resume.
+  update_interval: 30
+  http_timeout: 15
   first_day: TODAY
   num_days: 14
   railviz: true
@@ -18,18 +27,41 @@ timetable:
   datasets:
     us-ny-MTA-NYCSubway:
       path: input/gtfs_supplemented.zip
+      # The MTA's subway feeds, with trip ids matched to this timetable by
+      # the adapter on localhost (adapter/adapter.py).
+      rt:
+        - url: http://127.0.0.1:8081/subway/gtfs
+        - url: http://127.0.0.1:8081/subway/gtfs-ace
+        - url: http://127.0.0.1:8081/subway/gtfs-bdfm
+        - url: http://127.0.0.1:8081/subway/gtfs-g
+        - url: http://127.0.0.1:8081/subway/gtfs-jz
+        - url: http://127.0.0.1:8081/subway/gtfs-nqrw
+        - url: http://127.0.0.1:8081/subway/gtfs-l
+        - url: http://127.0.0.1:8081/subway/gtfs-si
     us-ny-MTA-BusBronx:
       path: input/gtfs_bx.zip
+      rt:
+        - url: http://127.0.0.1:8081/bus/us-ny-MTA-BusBronx
     us-ny-MTA-BusBrooklyn:
       path: input/gtfs_b.zip
+      rt:
+        - url: http://127.0.0.1:8081/bus/us-ny-MTA-BusBrooklyn
     us-ny-MTA-BusManhattan:
       path: input/gtfs_m.zip
+      rt:
+        - url: http://127.0.0.1:8081/bus/us-ny-MTA-BusManhattan
     us-ny-MTA-BusQueens:
       path: input/gtfs_q.zip
+      rt:
+        - url: http://127.0.0.1:8081/bus/us-ny-MTA-BusQueens
     us-ny-MTA-BusStatenIsland:
       path: input/gtfs_si.zip
+      rt:
+        - url: http://127.0.0.1:8081/bus/us-ny-MTA-BusStatenIsland
     us-ny-MTA-BusCompany:
       path: input/gtfs_busco.zip
+      rt:
+        - url: http://127.0.0.1:8081/bus/us-ny-MTA-BusCompany
 elevators: false
 street_routing: true
 osr_footpath: false

@@ -6,7 +6,9 @@ the developer's personal account "charlespan's projects", Hobby plan).
 | Path | Service | What |
 | --- | --- | --- |
 | `/api/vehicles/bus` | `bus` (Node.js Function) | Live bus GPS from MTA Bus Time, filtered to a bounding box. See [Bus positions](#bus-positions). |
-| `/api/(.*)` | `motis` (container) | [MOTIS 2](https://github.com/motis-project/motis) v2.11.4 routing for NYC: subway with SIR, and MTA buses. Timetables only for now. |
+| `/api/cron/(.*)` | `cron` (Node function, TypeScript) | Daily rebuild trigger, called by Vercel Cron only. |
+| `/api/(.*)` | `motis` (container) | [MOTIS 2](https://github.com/motis-project/motis) v2.11.4 routing for NYC: subway with SIR, and MTA buses, with live subway (and bus, once `MTA_BUS_TIME_KEY` is set) data. |
+| `/metrics` | `motis` (container) | MOTIS's Prometheus metrics: realtime data age and match rate. |
 
 Production: <https://express-server-cyan-zeta.vercel.app> (also
 `express-server-charlespan-projects.vercel.app`). Example:
@@ -100,20 +102,127 @@ pnpm turbo run lint typecheck test --filter=@express/bus
 
 ## Data
 
-The image is built with the data already imported (`server/motis/Dockerfile`):
+The image is built with the data already imported (`apps/api/motis/Dockerfile`):
 
 - MTA supplemented subway GTFS (includes SIR and planned work), the six MTA bus
   GTFS feeds (Bronx, Brooklyn, Manhattan, Queens, Staten Island, MTA Bus Co.),
   and Geofabrik's New York State OpenStreetMap extract clipped with `osmium`
   to the five boroughs (bbox -74.28,40.48,-73.68,40.93). New Jersey isn't in
   that extract, so walking legs stop at the Hudson.
-- 14 days of timetable from the build day (`num_days: 14`). The data goes stale
-  unless the image is rebuilt; the nightly rebuild is B3.
+- 14 days of timetable from the build day (`num_days: 14`). The image is
+  rebuilt every night (see [Nightly rebuild](#nightly-rebuild)).
 - Dataset names match Transitous (`us-ny-MTA-NYCSubway`,
   `us-ny-MTA-BusBronx`, …), so stop and trip ids such as
   `us-ny-MTA-NYCSubway_L03` are the same on both servers and the app can switch
   by base URL alone.
 - No tiles, geocoding, or reverse geocoding.
+
+## Realtime
+
+A small adapter (`motis/adapter/`) runs in the same container and serves
+corrected feeds to MOTIS on `127.0.0.1:8081`; MOTIS polls it every 30 s and
+each poll makes one upstream fetch.
+
+- **Subway**: the 8 MTA subway GTFS-RT feeds. MOTIS resolves realtime trips by
+  trip id, and the MTA's realtime ids (`071900_A..S58R`) are not the static ids
+  (`BFA26GEN-A047-Weekday-00_071900_A..S58R`); MOTIS has no NYC matching of its
+  own. The adapter matches each live train to the one static trip with the same
+  route token, direction, origin time, and service date (path as tie-breaker,
+  `6X`/`7X`/`FX`/`SS` read as `6`/`7`/`F`/`SI`), then sets the static
+  `start_time`, because MOTIS skips a trip whose `start_time` differs from its
+  scheduled first departure. Live trains no scheduled trip matches go to MOTIS
+  as ADDED trips with their own times, never onto the nearest scheduled trip.
+  The NYCT extension fields pass through unchanged.
+- **Bus**: MTA Bus Time trip updates (`MTA_BUS_TIME_KEY`). It is one
+  fleet-wide feed but MOTIS attaches realtime per dataset, so the adapter
+  fetches it once per cycle (the MTA allows one fleet-wide call per 30 s) and
+  hands each bus dataset its own routes.
+- **Cold start**: MOTIS answers 503 (`motis is starting up`) until its first
+  realtime update is in, about 1.5 s after start; retry after a second.
+  `/metrics` and `/api/v1/health` answer meanwhile.
+- **Data age**: `nigiri_gtfsrt_feed_timestamp_seconds{tag="us-ny-MTA-NYCSubway"}`
+  in `/metrics` is the MTA's own timestamp of the last subway feed MOTIS read
+  (0 if the last fetch failed). Show the "may not be real time" notice when
+  `now - timestamp` is over about 90 s or the value is 0. After an idle pause
+  the first answer can be as old as the pause; MOTIS's overdue poll runs at
+  once, so the next refresh is current.
+- **Match rate**: `current_trips_running_scheduled_with_realtime_count` over
+  `current_trips_running_scheduled_count` (per tag) in `/metrics` is the share
+  of trains running now with live data; it drops if matching breaks.
+  `nigiri_gtfsrt_trip_resolve_error_total` should stay 0. The adapter logs
+  matched / added / dropped per feed on every poll.
+
+## Nightly rebuild
+
+The MTA's supplemented subway feed changes hourly and covers planned work only
+7 days ahead, so production is rebuilt from scratch once a day.
+
+1. **Vercel Cron** calls `GET /api/cron/rebuild` on the production deployment
+   at `0 9 * * *` (09:00 UTC: 4 am EST, 5 am EDT). Hobby runs it once a day
+   somewhere inside that hour (±59 min). Configured in [`vercel.json`](vercel.json).
+2. The function ([`cron/lib/rebuild.ts`](cron/lib/rebuild.ts)) checks
+   `Authorization: Bearer $CRON_SECRET` and POSTs the project's Deploy Hook
+   with `?buildCache=false`, so the Docker build downloads fresh feeds and
+   re-imports them.
+3. The Docker build runs the **health check** in its `smoke` stage
+   ([`motis/smoke-build.sh`](motis/smoke-build.sh)): it serves the freshly
+   imported data inside the build and runs [`motis/smoke.sh`](motis/smoke.sh)
+   against it (Union Square → Bedford Av still returns the L, stoptimes at
+   14 St–Union Sq return departures, no out-of-scope agencies). It queries the
+   next weekday at 15:00 UTC rather than build time, so the check tests the
+   data, not the 4 am service pattern. A failure fails the build.
+4. A failed build never gets the production domains: Vercel assigns them only
+   to a deployment that reaches Ready, so the previous production deployment
+   keeps serving. The developer hears of it through Vercel's failed-deployment
+   notification (Account Settings → Notifications → Deployment Failures, on by
+   default for the deployment's creator; keep it on for this project).
+
+### Secrets and env vars (project `express-server`, Production)
+
+| Name | What | Who sets it |
+| --- | --- | --- |
+| `CRON_SECRET` | Random string (≥ 16 chars). Vercel Cron sends it as `Authorization: Bearer …`; the function rejects anything else. | Developer, Sensitive |
+| `DEPLOY_HOOK_URL` | URL of the project's Deploy Hook for branch `main` (Settings → Git → Deploy Hooks). Anyone with it can trigger a build. | Developer, Sensitive |
+
+Without either, the function answers 401 or 500 and nothing rebuilds.
+
+### Rebuild by hand
+
+- Dashboard: Deployments → latest production → ⋯ → **Redeploy**, untick
+  "Use existing Build Cache".
+- Or POST the hook: `curl -X POST "$DEPLOY_HOOK_URL?buildCache=false"`.
+- Or run the cron now: Settings → Cron Jobs → **Run**, or
+  `vercel crons run /api/cron/rebuild --scope charlespan-projects` from `apps/api/`.
+
+### Roll back
+
+A failed nightly build needs no rollback; production stays on the last good
+deployment. If a build passed the smoke test but serves bad data:
+
+- Dashboard: Deployments → the previous production deployment → **Instant
+  Rollback**, or `vercel rollback --scope charlespan-projects`. Hobby can only
+  roll back to the immediately previous production deployment.
+- After a rollback Vercel stops assigning production domains to new
+  deployments, so the next nightly build will **not** go live until you
+  promote one (`vercel promote <deployment-url>` or **Promote** in the
+  dashboard). Fix the cause first.
+
+### Old deployments and images
+
+Cleanup is Vercel's own **Deployment Retention Policy** (Settings → Build and
+Deployment), not a script. Recommended for this project: Canceled 1 week,
+Errored 1 week, Preview 1 week, Production 1 week. Vercel always keeps the
+current production deployment and, on Hobby, the last 3 Ready production
+deployments, so rollback still works. That keeps roughly 7–10 deployments
+(each ≈ 181 MB of image) instead of the 30-day default's ≈ 30+ against Hobby's
+10 GB deployment storage and VCR's 50 images per repository.
+
+Each build pushes its image to the project's registry repository `motis`,
+tagged with the deployment id (`motis:dpl_…`; project → **Images**). Vercel's
+docs do not say whether deleting a deployment deletes that image. Check once
+the first deployments have aged out (after Nov 10, 2026 with a 1-week policy):
+if `vercel vcr image ls motis` lists tags for deployments that no longer
+exist, delete those with `vercel vcr image rm motis <image-id>`.
 
 ## Measurements
 
