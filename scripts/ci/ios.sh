@@ -77,6 +77,7 @@ echo "::endgroup::"
 
 rm -rf build/Express.xcresult build/screenshots
 # -quiet keeps the log to warnings, errors, and test failures; the .xcresult artifact has everything.
+# -skipPackagePluginValidation trusts TransitKit's OpenAPI generator build plugin, which CI cannot click through.
 # Export screenshots even when a test fails, so a broken screen can still be seen.
 status=0
 xcodebuild "$MODE" \
@@ -86,6 +87,7 @@ xcodebuild "$MODE" \
     -destination "id=$udid" \
     -derivedDataPath build/DerivedData \
     -resultBundlePath build/Express.xcresult \
+    -skipPackagePluginValidation \
     CODE_SIGNING_ALLOWED=NO || status=$?
 
 if [[ $MODE == test && -d build/Express.xcresult ]]; then

@@ -31,7 +31,16 @@ on every call.
   `/bus/<dataset>`; `build_index.py` runs at image build; `record.py` records
   live feeds as test fixtures and prints match rates. To add a feed (alerts,
   A1), add it to `adapter.py` and a `rt` entry to `config.yml`.
-- `motis/smoke.sh`: smoke test against any base URL.
+- `motis/smoke.sh`: smoke test against any base URL (`SMOKE_TIME` pins the
+  query time).
+- `motis/smoke-build.sh`: runs `smoke.sh` inside the Docker build (`smoke`
+  stage) against the freshly imported data; a failure fails the deployment.
+- `cron/`: the daily Vercel Cron target, the pnpm workspace `@express/cron`
+  (listed in `pnpm-workspace.yaml`, shared tsconfig and ESLint config).
+  `api/cron/rebuild.ts` is the entrypoint; `lib/rebuild.ts` checks
+  `CRON_SECRET` and POSTs `DEPLOY_HOOK_URL?buildCache=false`. Its route sits
+  before the `/api/(.*)` catch-all. Keep `typescript` below 7 (Vercel's
+  builder crashes on TS 7).
 
 ## Build and run locally
 
@@ -68,14 +77,35 @@ with `build_index.py` from the same GTFS zips):
 python3 record.py subway_index.json [tests/fixtures/<name>]
 ```
 
+Cron function checks (CI runs them through `scripts/ci/node.sh`):
+
+```sh
+pnpm turbo run lint typecheck test --filter=@express/cron
+```
+
 ## Deploy
 
 The project is linked to GitHub with Root Directory `apps/api`: pushes to a
 branch build a preview, and merges to `main` deploy production. To deploy by
 hand, run `vercel deploy --prod --scope charlespan-projects` from `apps/api/`.
 
+## Nightly rebuild
+
+Vercel Cron (`crons` in `vercel.json`, `0 9 * * *` UTC, ±59 min on Hobby)
+calls `/api/cron/rebuild`, which triggers a production build with no build
+cache. The build's smoke stage is the health check; a failing build leaves the
+previous production deployment serving and Vercel emails the developer. Do not
+add a GitHub Actions cron or an issue bot for this. Rebuild by hand, roll back,
+and retention: see `README.md`, "Nightly rebuild". After an Instant Rollback,
+new builds are not promoted until someone runs `vercel promote`.
+
 ## Environment variables
 
 - `PORT`: port MOTIS listens on (container default `80`, Vercel's default).
 - `MTA_BUS_TIME_KEY`: MTA Bus Time key, read by the adapter only (MOTIS never
   sees it). Without it, bus realtime is off and the bus feeds answer 404.
+- `CRON_SECRET` (sensitive): bearer token Vercel Cron sends to
+  `/api/cron/rebuild`.
+- `DEPLOY_HOOK_URL` (sensitive): the project's Deploy Hook for `main`.
+
+Never print their values.

@@ -1,0 +1,531 @@
+{
+ "requestParameters": {},
+ "debugOutput": {
+  "algorithm": 1,
+  "direct": 7,
+  "execute_time": 22,
+  "fares": 0,
+  "fastest_direct": 0,
+  "fp_update_prevented_by_lower_bound": 0,
+  "gpu_supported": 1,
+  "gpu_used": 1,
+  "interval_extensions": 0,
+  "lb_time": 0,
+  "n_dest_offsets": 112,
+  "n_earliest_arrival_updated_by_footpath": 0,
+  "n_earliest_arrival_updated_by_route": 0,
+  "n_earliest_trip_calls": 0,
+  "n_events_skipped_by_early_termination": 0,
+  "n_execute_bwd": 3,
+  "n_execute_fwd": 3,
+  "n_footpaths_visited": 0,
+  "n_routes_visited": 0,
+  "n_routing_time": 0,
+  "n_start_offsets": 140,
+  "n_td_dest_offsets": 0,
+  "n_td_start_offsets": 0,
+  "prepare": 19,
+  "prepare_backward_WALK": 7,
+  "prepare_forward_WALK": 11,
+  "route_update_prevented_by_lower_bound": 0,
+  "search_interval_reduction_by_early_termination": 0
+ },
+ "from": {
+  "name": "START",
+  "lat": 40.7359,
+  "lon": -73.9906,
+  "vertexType": "NORMAL"
+ },
+ "to": {
+  "name": "END",
+  "lat": 40.7083,
+  "lon": -73.9578,
+  "vertexType": "NORMAL"
+ },
+ "direct": [],
+ "itineraries": [
+  {
+   "duration": 1320,
+   "startTime": "2026-11-03T20:29:00Z",
+   "endTime": "2026-11-03T20:51:00Z",
+   "transfers": 1,
+   "id": "ClshLpCg+DFeREAputqK/WV/UsAyGHVzLW55LU1UQS1OWUNTdWJ3YXlfUjIwUzmFukihLF5EQEGFmbZ/ZX9SwEiMiKnXBlDIiKnXBloEV0FMS2ABcQAAAAAAAADACs8BCgFXEkoyMDI2MTEwM18xNTowMV91cy1ueS1NVEEtTllDU3Vid2F5X0JGQTI2R0VOLU4xMDMtV2Vla2RheS0wMF8wOTAxMDBfTi4uUzcyUhoYdXMtbnktTVRBLU5ZQ1N1YndheV9SMjBTIYW6SKEsXkRAKYWZtn9lf1LAMhh1cy1ueS1NVEEtTllDU3Vid2F5X1IyMlM5gMFu2LZcREBBCM4ZUdp/UsBIyIip1wZQuIqp1wZaBlNVQldBWWABaQAAAAAAAADAcQAAAAAAAPC/Cn4aGHVzLW55LU1UQS1OWUNTdWJ3YXlfUjIyUyGAwW7YtlxEQCkIzhlR2n9SwDIYdXMtbnktTVRBLU5ZQ1N1YndheV9EMjFTObf103/WXERAQZ4Rpb3Bf1LASLiKqdcGUKiMqdcGWgRXQUxLYAFpAAAAAAAA8L9xAAAAAAAACMAKzwEKAU0SSjIwMjYxMTAzXzE0OjU4X3VzLW55LU1UQS1OWUNTdWJ3YXlfQkZBMjZHRU4tTTA5NS1XZWVrZGF5LTAwXzA4OTg1MF9NLi5TMjRSGhh1cy1ueS1NVEEtTllDU3Vid2F5X0QyMVMht/XTf9ZcREApnhGlvcF/UsAyGHVzLW55LU1UQS1OWUNTdWJ3YXlfTTE2Uzm15VyKq1pEQEEPY9LfS31SwEjkjKnXBlD4kanXBloGU1VCV0FZYAFpAAAAAAAACMBxAAAAAAAA8D8KWxoYdXMtbnktTVRBLU5ZQ1N1YndheV9NMTZTIbXlXIqrWkRAKQ9j0t9LfVLAOd/gC5OpWkRAQfcGX5hMfVLASPiRqdcGULSSqdcGWgRXQUxLYAFpAAAAAAAA8D8=",
+   "legs": [
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "START",
+      "lat": 40.7359,
+      "lon": -73.9906,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T20:29:00Z",
+      "scheduledDeparture": "2026-11-03T20:29:00Z",
+      "vertexType": "NORMAL"
+     },
+     "to": {
+      "name": "14 St-Union Sq",
+      "stopId": "us-ny-MTA-NYCSubway_R20S",
+      "parentId": "us-ny-MTA-NYCSubway_R20",
+      "importance": 0.028651604428887367,
+      "lat": 40.73573700000001,
+      "lon": -73.99057,
+      "level": -2.0,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:30:00Z",
+      "scheduledArrival": "2026-11-03T20:30:00Z",
+      "vertexType": "TRANSIT",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "duration": 60,
+     "startTime": "2026-11-03T20:29:00Z",
+     "endTime": "2026-11-03T20:30:00Z",
+     "scheduledStartTime": "2026-11-03T20:29:00Z",
+     "scheduledEndTime": "2026-11-03T20:30:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 17.0,
+     "legGeometry": {
+      "points": "qhiulA`z_clCrHdA",
+      "precision": 6,
+      "length": 2
+     },
+     "steps": [
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 17.0,
+       "fromLevel": -2.0,
+       "toLevel": -2.0,
+       "osmWay": 509025036,
+       "polyline": {
+        "points": "qhiulA`z_clCrHdA",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "14th Street–Union Square",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      }
+     ]
+    },
+    {
+     "mode": "SUBWAY",
+     "from": {
+      "name": "14 St-Union Sq",
+      "stopId": "us-ny-MTA-NYCSubway_R20S",
+      "parentId": "us-ny-MTA-NYCSubway_R20",
+      "importance": 0.028651604428887367,
+      "lat": 40.73573700000001,
+      "lon": -73.99057,
+      "level": -2.0,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T20:30:00Z",
+      "scheduledDeparture": "2026-11-03T20:30:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "to": {
+      "name": "Prince St",
+      "stopId": "us-ny-MTA-NYCSubway_R22S",
+      "parentId": "us-ny-MTA-NYCSubway_R22",
+      "importance": 0.005714764352887869,
+      "lat": 40.72433000000001,
+      "lon": -73.99770000000001,
+      "level": -1.0,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:34:00Z",
+      "scheduledArrival": "2026-11-03T20:34:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "duration": 240,
+     "startTime": "2026-11-03T20:30:00Z",
+     "endTime": "2026-11-03T20:34:00Z",
+     "scheduledStartTime": "2026-11-03T20:30:00Z",
+     "scheduledEndTime": "2026-11-03T20:34:00Z",
+     "realTime": false,
+     "scheduled": true,
+     "interlineWithPreviousLeg": false,
+     "headsign": "Whitehall St-South Ferry",
+     "tripFrom": {
+      "name": "Astoria-Ditmars Blvd",
+      "stopId": "us-ny-MTA-NYCSubway_R01S",
+      "parentId": "us-ny-MTA-NYCSubway_R01",
+      "importance": 0.0043660602532327175,
+      "lat": 40.77503600000001,
+      "lon": -73.91203,
+      "level": 2.0,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T20:01:00Z",
+      "scheduledDeparture": "2026-11-03T20:01:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "tripTo": {
+      "name": "Whitehall St-South Ferry",
+      "stopId": "us-ny-MTA-NYCSubway_R27S",
+      "parentId": "us-ny-MTA-NYCSubway_R27",
+      "importance": 0.00508107291534543,
+      "lat": 40.703087,
+      "lon": -74.01299,
+      "level": -3.0,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:44:00Z",
+      "scheduledArrival": "2026-11-03T20:44:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "routeId": "us-ny-MTA-NYCSubway_W",
+     "routeUrl": "https://www.mta.info/schedules/subway/w-train",
+     "directionId": "1",
+     "routeColor": "f6bc26",
+     "routeTextColor": "000000",
+     "routeType": 1,
+     "agencyName": "MTA New York City Transit",
+     "agencyUrl": "http://www.mta.info",
+     "agencyFareUrl": "",
+     "agencyId": "MTA NYCT",
+     "tripId": "20261103_15:01_us-ny-MTA-NYCSubway_BFA26GEN-N103-Weekday-00_090100_N..S72R",
+     "routeShortName": "W",
+     "routeLongName": "Broadway Local",
+     "tripShortName": "",
+     "displayName": "W",
+     "cancelled": false,
+     "source": "us-ny_MTA-NYCSubway.gtfs.zip/stop_times.txt:336294:336316",
+     "intermediateStops": [
+      {
+       "name": "8 St-NYU",
+       "stopId": "us-ny-MTA-NYCSubway_R21S",
+       "parentId": "us-ny-MTA-NYCSubway_R21",
+       "importance": 0.005714764352887869,
+       "lat": 40.73032800000001,
+       "lon": -73.99263,
+       "level": -1.0,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:32:00Z",
+       "departure": "2026-11-03T20:32:00Z",
+       "scheduledArrival": "2026-11-03T20:32:00Z",
+       "scheduledDeparture": "2026-11-03T20:32:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "SUBWAY"
+       ]
+      }
+     ],
+     "legGeometry": {
+      "points": "q~hulAry_clC|bFbp@zAFvAf@|AZtA^xA\\rA\\zAf@rAr@rAn@tAf@nAn@tA|@rAz@rA|@jAjAxdAbz@zuJz{H",
+      "precision": 6,
+      "length": 19
+     },
+     "bikesAllowed": false,
+     "wheelchairAccessible": "NOT_ACCESSIBLE",
+     "reservation": "NONE",
+     "alternatives": []
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "Prince St",
+      "stopId": "us-ny-MTA-NYCSubway_R22S",
+      "parentId": "us-ny-MTA-NYCSubway_R22",
+      "importance": 0.005714764352887869,
+      "lat": 40.72433000000001,
+      "lon": -73.99770000000001,
+      "level": -1.0,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:34:00Z",
+      "departure": "2026-11-03T20:34:00Z",
+      "scheduledArrival": "2026-11-03T20:34:00Z",
+      "scheduledDeparture": "2026-11-03T20:34:00Z",
+      "vertexType": "TRANSIT",
+      "cancelled": true,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "to": {
+      "name": "Broadway-Lafayette St",
+      "stopId": "us-ny-MTA-NYCSubway_D21S",
+      "parentId": "us-ny-MTA-NYCSubway_D21",
+      "importance": 0.010414114221930504,
+      "lat": 40.72529600000001,
+      "lon": -73.99620000000002,
+      "level": -3.0,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:38:00Z",
+      "scheduledArrival": "2026-11-03T20:38:00Z",
+      "vertexType": "TRANSIT",
+      "cancelled": true,
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "duration": 240,
+     "startTime": "2026-11-03T20:34:00Z",
+     "endTime": "2026-11-03T20:38:00Z",
+     "scheduledStartTime": "2026-11-03T20:34:00Z",
+     "scheduledEndTime": "2026-11-03T20:38:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "cancelled": true,
+     "legGeometry": {
+      "points": "",
+      "precision": 6,
+      "length": 0
+     }
+    },
+    {
+     "mode": "SUBWAY",
+     "from": {
+      "name": "Broadway-Lafayette St",
+      "stopId": "us-ny-MTA-NYCSubway_D21S",
+      "parentId": "us-ny-MTA-NYCSubway_D21",
+      "importance": 0.010414114221930504,
+      "lat": 40.72529600000001,
+      "lon": -73.99620000000002,
+      "level": -3.0,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T20:39:00Z",
+      "scheduledDeparture": "2026-11-03T20:39:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "to": {
+      "name": "Marcy Av",
+      "stopId": "us-ny-MTA-NYCSubway_M16S",
+      "parentId": "us-ny-MTA-NYCSubway_M16",
+      "importance": 0.005864762235432863,
+      "lat": 40.708360000000006,
+      "lon": -73.957756,
+      "level": 1.0,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:50:00Z",
+      "scheduledArrival": "2026-11-03T20:50:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "duration": 660,
+     "startTime": "2026-11-03T20:39:00Z",
+     "endTime": "2026-11-03T20:50:00Z",
+     "scheduledStartTime": "2026-11-03T20:39:00Z",
+     "scheduledEndTime": "2026-11-03T20:50:00Z",
+     "realTime": false,
+     "scheduled": true,
+     "interlineWithPreviousLeg": false,
+     "headsign": "Middle Village-Metropolitan Av",
+     "tripFrom": {
+      "name": "Forest Hills-71 Av",
+      "stopId": "us-ny-MTA-NYCSubway_G08S",
+      "parentId": "us-ny-MTA-NYCSubway_G08",
+      "importance": 0.012091931886970997,
+      "lat": 40.72169,
+      "lon": -73.84452000000002,
+      "level": -2.0,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T19:58:00Z",
+      "scheduledDeparture": "2026-11-03T19:58:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "tripTo": {
+      "name": "Middle Village-Metropolitan Av",
+      "stopId": "us-ny-MTA-NYCSubway_M01S",
+      "parentId": "us-ny-MTA-NYCSubway_M01",
+      "importance": 0.003223444102331996,
+      "lat": 40.711395,
+      "lon": -73.8896,
+      "level": 0.0,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T21:10:00Z",
+      "scheduledArrival": "2026-11-03T21:10:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "routeId": "us-ny-MTA-NYCSubway_M",
+     "routeUrl": "https://www.mta.info/schedules/subway/m-train",
+     "directionId": "1",
+     "routeColor": "eb6800",
+     "routeTextColor": "ffffff",
+     "routeType": 1,
+     "agencyName": "MTA New York City Transit",
+     "agencyUrl": "http://www.mta.info",
+     "agencyFareUrl": "",
+     "agencyId": "MTA NYCT",
+     "tripId": "20261103_14:58_us-ny-MTA-NYCSubway_BFA26GEN-M095-Weekday-00_089850_M..S24R",
+     "routeShortName": "M",
+     "routeLongName": "Queens Blvd Local/6 Av Local",
+     "tripShortName": "",
+     "displayName": "M",
+     "cancelled": false,
+     "source": "us-ny_MTA-NYCSubway.gtfs.zip/stop_times.txt:551521:551556",
+     "intermediateStops": [
+      {
+       "name": "Delancey St-Essex St",
+       "stopId": "us-ny-MTA-NYCSubway_M18S",
+       "parentId": "us-ny-MTA-NYCSubway_M18",
+       "importance": 0.009673232212662697,
+       "lat": 40.71831500000001,
+       "lon": -73.98743400000001,
+       "level": -1.0,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:43:00Z",
+       "departure": "2026-11-03T20:43:00Z",
+       "scheduledArrival": "2026-11-03T20:43:00Z",
+       "scheduledDeparture": "2026-11-03T20:43:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "SUBWAY"
+       ]
+      }
+     ],
+     "legGeometry": {
+      "points": "_rttlAnyjclCjdAccFhB{FrBwFxBqEfCeEpCkDpCsC~CcCdDwBvDoAtDoAfEg@nEg@fEK~EJjFf@ns@jHzy@jHvIp@jIHzH?hHg@xG{@fGcB|FwBjFsC|EwDnEeEzDyFnDcG~CwGpC_IxBsIp`A_wEl[qyAb@mB\\cB`@mB`@yA^mB\\yAd@{A\\wA^cBd@oA\\oA\\cB\\gA^wAd@oAhBwGl@cBd@cBb@cBf@cBl@wBd@cB^yAd@mBd@cBZoB^wAd@mB\\yA^kBZ{A~fBcvI~nI{qa@RoA^oAT{@^gATcA^cA\\}@d@{@^}@b@cA\\{@d@{@b@{@n@g@d@{@x{@_jAZg@Xg@\\SVq@\\]Tg@V{@\\g@Tg@Vq@Tq@Xg@Ro@Ns@V{@r]_xA",
+      "precision": 6,
+      "length": 101
+     },
+     "bikesAllowed": false,
+     "wheelchairAccessible": "NOT_ACCESSIBLE",
+     "reservation": "NONE",
+     "alternatives": []
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "Marcy Av",
+      "stopId": "us-ny-MTA-NYCSubway_M16S",
+      "parentId": "us-ny-MTA-NYCSubway_M16",
+      "importance": 0.005864762235432863,
+      "lat": 40.708360000000006,
+      "lon": -73.957756,
+      "level": 1.0,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:50:00Z",
+      "departure": "2026-11-03T20:50:00Z",
+      "scheduledArrival": "2026-11-03T20:50:00Z",
+      "scheduledDeparture": "2026-11-03T20:50:00Z",
+      "vertexType": "TRANSIT",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "to": {
+      "name": "END",
+      "lat": 40.7083,
+      "lon": -73.9578,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:51:00Z",
+      "scheduledArrival": "2026-11-03T20:51:00Z",
+      "vertexType": "NORMAL"
+     },
+     "duration": 60,
+     "startTime": "2026-11-03T20:50:00Z",
+     "endTime": "2026-11-03T20:51:00Z",
+     "scheduledStartTime": "2026-11-03T20:50:00Z",
+     "scheduledEndTime": "2026-11-03T20:51:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 7.0,
+     "legGeometry": {
+      "points": "oosslAvv_alCvBvA",
+      "precision": 6,
+      "length": 2
+     },
+     "steps": [
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 7.0,
+       "fromLevel": 1.0,
+       "toLevel": 0.0,
+       "polyline": {
+        "points": "oosslAvv_alCvBvA",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "previousPageCursor": "EARLIER|1793737620",
+ "nextPageCursor": "LATER|1793738640"
+}

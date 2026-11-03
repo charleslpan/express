@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # CI for apps/api/: test the realtime adapter, build the MOTIS image (downloads
-# feeds, runs the import), start it, and run the smoke test. Needs docker,
-# curl, jq, and python3 with pip.
+# feeds, runs the import and the build-time smoke test), start it, and run the
+# smoke test against it. Needs docker, curl, jq, and python3 with pip. The cron
+# function (@express/cron) is linted, typechecked, and tested by
+# scripts/ci/node.sh's Turborepo run.
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
