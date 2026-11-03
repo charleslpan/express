@@ -36,6 +36,7 @@
     /// it through the screenshot harness (`-screenshot gallery`, or `gallery-<section>` for one section).
     public struct GlassUIGallery: View {
         private let sections: [GallerySection]
+        @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
         /// A gallery of `sections`, in order; every section by default.
         public init(sections: [GallerySection] = GallerySection.allCases) {
@@ -53,10 +54,13 @@
                                         .typography(.sectionTitle)
                                         .accessibilityAddTraits(.isHeader)
                                 }
-                                Text(section.summary)
-                                    .typography(.secondary)
-                                    .foregroundStyle(.textSecondary)
-                                    .fixedSize(horizontal: false, vertical: true)
+                                // At accessibility sizes the summary would fill the screen before any token.
+                                if !dynamicTypeSize.isAccessibilitySize {
+                                    Text(section.summary)
+                                        .typography(.secondary)
+                                        .foregroundStyle(.textSecondary)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
                                 content(for: section)
                             }
                         }

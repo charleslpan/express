@@ -4,7 +4,7 @@
     /// The spacing scale as bars, the radii as tiles, and a concentric pair.
     struct LayoutGallery: View {
         @ScaledMetric private var labelWidth: CGFloat = 52
-        @ScaledMetric private var tileSize: CGFloat = 64
+        @ScaledMetric private var tileWidth: CGFloat = 132
 
         var body: some View {
             VStack(spacing: Spacing.md) {
@@ -30,20 +30,23 @@
 
                 GalleryCard(title: "Radii") {
                     LazyVGrid(
-                        columns: [GridItem(.adaptive(minimum: tileSize), spacing: Spacing.sm, alignment: .top)],
+                        columns: [GridItem(.adaptive(minimum: tileWidth), spacing: Spacing.sm, alignment: .top)],
                         alignment: .leading,
                         spacing: Spacing.md
                     ) {
                         ForEach(Radius.steps, id: \.name) { step in
-                            VStack(spacing: Spacing.xs) {
+                            VStack(alignment: .leading, spacing: Spacing.xs) {
+                                // Taller than twice the largest radius, so no tile reads as a capsule.
                                 Radius.shape(step.value)
                                     .fill(.surfaceRaised)
                                     .overlay(Radius.shape(step.value).strokeBorder(.brand, lineWidth: 1.5))
-                                    .frame(width: tileSize, height: tileSize)
-                                TokenName(".\(step.name)")
-                                Text("\(Int(step.value)) pt")
-                                    .typography(.caption)
-                                    .foregroundStyle(.textSecondary)
+                                    .frame(height: 96)
+                                HStack(spacing: Spacing.xs) {
+                                    TokenName(".\(step.name)")
+                                    Text("\(Int(step.value)) pt")
+                                        .typography(.caption)
+                                        .foregroundStyle(.textSecondary)
+                                }
                             }
                             .accessibilityElement(children: .ignore)
                             .accessibilityLabel("\(step.name), \(Int(step.value)) points")
