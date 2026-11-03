@@ -15,6 +15,9 @@ public struct TransitClient: Sendable {
     /// The server this client talks to.
     public let baseURL: URL
     let client: Client
+    /// The transport and `User-Agent` the generated client uses, for endpoints outside MOTIS's spec (`/metrics`).
+    let transport: any ClientTransport
+    let userAgent: UserAgentMiddleware
 
     /// - Parameters:
     ///   - baseURL: The MOTIS server's root, without `/api`; defaults to ``TransitKit/defaultBaseURL``.
@@ -26,11 +29,9 @@ public struct TransitClient: Sendable {
         transport: any ClientTransport = URLSessionTransport()
     ) {
         self.baseURL = baseURL
-        client = Client(
-            serverURL: baseURL,
-            transport: transport,
-            middlewares: [UserAgentMiddleware(appVersion: appVersion)]
-        )
+        self.transport = transport
+        userAgent = UserAgentMiddleware(appVersion: appVersion)
+        client = Client(serverURL: baseURL, transport: transport, middlewares: [userAgent])
     }
 
     /// Plans itineraries for a trip (`GET /api/v6/plan`).
