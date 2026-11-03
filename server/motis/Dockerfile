@@ -6,33 +6,32 @@ ARG ALPINE_VERSION=3.22
 # Debian for the build stage: it packages osmium-tool, Alpine doesn't.
 FROM debian:bookworm-slim AS build
 ARG MOTIS_VERSION=v2.11.4
+# Every download retries with exponential backoff (1, 2, 4, 8, 16 s), so one
+# flaky host doesn't fail a build. Vercel and CI builders start without a
+# layer cache, so each build fetches fresh feeds.
+ENV CURL_RETRY="-fsSL --retry 5 --retry-all-errors --connect-timeout 30"
 WORKDIR /srv/motis
 
 RUN apt-get update -qq \
  && apt-get install -y -qq --no-install-recommends ca-certificates curl bzip2 osmium-tool > /dev/null \
  && rm -rf /var/lib/apt/lists/* \
- && curl -fsSL "https://github.com/motis-project/motis/releases/download/${MOTIS_VERSION}/motis-linux-amd64.tar.bz2" \
+ && curl $CURL_RETRY "https://github.com/motis-project/motis/releases/download/${MOTIS_VERSION}/motis-linux-amd64.tar.bz2" \
     | tar -xj ./motis \
  && ./motis --help > /dev/null
 
 # OpenStreetMap: Geofabrik's New York State extract, clipped to the five
 # boroughs. (BBBike's NYC extract timed out from GitHub and Vercel builders.)
-# The map changes slowly, so a cached layer is fine.
 RUN mkdir -p input \
- && curl -fsSL --retry 3 --connect-timeout 30 -o /tmp/ny.osm.pbf \
+ && curl $CURL_RETRY -o /tmp/ny.osm.pbf \
       https://download.geofabrik.de/north-america/us/new-york-latest.osm.pbf \
  && osmium extract --bbox=-74.28,40.48,-73.68,40.93 -o input/nyc.osm.pbf /tmp/ny.osm.pbf \
  && rm /tmp/ny.osm.pbf
 
-# ADD with a URL re-checks the remote file on every build, so a new feed
-# busts the cache and the import below runs again.
-ADD https://rrgtfsfeeds.s3.amazonaws.com/gtfs_supplemented.zip input/gtfs_supplemented.zip
-ADD https://rrgtfsfeeds.s3.amazonaws.com/gtfs_bx.zip input/gtfs_bx.zip
-ADD https://rrgtfsfeeds.s3.amazonaws.com/gtfs_b.zip input/gtfs_b.zip
-ADD https://rrgtfsfeeds.s3.amazonaws.com/gtfs_m.zip input/gtfs_m.zip
-ADD https://rrgtfsfeeds.s3.amazonaws.com/gtfs_q.zip input/gtfs_q.zip
-ADD https://rrgtfsfeeds.s3.amazonaws.com/gtfs_si.zip input/gtfs_si.zip
-ADD https://rrgtfsfeeds.s3.amazonaws.com/gtfs_busco.zip input/gtfs_busco.zip
+# MTA GTFS: the supplemented subway feed (with SIR and planned work) and the
+# six bus feeds.
+RUN for feed in gtfs_supplemented gtfs_bx gtfs_b gtfs_m gtfs_q gtfs_si gtfs_busco; do \
+      curl $CURL_RETRY -o "input/${feed}.zip" "https://rrgtfsfeeds.s3.amazonaws.com/${feed}.zip" || exit 1; \
+    done
 
 COPY config.yml ./
 RUN ./motis import \

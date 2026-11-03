@@ -47,10 +47,9 @@ starts it, and runs the smoke test; run it locally the same way with Docker.
 
 ## Deploy
 
-Pushes to `main` deploy production once the project is linked to GitHub with
-Root Directory `server`. Until then, deploy the files under `server/` through
-the Vercel API or `vercel deploy --prod --scope charlespan-projects` from
-`server/`.
+The project is linked to GitHub with Root Directory `server`: pushes to a
+branch build a preview, and merges to `main` deploy production. To deploy by
+hand, run `vercel deploy --prod --scope charlespan-projects` from `server/`.
 
 ## Environment variables
 

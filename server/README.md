@@ -70,13 +70,17 @@ above are the same binary and data.
 ## Findings from the first deploys
 
 - The Docker build has network access, so feeds download during the build.
-- Builds run `buildah` with `--layers`; the first build had no cache ("Buildah
-  store: cold"). `ADD <url>` re-checks each GTFS feed, so new feeds re-run
-  the import. The OSM extract comes from Geofabrik with `curl` (a cached
-  layer): BBBike, the first source, timed out from both GitHub runners and
-  Vercel builders.
+- Builds run `buildah` with `--layers`, but every build so far started with
+  "Buildah store: cold" (no layer cache), as do GitHub runners, so each build
+  downloads fresh feeds. If Vercel starts caching layers, the nightly rebuild
+  (B3) needs a cache-bust before the download steps.
+- Every download (`curl --retry 5 --retry-all-errors`, exponential backoff)
+  retries, so one flaky host doesn't fail a build.
+- **Why not BBBike:** its NYC extract (the pilot's first choice) timed out from
+  both GitHub runners and Vercel builders, mirrors included. We use Geofabrik's
+  New York State extract clipped to the five boroughs; v1 is MTA-only, so
+  losing New Jersey walking costs nothing.
 - The container writes its runtime config to `/tmp`, which works.
-- The project is not yet linked to GitHub (Vercel's GitHub app is not installed
-  on the repo), so deploys go through the Vercel API for now. Once linked, set
-  the project's Root Directory to `server`.
+- The project is linked to GitHub with Root Directory `server`: pushes build
+  previews, and `main` deploys production.
 - Vercel Authentication covers previews only, so production is public.
