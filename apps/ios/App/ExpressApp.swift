@@ -11,6 +11,7 @@ struct ExpressApp: App {
 
     init() {
         _environment = State(initialValue: AppEnvironment(fixtures: launch.fixtures))
+        GoogleMapsServices.configure()
         if launch.isScreenshot {
             UIView.setAnimationsEnabled(false)
         }

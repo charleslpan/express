@@ -6,6 +6,8 @@ import SwiftUI
 enum ScreenshotScreen: String, CaseIterable {
     /// The placeholder root view.
     case root
+    /// Liquid Glass controls and a glass sheet over the Google map, for judging the look (F5).
+    case mapGlass = "map-glass"
 
     #if DEBUG
         /// GlassUI's gallery, every section (debug builds only).
@@ -21,6 +23,7 @@ enum ScreenshotScreen: String, CaseIterable {
     var view: some View {
         switch self {
         case .root: RootView()
+        case .mapGlass: MapGlassScreen()
         #if DEBUG
             case .gallery: GlassUIGallery()
             case .galleryColors: GlassUIGallery(sections: [.colors])
