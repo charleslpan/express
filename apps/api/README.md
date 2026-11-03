@@ -6,6 +6,7 @@ the developer's personal account "charlespan's projects", Hobby plan).
 | Path | Service | What |
 | --- | --- | --- |
 | `/api/vehicles/bus` | `bus` (Node.js Function) | Live bus GPS from MTA Bus Time, filtered to a bounding box. See [Bus positions](#bus-positions). |
+| `/api/alerts` | `alerts` (Node.js Function) | MTA subway and bus service alerts per line. See [Line status](#line-status). |
 | `/api/cron/(.*)` | `cron` (Node function, TypeScript) | Daily rebuild trigger, called by Vercel Cron only. |
 | `/api/(.*)` | `motis` (container) | [MOTIS 2](https://github.com/motis-project/motis) v2.11.4 routing for NYC: subway with SIR, and MTA buses, with live subway (and bus, once `MTA_BUS_TIME_KEY` is set) data. |
 | `/metrics` | `motis` (container) | MOTIS's Prometheus metrics: realtime data age and match rate. |
@@ -100,6 +101,77 @@ Tests run on twelve buses recorded from the real Bus Time feed on Nov 3, 2026
 pnpm turbo run lint typecheck test --filter=@express/bus
 ```
 
+## Line status
+
+`GET /api/alerts?lines=A,C,M15+`
+
+The MTA's subway and bus service alerts (`camsys%2Fsubway-alerts.json` and
+`camsys%2Fbus-alerts.json`, no key), per line, with the standard GTFS-RT
+effect, cause, and severity filled from the MTA's alert type by the same table
+the MOTIS adapter uses (see [Alerts](#alerts)). Every alert in the feeds is
+returned, future ones included (the line page shows upcoming work); filtering
+by time is the app's. Code in [`alerts/`](alerts/).
+
+```sh
+curl 'https://express-server-cyan-zeta.vercel.app/api/alerts?lines=A,L,M15+'
+```
+
+Query: `lines` (required), up to 50 comma-separated GTFS `route_id`s, matched
+exactly (`A`, `6X`, `SI`, `GS`, `M15+`, `BM1`). `+` is read literally, so
+`M15+` works as typed; `%2B` works too.
+
+Response (`200`, `application/json`): every requested line, with `[]` where it
+has no alerts.
+
+```json
+{
+  "updatedAt": { "subway": 1793741003, "bus": 1793741361 },
+  "lines": {
+    "2": [
+      {
+        "id": "lmm:alert:274734:26",
+        "type": "Delays",
+        "effect": "SIGNIFICANT_DELAYS",
+        "cause": "UNKNOWN_CAUSE",
+        "severity": "WARNING",
+        "activePeriods": [{ "start": 1793740456, "end": 1793742540 }],
+        "header": "Wakefield-241 St-bound [2] and Eastchester-Dyre Av-bound [5] trains are running with delays …",
+        "description": null,
+        "affected": [{ "stopId": null, "directionId": null }]
+      }
+    ]
+  }
+}
+```
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `updatedAt` | object | Each feed's header time, Unix seconds (or null). |
+| `id` | string | The MTA's alert id, also the GTFS-RT entity id MOTIS reads. An alert on several lines appears under each. |
+| `type` | string or null | The MTA's own alert type (`Planned - Part Suspended`, `Boarding Change`). |
+| `effect` | string | GTFS-RT effect (`NO_SERVICE`, `REDUCED_SERVICE`, `SIGNIFICANT_DELAYS`, `DETOUR`, `ADDITIONAL_SERVICE`, `MODIFIED_SERVICE`, `STOP_MOVED`, `OTHER_EFFECT`), the same MOTIS puts on departures and legs. |
+| `cause` | string | `MAINTENANCE` for planned work, else `UNKNOWN_CAUSE`. |
+| `severity` | string | `INFO`, `WARNING`, or `SEVERE`. |
+| `activePeriods` | array | `{ start, end }` in Unix seconds; either may be null (open-ended). MOTIS returns these as `communicationPeriod`. |
+| `header`, `description` | string, string or null | English plain text (the feeds also carry HTML, not returned). The MTA writes lines as `[A]`. |
+| `affected` | array | This line's informed entities: `stopId` is a GTFS parent stop (`A24`, without the MOTIS dataset prefix) or null for the whole line; `directionId` is 0, 1, or null for both. Bus alerts name lines only. |
+
+Errors answer `{ "error": "…" }` with `Cache-Control: no-store`: `400` for a
+bad query, `405` for methods other than GET and HEAD, `502` when either MTA
+feed fails.
+
+Caching: both feeds are decoded into one per-line index kept in Vercel's
+Runtime Cache for 60 s (`getCache()`, `ttl: 60`), shared by every instance, so
+the MTA is asked at most about once a minute; misses on one instance share one
+fetch. Responses carry `Cache-Control: public, max-age=0, s-maxage=60`.
+
+Tests run on both feeds as recorded on Nov 3, 2026 at about 21:30 UTC
+(`alerts/test/fixtures/`):
+
+```sh
+pnpm turbo run lint typecheck test --filter=@express/alerts
+```
+
 ## Data
 
 The image is built with the data already imported (`apps/api/motis/Dockerfile`):
@@ -137,6 +209,19 @@ each poll makes one upstream fetch.
   fleet-wide feed but MOTIS attaches realtime per dataset, so the adapter
   fetches it once per cycle (the MTA allows one fleet-wide call per 30 s) and
   hands each bus dataset its own routes.
+- **Alerts**: the MTA's subway and bus service alerts (no key). The MTA leaves
+  the standard `effect`, `cause`, and `severity_level` empty and says what an
+  alert is only in its `mercury_alert` extension's `alert_type`, so MOTIS would
+  answer `UNKNOWN_EFFECT` for all of them. The adapter fills the three fields
+  from [`motis/adapter/alert_types.json`](motis/adapter/alert_types.json)
+  (fields the feed sets are kept; `Planned - …` types get `cause:
+  MAINTENANCE`; an unknown type gets `OTHER_EFFECT` and is logged once) and
+  changes nothing else. The bus alerts feed is fetched once per cycle and each
+  bus dataset gets the alerts naming its routes. MOTIS attaches them to
+  departures (`place.alerts`) and legs, with the MTA's `active_period` as
+  `communicationPeriod`, whatever its time. Alert feeds are listed first per
+  dataset in `config.yml`: the feed-timestamp metric is per dataset and the
+  last feed listed sets it.
 - **Cold start**: MOTIS answers 503 (`motis is starting up`) until its first
   realtime update is in, about 1.5 s after start; retry after a second.
   `/metrics` and `/api/v1/health` answer meanwhile.

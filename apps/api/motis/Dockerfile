@@ -43,7 +43,7 @@ RUN ./motis import \
 ARG GTFS_RT_BINDINGS_VERSION=2.0.0
 RUN pip install --no-cache-dir --no-deps --break-system-packages --target /srv/adapter/lib \
     "gtfs-realtime-bindings==${GTFS_RT_BINDINGS_VERSION}"
-COPY adapter/*.py /srv/adapter/
+COPY adapter/*.py adapter/alert_types.json /srv/adapter/
 RUN PYTHONPATH=/srv/adapter/lib python3 /srv/adapter/build_index.py /srv/adapter \
     input/gtfs_supplemented.zip \
     us-ny-MTA-BusBronx=input/gtfs_bx.zip \

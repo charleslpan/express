@@ -66,6 +66,49 @@ if [ "${SMOKE_SKIP_REALTIME:-}" != 1 ]; then
     [ "$rt" -ge $(( (n + 1) / 2 )) ] || fail "under half of departures at $stop are realTime"
   done
 
+  # Alerts reach MOTIS through the adapter, which fills the effect from the
+  # MTA's alert type (adapter/alert_types.json). Take alerts from the MTA's own
+  # feed that name a line at a stop, and look for one on a departure of that
+  # line (and direction) at that stop, with the mapped effect. Several are
+  # tried: a skipped stop has no departures of its line to carry the alert.
+  echo "MTA subway alert on a matching departure, with its mapped effect"
+  types="$(dirname "$0")/adapter/alert_types.json"
+  alerts="$(get "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/camsys%2Fsubway-alerts.json")"
+  candidates="$(jq -c --slurpfile t "$types" '
+    $t[0] as $t
+    | [.entity[] | .alert as $a
+       | ($a["transit_realtime.mercury_alert"].alert_type // "") as $type
+       | ($type | ltrimstr($t.plannedPrefix)) as $base
+       | {header: ([$a.header_text.translation[] | select(.language == "en") | .text][0]),
+          effect: (($t.types[$type] // $t.types[$base] // $t.fallback).effect),
+          type: $type}
+         + ([$a.informed_entity[] | select(.stop_id and .route_id)][0]
+            | {route: .route_id, stop: .stop_id, dir: (.direction_id // null)})
+       | select(.stop)]
+    | .[:25][]' <<<"$alerts")"
+  found=""
+  while IFS= read -r c; do
+    [ -n "$c" ] || continue
+    stop="$(jq -r .stop <<<"$c")"
+    st="$(get "$BASE_URL/api/v6/stoptimes?stopId=us-ny-MTA-NYCSubway_$stop&n=30")"
+    hit="$(jq -r --argjson c "$c" '
+      [.stopTimes[]
+       | select(.routeId == "us-ny-MTA-NYCSubway_\($c.route)")
+       | select($c.dir == null or .directionId == ($c.dir | tostring))
+       | .place.alerts[]? | select(.headerText == $c.header)] as $hits
+      | if ($hits | length) == 0 then "none"
+        elif any($hits[]; .effect == $c.effect) then "ok"
+        else "effect \($hits[0].effect // "missing")" end' <<<"$st")"
+    case "$hit" in
+      ok) found="$c"; break ;;
+      none) ;;
+      *) fail "alert $(jq -r '"\(.type) on \(.route) at \(.stop)"' <<<"$c") has $hit, expected $(jq -r .effect <<<"$c")" ;;
+    esac
+  done <<<"$candidates"
+  [ -n "$candidates" ] || fail "the MTA's subway alerts name no line at a stop"
+  [ -n "$found" ] || fail "none of $(wc -l <<<"$candidates") MTA alerts appears on a matching departure"
+  echo "  ok: $(jq -r '"\(.type) on the \(.route) at \(.stop): \(.effect)"' <<<"$found")"
+
   echo "realtime age and match rate in /metrics"
   m="$(get "$BASE_URL/metrics")"
   ts="$(awk '/^nigiri_gtfsrt_feed_timestamp_seconds\{tag="us-ny-MTA-NYCSubway"\}/ {print int($2)}' <<<"$m")"
