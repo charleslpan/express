@@ -56,7 +56,6 @@ private struct GlassSurface<S: InsettableShape>: ViewModifier {
         contrast == .increased || forcesHighContrastGlass
     }
 
-    @ViewBuilder
     func body(content: Content) -> some View {
         if isOpaque {
             content
