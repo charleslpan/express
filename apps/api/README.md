@@ -22,7 +22,7 @@ MOTIS as `/api/v6/plan`. New routes go **before** the `/api/(.*)` catch-all in
 
 ## Data
 
-The image is built with the data already imported (`server/motis/Dockerfile`):
+The image is built with the data already imported (`apps/api/motis/Dockerfile`):
 
 - MTA supplemented subway GTFS (includes SIR and planned work), the six MTA bus
   GTFS feeds (Bronx, Brooklyn, Manhattan, Queens, Staten Island, MTA Bus Co.),

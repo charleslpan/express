@@ -1,5 +1,5 @@
 # MOTIS 2 for NYC with timetables prepared at build time.
-# Build context: this directory (server/motis).
+# Build context: this directory (apps/api/motis).
 
 ARG ALPINE_VERSION=3.22
 

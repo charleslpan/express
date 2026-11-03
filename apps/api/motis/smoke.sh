@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Smoke test for the MOTIS server.
-# Usage: server/motis/smoke.sh [BASE_URL]   (default http://localhost:8080)
+# Usage: apps/api/motis/smoke.sh [BASE_URL]   (default http://localhost:8080)
 # Needs curl and jq. Exits non-zero on the first failed check.
 # SMOKE_TIME (ISO 8601, e.g. 2026-11-04T15:00:00Z) queries at that time instead
 # of now; the Docker build sets it so the check does not depend on the hour.
