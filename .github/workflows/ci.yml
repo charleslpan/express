@@ -1,0 +1,81 @@
+# FROZEN: changing anything under .github/workflows/ needs a manual push by the
+# developer. Put CI logic in the Makefile or scripts/ci/, path filters in
+# .github/ci-filters.yml, and settings in .github/ci-config.env.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      swift: ${{ steps.filter.outputs.swift }}
+      server: ${{ steps.filter.outputs.server }}
+      ios: ${{ steps.filter.outputs.ios }}
+      swift-image: ${{ steps.config.outputs.SWIFT_IMAGE }}
+      ios-runner: ${{ steps.config.outputs.IOS_RUNNER }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: config
+        run: grep -E '^[A-Z_]+=' .github/ci-config.env >> "$GITHUB_OUTPUT"
+      - id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: .github/ci-filters.yml
+
+  swift:
+    needs: changes
+    if: needs.changes.outputs.swift == 'true'
+    runs-on: ubuntu-latest
+    container: ${{ needs.changes.outputs.swift-image }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: command -v make || (apt-get update -qq && apt-get install -y -qq make)
+      - run: make ci-swift
+
+  server:
+    needs: changes
+    if: needs.changes.outputs.server == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: make ci-server
+
+  ios:
+    needs: changes
+    if: needs.changes.outputs.ios == 'true'
+    runs-on: ${{ needs.changes.outputs.ios-runner }}
+    env:
+      GOOGLE_MAPS_IOS_API_KEY: ${{ secrets.GOOGLE_MAPS_IOS_API_KEY }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: make ci-ios
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ios-${{ github.run_attempt }}
+          path: |
+            build/screenshots/**
+            build/*.xcresult
+          if-no-files-found: ignore
+
+  ci-ok:
+    if: always()
+    needs: [changes, swift, server, ios]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
+        with:
+          allowed-skips: swift, server, ios
+          jobs: ${{ toJSON(needs) }}
