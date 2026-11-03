@@ -95,7 +95,7 @@ public struct JourneySegmentBar: View {
 
     /// The width of each segment: shares of `available` in proportion to `weights`, except that none is narrower
     /// than its entry in `minimums`. Where even the minimums don't fit, they shrink together.
-    static func widths(weights: [Double], minimums: [CGFloat], available: CGFloat) -> [CGFloat] {
+    nonisolated static func widths(weights: [Double], minimums: [CGFloat], available: CGFloat) -> [CGFloat] {
         let count = min(weights.count, minimums.count)
         guard count > 0 else {
             return []
@@ -144,7 +144,8 @@ private struct LegMinimumWidth: LayoutValueKey {
     static let defaultValue: CGFloat? = nil
 }
 
-/// Lays legs out side by side across the full width, as wide as ``JourneySegmentBar/widths(weights:minimums:available:)``
+/// Lays legs out side by side across the full width, as wide as
+/// ``JourneySegmentBar/widths(weights:minimums:available:)``
 /// says, all as tall as the tallest.
 private struct SegmentLayout: Layout {
     var spacing: CGFloat

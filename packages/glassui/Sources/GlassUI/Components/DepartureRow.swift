@@ -38,9 +38,12 @@ public struct DepartureRow: View {
             } else {
                 HStack(spacing: gap) {
                     LinePill(line)
+                        .fixedSize()
                     titles
+                        .layoutPriority(1)
                     Spacer(minLength: Spacing.xs)
                     times
+                        .fixedSize()
                 }
             }
         }
@@ -72,14 +75,23 @@ public struct DepartureRow: View {
             Text("No departures")
                 .typography(.secondary)
                 .foregroundStyle(.textSecondary)
-        } else {
-            // At accessibility sizes three times can outgrow the screen's width, so they wrap.
-            let layout = dynamicTypeSize.isAccessibilitySize
-                ? AnyLayout(FlowLayout(spacing: Spacing.sm))
-                : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: Spacing.sm))
-            layout {
+        } else if dynamicTypeSize.isAccessibilitySize {
+            // Three times can outgrow the screen's width here, so they wrap.
+            FlowLayout(spacing: Spacing.sm) {
                 ForEach(Array(departures.enumerated()), id: \.offset) { index, departure in
                     RealtimeBadge(departure, prominence: index == 0 ? .primary : .secondary)
+                }
+            }
+        } else {
+            // The next time on top, the later ones quieter underneath, leaving the headsign the row's width.
+            VStack(alignment: .trailing, spacing: Spacing.xxxs) {
+                RealtimeBadge(departures[0])
+                if departures.count > 1 {
+                    HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
+                        ForEach(Array(departures.dropFirst().enumerated()), id: \.offset) { _, departure in
+                            RealtimeBadge(departure, prominence: .secondary)
+                        }
+                    }
                 }
             }
         }
