@@ -57,7 +57,7 @@ public struct GlassCard<Content: View>: View {
             Text("14 St–Union Sq").typography(.cardTitle)
             Text("4 5 6 L N Q R W · 2 min walk").typography(.secondary).foregroundStyle(.textSecondary)
         }
-        GlassCard(action: {}) {
+        GlassCard {} content: {
             Text("Tappable").typography(.cardTitle)
             Text("The whole card is one button").typography(.secondary).foregroundStyle(.textSecondary)
         }

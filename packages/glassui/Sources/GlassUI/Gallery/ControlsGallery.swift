@@ -25,7 +25,7 @@
                         }
                     }
                     Spacer(minLength: Spacing.xl)
-                    GlassCard(action: {}) {
+                    GlassCard {} content: {
                         Text(verbatim: "14 St–Union Sq")
                             .typography(.cardTitle)
                         Text(verbatim: "4 5 6 L N Q R W · 2 min walk")
