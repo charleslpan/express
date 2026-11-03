@@ -41,7 +41,8 @@ export function createHandler(deps: Deps) {
       const res = await deps.fetch(url, { signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) });
       if (!res.ok) throw new UpstreamError(`Bus Time answered ${res.status}`);
       const fleet = decodeFleet(new Uint8Array(await res.arrayBuffer()));
-      await cache.set(CACHE_KEY, fleet, { ttl: TTL_SECONDS, name: "bus fleet" }).catch(() => {});
+      // A failed cache write still answers this request from the fresh fetch.
+      await cache.set(CACHE_KEY, fleet, { ttl: TTL_SECONDS, name: "bus fleet" }).catch(() => undefined);
       return fleet;
     })().finally(() => {
       inFlight = null;

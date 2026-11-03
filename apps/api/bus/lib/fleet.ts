@@ -46,7 +46,7 @@ export interface Query {
 // narrow enough that the endpoint stays a map query rather than a feed dump.
 export const MAX_BBOX_SPAN_DEG = 1;
 export const MAX_ROUTES = 50;
-const ROUTE_ID = /^[A-Za-z0-9+\-]{1,16}$/;
+const ROUTE_ID = /^[A-Za-z0-9+-]{1,16}$/;
 
 function toNumber(value: number | { toNumber(): number } | null | undefined): number | null {
   if (value == null) return null;
@@ -71,12 +71,12 @@ export function decodeFleet(bytes: Uint8Array): Fleet {
     vehicles.push({
       id: v.vehicle?.id || entity.id,
       route: v.trip?.routeId || null,
-      directionId: v.trip && has(v.trip, "directionId") ? v.trip.directionId! : null,
+      directionId: v.trip && has(v.trip, "directionId") ? (v.trip.directionId ?? null) : null,
       tripId: v.trip?.tripId || null,
       headsign: null,
       lat: round(pos.latitude, 5),
       lon: round(pos.longitude, 5),
-      bearing: has(pos, "bearing") && Number.isFinite(pos.bearing) ? round(pos.bearing!, 1) : null,
+      bearing: has(pos, "bearing") && pos.bearing != null && Number.isFinite(pos.bearing) ? round(pos.bearing, 1) : null,
       timestamp: toNumber(v.timestamp),
     });
   }
@@ -98,7 +98,8 @@ export function parseQuery(params: URLSearchParams): Query | { error: string } {
   if (parts.length !== 4 || parts.some((p) => p.trim() === "")) {
     return { error: "bbox must be four numbers: minLat,minLon,maxLat,maxLon" };
   }
-  const [minLat, minLon, maxLat, maxLon] = parts.map(Number);
+  // Four parts, checked above.
+  const [minLat, minLon, maxLat, maxLon] = parts.map(Number) as [number, number, number, number];
   if (![minLat, minLon, maxLat, maxLon].every(Number.isFinite)) {
     return { error: "bbox must be four numbers: minLat,minLon,maxLat,maxLon" };
   }

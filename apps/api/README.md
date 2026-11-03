@@ -95,7 +95,7 @@ Tests run on twelve buses recorded from the real Bus Time feed on Nov 3, 2026
 (`bus/test/fixtures/bus-time-2026-11-03.pb`, header included):
 
 ```sh
-cd apps/api/bus && npm ci && npm test && npm run typecheck
+pnpm turbo run lint typecheck test --filter=@express/bus
 ```
 
 ## Data
