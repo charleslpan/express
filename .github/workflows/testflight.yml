@@ -1,0 +1,39 @@
+# FROZEN: changing anything under .github/workflows/ needs a manual push by the
+# developer. Put the upload logic in `make testflight` (Makefile or scripts/ci/)
+# and settings in .github/ci-config.env.
+name: TestFlight
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: testflight
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  config:
+    runs-on: ubuntu-latest
+    outputs:
+      ios-runner: ${{ steps.config.outputs.IOS_RUNNER }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: config
+        run: grep -E '^[A-Z_]+=' .github/ci-config.env >> "$GITHUB_OUTPUT"
+
+  testflight:
+    needs: config
+    runs-on: ${{ needs.config.outputs.ios-runner }}
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      GOOGLE_MAPS_IOS_API_KEY: ${{ secrets.GOOGLE_MAPS_IOS_API_KEY }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: make testflight
