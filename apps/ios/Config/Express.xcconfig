@@ -1,0 +1,7 @@
+// Build settings for the Express app target (apps/ios/project.yml's configFiles).
+//
+// GOOGLE_MAPS_IOS_API_KEY comes from Secrets.xcconfig, which is git-ignored: copy Secrets.example.xcconfig to
+// Secrets.xcconfig and fill it in. CI and TestFlight write it from the GOOGLE_MAPS_IOS_API_KEY secret
+// (scripts/ci/ios.sh, scripts/ci/testflight.sh). Without it the app builds and shows "Map unavailable".
+GOOGLE_MAPS_IOS_API_KEY =
+#include? "Secrets.xcconfig"

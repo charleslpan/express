@@ -5,11 +5,14 @@ import SwiftUI
 enum ScreenshotScreen: String, CaseIterable {
     /// The placeholder root view.
     case root
+    /// Liquid Glass controls and a glass sheet over the Google map, for judging the look (F5).
+    case mapGlass = "map-glass"
 
     @MainActor @ViewBuilder
     var view: some View {
         switch self {
         case .root: RootView()
+        case .mapGlass: MapGlassScreen()
         }
     }
 
