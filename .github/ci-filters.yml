@@ -1,0 +1,22 @@
+# dorny/paths-filter filters for .github/workflows/ci.yml: each one decides
+# whether the job of the same name runs. Edit freely; the workflow is frozen.
+shared: &shared
+  - .github/**
+  - Makefile
+  - scripts/ci/**
+
+swift:
+  - *shared
+  - Packages/TransitKit/**
+
+server:
+  - *shared
+  - server/**
+
+ios:
+  - *shared
+  - project.yml
+  - App/**
+  - Packages/**
+  - .swiftformat
+  - .swiftlint.yml

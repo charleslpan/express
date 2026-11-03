@@ -13,7 +13,8 @@ Many agents work on it in parallel; follow this file so your work fits theirs.
 | `Packages/TransitKit/` | Transit models, networking, and routing logic. Platform-neutral: **no UIKit, SwiftUI, or CoreLocation**, so it builds and tests on Linux. Import `FoundationNetworking` behind `#if canImport(FoundationNetworking)`. |
 | `Packages/GlassUI/` | Shared SwiftUI components and Liquid Glass styling (iOS 27+). Depends on SwiftUI only, **never on TransitKit**. |
 | `server/` | The backend the server tasks build. It has its own [`server/AGENTS.md`](server/AGENTS.md); read it before touching anything there. |
-| `.github/workflows/` | CI. The `ci-ok` job is the required check on `main`. |
+| `.github/` | CI. Workflows are frozen (see [CI](#ci)); `ci-filters.yml` and `ci-config.env` are editable. `ci-ok` is the required check on `main`. |
+| `scripts/ci/` | Scripts the CI Make targets call. |
 
 The app target depends on both packages.
 
@@ -31,6 +32,22 @@ open Express.xcodeproj
 - **On Linux** (agent sandboxes) only TransitKit builds: `swift test --package-path Packages/TransitKit` (or `make test`).
   Everything iOS (the app, GlassUI) is built and tested by CI; don't try to run Xcode.
 - **Lint before you push:** `make lint` checks SwiftFormat and SwiftLint; `make format` fixes what it can.
+
+### CI
+
+Workflow files are **frozen**: Vespin's GitHub App can't push anything under `.github/workflows/`, so each change
+there costs the developer a manual push. Never edit them. Change what CI does through the files they read instead:
+
+- **Job logic:** the Make targets each job runs (`make ci-swift`, `ci-server`, `ci-ios`, `testflight`), with longer
+  scripts in `scripts/ci/`.
+- **Which jobs run:** path filters in `.github/ci-filters.yml`. Each filter gates the job of the same name.
+- **Settings:** `.github/ci-config.env` (Swift container image, iOS runner label).
+- **Secrets** the jobs already receive as env: `GOOGLE_MAPS_IOS_API_KEY` (`ios`, `testflight`), and `ASC_KEY_ID`,
+  `ASC_ISSUER_ID`, `ASC_KEY_P8`, `APPLE_TEAM_ID` (`testflight`).
+- `ci-ok` passes when every job passed or was skipped by its filter. It is the only required check on `main`.
+- The `ios` job uploads `build/screenshots/**` and `build/*.xcresult` as artifacts, so write output there.
+
+If a change truly needs a workflow edit, ask the developer for it rather than pushing.
 
 ### CI screenshots
 
