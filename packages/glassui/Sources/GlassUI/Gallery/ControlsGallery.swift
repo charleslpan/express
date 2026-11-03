@@ -107,10 +107,8 @@
                             .typography(.secondary)
                             .foregroundStyle(.textSecondary)
                     }
-                    HStack(spacing: Spacing.floatingInset) {
-                        GlassIconButton("Show my location", systemImage: "location.fill") {}
-                        ActionRow()
-                    }
+                    GlassIconButton("Show my location", systemImage: "location.fill") {}
+                    ActionRow()
                 }
             }
         }

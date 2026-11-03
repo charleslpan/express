@@ -10,7 +10,7 @@ import SwiftUI
 ///
 /// Tapping anywhere on the capsule focuses the field. Once there's text, a clear button appears at its end. An
 /// optional `accessory` sits at the trailing end, such as an account button; it's inside the glass, so it must not
-/// be glass itself. The field is at least 48 points tall and grows with Dynamic Type.
+/// be glass itself. The field is at least 48 points tall and grows with Dynamic Type up to AX2.
 public struct GlassSearchField<Accessory: View>: View {
     private let prompt: LocalizedStringKey
     @Binding private var text: String
@@ -41,6 +41,7 @@ public struct GlassSearchField<Accessory: View>: View {
                 .foregroundStyle(.textSecondary)
                 .accessibilityHidden(true)
             TextField(prompt, text: $text)
+                .typography(.body)
                 .foregroundStyle(.textPrimary)
                 .submitLabel(.search)
                 .autocorrectionDisabled()
@@ -68,6 +69,8 @@ public struct GlassSearchField<Accessory: View>: View {
         .contentShape(Capsule())
         .onTapGesture { isFocused = true }
         .glassSurface(in: Capsule(), isInteractive: true)
+        // Past AX2 the icons crowd the field out of room for its text; the system's own search bars stop there too.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
     }
 
     private var hasTrailingControl: Bool {
