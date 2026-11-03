@@ -53,10 +53,21 @@ RUN PYTHONPATH=/srv/adapter/lib python3 /srv/adapter/build_index.py /srv/adapter
     us-ny-MTA-BusStatenIsland=input/gtfs_si.zip \
     us-ny-MTA-BusCompany=input/gtfs_busco.zip
 
+# Health check: serve the imported data and run the smoke test against it. A
+# failure fails the build, so production keeps serving the previous image.
+FROM build AS smoke
+RUN apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends bash jq > /dev/null \
+ && rm -rf /var/lib/apt/lists/*
+COPY smoke.sh smoke-build.sh ./
+RUN bash smoke-build.sh && touch /smoke-passed
+
 FROM alpine:${ALPINE_VERSION}
 # py3-protobuf is the C (upb) build; PyPI has no musl wheel.
 RUN apk add --no-cache python3 py3-protobuf tini
 WORKDIR /srv/motis
+# Depends on the smoke stage, so the build cannot skip it.
+COPY --from=smoke /smoke-passed /srv/motis/smoke-passed
 COPY --from=build /srv/motis/motis /usr/local/bin/motis
 COPY --from=build /srv/motis/data data
 COPY --from=build /srv/motis/config.server.yml ./

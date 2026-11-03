@@ -1,0 +1,20 @@
+{
+  "name": "@express/cron",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Daily Vercel Cron target: triggers a cache-free production rebuild via the Deploy Hook.",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@express/eslint-config": "workspace:*",
+    "@express/tsconfig": "workspace:*",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.14.0",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}
