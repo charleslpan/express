@@ -49,7 +49,9 @@ struct BackendFixtureTests {
     }
 
     @Test func everyFixtureUsesBackendDatasets() throws {
-        let urls = Bundle.module.urls(forResourcesWithExtension: "json", subdirectory: "Fixtures") ?? []
+        let directory = try #require(Bundle.module.url(forResource: "Fixtures", withExtension: nil))
+        let urls = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension == "json" }
         #expect(urls.count >= 5)
         for url in urls {
             let name = url.deletingPathExtension().lastPathComponent
