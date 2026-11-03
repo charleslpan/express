@@ -25,38 +25,28 @@
             }
         }
 
+        /// Each role's sample text and the text style it's built on.
+        private static let specimens: [Typography: (sample: String, style: String)] = [
+            .screenTitle: ("Express", "Large Title, bold"),
+            .sectionTitle: ("Nearby stops", "Title 2, bold"),
+            .cardTitle: ("Times Sq–42 St", "Headline"),
+            .body: ("Walk to 7 Av, then take the uptown train.", "Body"),
+            .bodyEmphasized: ("Exit at the rear of the train.", "Body, semibold"),
+            .secondary: ("Uptown · 2 min walk", "Subheadline"),
+            .caption: ("Updated 18:30", "Caption"),
+            .captionEmphasized: ("Delayed", "Caption, semibold"),
+            .time: ("4 min · 18:42", "Title 3, rounded, tabular"),
+            .timeLarge: ("18:42", "Large Title, rounded, tabular"),
+            .badge: ("M15 SBS", "Subheadline, rounded, bold"),
+            .button: ("Start trip", "Body, semibold"),
+        ]
+
         private func sample(for role: Typography) -> String {
-            switch role {
-            case .screenTitle: "Express"
-            case .sectionTitle: "Nearby stops"
-            case .cardTitle: "Times Sq–42 St"
-            case .body: "Walk to 7 Av, then take the uptown train."
-            case .bodyEmphasized: "Exit at the rear of the train."
-            case .secondary: "Uptown · 2 min walk"
-            case .caption: "Updated 18:30"
-            case .captionEmphasized: "Delayed"
-            case .time: "4 min · 18:42"
-            case .timeLarge: "18:42"
-            case .badge: "M15 SBS"
-            case .button: "Start trip"
-            }
+            Self.specimens[role]?.sample ?? role.rawValue
         }
 
         private func description(of role: Typography) -> String {
-            switch role {
-            case .screenTitle: "Large Title, bold"
-            case .sectionTitle: "Title 2, bold"
-            case .cardTitle: "Headline"
-            case .body: "Body"
-            case .bodyEmphasized: "Body, semibold"
-            case .secondary: "Subheadline"
-            case .caption: "Caption"
-            case .captionEmphasized: "Caption, semibold"
-            case .time: "Title 3, rounded, tabular"
-            case .timeLarge: "Large Title, rounded, tabular"
-            case .badge: "Subheadline, rounded, bold"
-            case .button: "Body, semibold"
-            }
+            Self.specimens[role]?.style ?? ""
         }
     }
 #endif
