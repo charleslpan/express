@@ -5,6 +5,7 @@ the developer's personal account "charlespan's projects", Hobby plan).
 
 | Path | Service | What |
 | --- | --- | --- |
+| `/api/vehicles/bus` | `bus` (Node.js Function) | Live bus GPS from MTA Bus Time, filtered to a bounding box. See [Bus positions](#bus-positions). |
 | `/api/(.*)` | `motis` (container) | [MOTIS 2](https://github.com/motis-project/motis) v2.11.4 routing for NYC: subway with SIR, and MTA buses. Timetables only for now. |
 
 Production: <https://express-server-cyan-zeta.vercel.app> (also
@@ -18,6 +19,78 @@ curl 'https://express-server-cyan-zeta.vercel.app/api/v6/stoptimes?stopId=us-ny-
 Vercel passes the original path to the service, so `/api/v6/plan` reaches
 MOTIS as `/api/v6/plan`. New routes go **before** the `/api/(.*)` catch-all in
 [`vercel.json`](vercel.json).
+
+## Bus positions
+
+`GET /api/vehicles/bus?bbox=minLat,minLon,maxLat,maxLon[&routes=M15,B44%2B]`
+
+Live bus positions from MTA Bus Time's GTFS-RT vehicle positions feed, decoded
+with Google's `gtfs-realtime-bindings`. The Bus Time key stays on the server
+(`MTA_BUS_TIME_KEY`), and the app never calls MTA servers itself, as MTA's
+terms require. Code in [`bus/`](bus/).
+
+```sh
+curl 'https://express-server-cyan-zeta.vercel.app/api/vehicles/bus?bbox=40.70,-74.02,40.72,-73.98&routes=M15,M15%2B'
+```
+
+Query:
+
+- `bbox` (required): `minLat,minLon,maxLat,maxLon` in degrees, each side at
+  most 1°, which covers all five boroughs.
+- `routes` (optional): up to 50 comma-separated GTFS `route_id`s, matched
+  exactly. Select Bus Service routes end in `+` (`M15+`), which must be sent as
+  `%2B`.
+
+Response (`200`, `application/json`):
+
+```json
+{
+  "updatedAt": 1793731200,
+  "vehicles": [
+    {
+      "id": "MTA NYCT_7582",
+      "route": "M15",
+      "directionId": 0,
+      "tripId": "OH_D6-Weekday-SDon-108500_M15_402",
+      "headsign": null,
+      "lat": 40.7075,
+      "lon": -74.0021,
+      "bearing": 212.4,
+      "timestamp": 1793731188
+    }
+  ]
+}
+```
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `updatedAt` | number or null | Feed header time, Unix seconds. |
+| `id` | string | Bus Time vehicle id (`MTA NYCT_…` or `MTABC_…`). |
+| `route` | string or null | GTFS `route_id`, the same as in the bus timetables MOTIS loads. |
+| `directionId` | 0, 1, or null | GTFS `direction_id`. |
+| `tripId` | string or null | GTFS `trip_id`; MOTIS knows it as `us-ny-MTA-Bus<Borough>_<tripId>`. |
+| `headsign` | null | Always null: GTFS-RT vehicle positions carry no headsign. Look it up from MOTIS (`/api/v6/trip`) by `tripId` when a bus is tapped. |
+| `lat`, `lon` | number | GPS position, 5 decimals (about 1 m). |
+| `bearing` | number or null | Degrees clockwise from true north. |
+| `timestamp` | number or null | Time of the GPS fix, Unix seconds. |
+
+Errors answer `{ "error": "…" }` with `Cache-Control: no-store`: `400` for a
+bad query, `405` for methods other than GET and HEAD, `502` when Bus Time fails,
+`503` when `MTA_BUS_TIME_KEY` is not set.
+
+Caching: the decoded fleet (every bus, a few hundred KB) is kept in Vercel's
+Runtime Cache for 30 s, shared by every instance and every bbox, so Bus Time is
+fetched at most about once per 30 s; misses on one instance share one fetch.
+Responses carry `Cache-Control: public, max-age=0, s-maxage=30`, so the CDN
+also answers repeats of the same URL. A whole-city response for a full fleet
+is about 1 MB, well under Vercel's 4.5 MB response limit.
+
+Tests run on a GTFS-RT fixture shaped like Bus Time's feed
+(`bus/test/fixtures/small.pb`, written by `bus/test/make-fixture.ts`):
+
+```sh
+cd apps/api/bus && npm ci && npm test && npm run typecheck
+```
 
 ## Data
 

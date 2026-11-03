@@ -1,0 +1,23 @@
+{
+  "name": "express-bus",
+  "private": true,
+  "description": "Bus GPS endpoint: MTA Bus Time vehicle positions, filtered to a bounding box.",
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "fixture": "node test/make-fixture.ts"
+  },
+  "dependencies": {
+    "@vercel/functions": "^3.10.6",
+    "gtfs-realtime-bindings": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}

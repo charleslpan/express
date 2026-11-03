@@ -5,9 +5,13 @@
       "runtime": "container",
       "root": "motis/",
       "entrypoint": "Dockerfile"
+    },
+    "bus": {
+      "root": "bus/"
     }
   },
   "rewrites": [
+    { "source": "/api/vehicles/bus", "destination": { "service": "bus" } },
     { "source": "/api/(.*)", "destination": { "service": "motis" } }
   ]
 }

@@ -24,6 +24,9 @@ on every call.
 - `motis/entrypoint.sh`: writes the config to `/tmp` with the port from
   `PORT` and starts `motis server`.
 - `motis/smoke.sh`: smoke test against any base URL.
+- `bus/`: the bus GPS Function (`api/vehicles/bus.ts`, Node.js, TypeScript).
+  Logic lives in `lib/`, tests in `test/` (Vitest). It is routed by the
+  `/api/vehicles/bus` rewrite ahead of the catch-all.
 
 ## Build and run locally
 
@@ -46,6 +49,8 @@ apps/api/motis/smoke.sh https://express-server-cyan-zeta.vercel.app
 Needs `curl` and `jq`. CI runs `scripts/ci/server.sh`, which builds the image,
 starts it, and runs the smoke test; run it locally the same way with Docker.
 
+Bus Function: `cd apps/api/bus && npm ci && npm test && npm run typecheck`.
+
 ## Deploy
 
 The project is linked to GitHub with Root Directory `apps/api`: pushes to a
@@ -55,4 +60,6 @@ hand, run `vercel deploy --prod --scope charlespan-projects` from `apps/api/`.
 ## Environment variables
 
 - `PORT`: port MOTIS listens on (container default `80`, Vercel's default).
-- `MTA_BUS_TIME_KEY`: set in the project for B2 (bus realtime); not used yet.
+- `MTA_BUS_TIME_KEY`: MTA Bus Time API key, read by the `bus` Function
+  (`/api/vehicles/bus`), which answers 503 without it. Never send it to the
+  app or log it.
