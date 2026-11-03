@@ -45,7 +45,7 @@ The MTA's supplemented subway feed changes hourly and covers planned work only
 1. **Vercel Cron** calls `GET /api/cron/rebuild` on the production deployment
    at `0 9 * * *` (09:00 UTC: 4 am EST, 5 am EDT). Hobby runs it once a day
    somewhere inside that hour (±59 min). Configured in [`vercel.json`](vercel.json).
-2. The function ([`cron/api/cron/rebuild.js`](cron/api/cron/rebuild.js)) checks
+2. The function ([`cron/index.js`](cron/index.js)) checks
    `Authorization: Bearer $CRON_SECRET` and POSTs the project's Deploy Hook
    with `?buildCache=false`, so the Docker build downloads fresh feeds and
    re-imports them.
@@ -102,11 +102,12 @@ deployments, so rollback still works. That keeps roughly 7–10 deployments
 (each ≈ 181 MB of image) instead of the 30-day default's ≈ 30+ against Hobby's
 10 GB deployment storage and VCR's 50 images per repository.
 
-Vercel's docs do not say whether deleting a deployment deletes the image it
-pushed to the project's container registry (project → **Images**). Check once
-the first deployments have aged out: if the image count keeps growing past the
-deployment count, delete old untagged images with
-`vercel vcr image ls <repo> --untagged` and `vercel vcr image rm <repo> <id>`.
+Each build pushes its image to the project's registry repository `motis`,
+tagged with the deployment id (`motis:dpl_…`; project → **Images**). Vercel's
+docs do not say whether deleting a deployment deletes that image. Check once
+the first deployments have aged out (after Nov 10, 2026 with a 1-week policy):
+if `vercel vcr image ls motis` lists tags for deployments that no longer
+exist, delete those with `vercel vcr image rm motis <image-id>`.
 
 ## Measurements
 

@@ -27,7 +27,7 @@ on every call.
   query time).
 - `motis/smoke-build.sh`: runs `smoke.sh` inside the Docker build (`smoke`
   stage) against the freshly imported data; a failure fails the deployment.
-- `cron/api/cron/rebuild.js`: the daily Vercel Cron target. Checks
+- `cron/index.js`: the daily Vercel Cron target. Checks
   `CRON_SECRET`, POSTs `DEPLOY_HOOK_URL?buildCache=false`. The `cron` service
   is a plain Node function with no dependencies; its route sits before the
   `/api/(.*)` catch-all.

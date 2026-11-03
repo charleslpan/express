@@ -11,7 +11,7 @@ function authorized(request) {
   return got.length === want.length && timingSafeEqual(got, want);
 }
 
-export async function GET(request) {
+async function rebuild(request) {
   if (!authorized(request)) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
@@ -30,3 +30,12 @@ export async function GET(request) {
   console.log(`deploy hook job ${body?.job?.id} ${body?.job?.state}`);
   return Response.json({ ok: true, job: body?.job ?? null });
 }
+
+export default {
+  fetch(request) {
+    const { pathname } = new URL(request.url);
+    if (pathname !== "/api/cron/rebuild") return new Response("not found", { status: 404 });
+    if (request.method !== "GET") return new Response("method not allowed", { status: 405 });
+    return rebuild(request);
+  },
+};
