@@ -165,12 +165,14 @@ def rewrite_feed(feed: gtfs_realtime_pb2.FeedMessage, tt: Timetable) -> FeedStat
 
     Only trip descriptor fields change (trip id, start date and time, schedule
     relationship, and the route of added trips), so the MTA's NYCT extension
-    fields pass through intact. Other entities (vehicle positions, alerts)
-    pass through unchanged; MOTIS ignores vehicle positions.
+    fields pass through intact. Alerts pass through unchanged. Vehicle
+    positions are dropped: MOTIS ignores them, logging a line for each.
     """
     stats = FeedStats()
     keep = []
     for e in feed.entity:
+        if e.HasField("vehicle") and not (e.HasField("trip_update") or e.HasField("alert")):
+            continue
         if e.HasField("trip_update"):
             stats.trip_updates += 1
             if not _rewrite_trip_update(e.trip_update, tt, stats):

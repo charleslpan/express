@@ -189,7 +189,7 @@ class RecordedFeeds(unittest.TestCase):
                    and e.trip_update.trip.schedule_relationship == TripDescriptor.SCHEDULED]
             self.assertEqual(len(ids), len(set(ids)), name)
 
-    def test_nyct_extensions_and_other_entities_kept(self):
+    def test_nyct_extensions_and_alerts_kept(self):
         changed = ("trip_id", "start_time", "start_date", "schedule_relationship",
                    "route_id")
         for name, before, after, _ in self.feeds():
@@ -197,8 +197,12 @@ class RecordedFeeds(unittest.TestCase):
             self.assertEqual(before.header.SerializeToString(),
                              after.header.SerializeToString(), name)
             old = {e.id: e for e in before.entity}
+            self.assertEqual(
+                sum(1 for e in before.entity if e.HasField("alert")),
+                sum(1 for e in after.entity if e.HasField("alert")), name)
             for e in after.entity:
                 o = old[e.id]
+                self.assertFalse(e.HasField("vehicle"), "vehicle positions dropped")
                 if not e.HasField("trip_update"):
                     self.assertEqual(o.SerializeToString(), e.SerializeToString())
                     continue
