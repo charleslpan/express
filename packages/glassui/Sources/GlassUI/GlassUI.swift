@@ -6,5 +6,5 @@ import SwiftUI
 /// plain values, and the app maps transit models onto them.
 public enum GlassUI {
     /// The package's version, bumped by hand when its public API changes.
-    public static let version = "0.2.0"
+    public static let version = "0.3.0"
 }
