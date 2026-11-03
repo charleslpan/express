@@ -100,6 +100,7 @@ version=$(sed -n 's/^ *MARKETING_VERSION: *"\{0,1\}\([^"]*\)"\{0,1\} *$/\1/p' ap
 echo "Express $version ($build_number), team $APPLE_TEAM_ID"
 
 echo "::group::Archive"
+# -skipPackagePluginValidation trusts TransitKit's OpenAPI generator build plugin, which CI cannot click through.
 rm -rf build/Express.xcarchive build/export
 xcodebuild archive \
     -quiet \
@@ -109,6 +110,7 @@ xcodebuild archive \
     -destination generic/platform=iOS \
     -derivedDataPath build/DerivedData \
     -archivePath build/Express.xcarchive \
+    -skipPackagePluginValidation \
     "${auth[@]}" \
     DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
     CODE_SIGN_STYLE=Automatic \
