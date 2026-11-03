@@ -8,6 +8,9 @@
         case modes
         case typography
         case layout
+        case controls
+        case controlStates
+        case controlFallbacks
 
         public var id: Self {
             self
@@ -19,6 +22,9 @@
             case .modes: "Modes"
             case .typography: "Typography"
             case .layout: "Spacing & Radii"
+            case .controls: "Glass Controls"
+            case .controlStates: "Control States"
+            case .controlFallbacks: "Accessibility Fallbacks"
             }
         }
 
@@ -28,6 +34,9 @@
             case .modes: "Accent and symbol per way of travel. Line colors come from the feed, not from here."
             case .typography: "Roles on the system font. Every one scales with Dynamic Type."
             case .layout: "A 4-point spacing scale and continuous, concentric corner radii."
+            case .controls: "Search, buttons, and a card on Liquid Glass, floating over a stand-in map."
+            case .controlStates: "Empty and filled search; standard, prominent, and disabled buttons."
+            case .controlFallbacks: "Opaque with Reduce Transparency on; bordered with Increase Contrast on."
             }
         }
     }
@@ -80,6 +89,9 @@
             case .modes: ModesGallery()
             case .typography: TypographyGallery()
             case .layout: LayoutGallery()
+            case .controls: ControlsGallery()
+            case .controlStates: ControlStatesGallery()
+            case .controlFallbacks: ControlFallbacksGallery()
             }
         }
     }
