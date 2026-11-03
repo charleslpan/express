@@ -1,0 +1,57 @@
+# XcodeGen 2.46.0 spec. Run `xcodegen generate` to create Express.xcodeproj,
+# which is git-ignored: edit this file, never the generated project.
+name: Express
+
+options:
+  bundleIdPrefix: com.charleslpan
+  deploymentTarget:
+    iOS: "27.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+packages:
+  TransitKit:
+    path: Packages/TransitKit
+  GlassUI:
+    path: Packages/GlassUI
+
+targets:
+  Express:
+    type: application
+    platform: iOS
+    deploymentTarget: "27.0"
+    sources:
+      - path: App
+        excludes:
+          - "**/.gitkeep"
+    dependencies:
+      - package: TransitKit
+      - package: GlassUI
+    settings:
+      base:
+        # Placeholder bundle id; change it here before shipping.
+        PRODUCT_BUNDLE_IDENTIFIER: com.charleslpan.express
+        PRODUCT_NAME: Express
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_PREVIEWS: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Express
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: >-
+          Express uses your location to find nearby stops and plan trips from where you are.
+    scheme:
+      testTargets:
+        - package: TransitKit/TransitKitTests
+        - package: GlassUI/GlassUITests

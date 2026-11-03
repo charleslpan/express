@@ -1,0 +1,33 @@
+# SwiftLint rules. SwiftFormat owns formatting; SwiftLint catches the rest.
+excluded:
+  - .build
+  - Packages/TransitKit/.build
+  - Packages/GlassUI/.build
+  - DerivedData
+  - Express.xcodeproj
+
+disabled_rules:
+  - trailing_comma # SwiftFormat adds trailing commas
+  - opening_brace # SwiftFormat decides brace placement
+
+opt_in_rules:
+  - empty_count
+  - first_where
+  - sorted_imports
+  - toggle_bool
+  - unused_import
+
+analyzer_rules:
+  - unused_declaration
+
+line_length:
+  warning: 120
+  error: 160
+  ignores_comments: true
+  ignores_urls: true
+
+identifier_name:
+  excluded:
+    - id
+    - x
+    - y
