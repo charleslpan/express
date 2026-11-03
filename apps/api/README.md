@@ -68,7 +68,7 @@ Response (`200`, `application/json`):
 | `id` | string | Bus Time vehicle id (`MTA NYCT_…` or `MTABC_…`). |
 | `route` | string or null | GTFS `route_id`, the same as in the bus timetables MOTIS loads. |
 | `directionId` | 0, 1, or null | GTFS `direction_id`. |
-| `tripId` | string or null | GTFS `trip_id`; MOTIS knows it as `us-ny-MTA-Bus<Borough>_<tripId>`. |
+| `tripId` | string or null | GTFS `trip_id` from the bus timetables MOTIS loads (`MQ_D6-Weekday-081500_M9_67` for NYCT, `47352355-CPPD6-CP_D6-Weekday-04` for MTA Bus Company). Buses are often interlined, so the trip can belong to another route than `route` (an M9 bus running an M21 trip). |
 | `headsign` | null | Always null: GTFS-RT vehicle positions carry no headsign. Look it up from MOTIS (`/api/v6/trip`) by `tripId` when a bus is tapped. |
 | `lat`, `lon` | number | GPS position, 5 decimals (about 1 m). |
 | `bearing` | number or null | Degrees clockwise from true north. |
@@ -78,15 +78,21 @@ Errors answer `{ "error": "…" }` with `Cache-Control: no-store`: `400` for a
 bad query, `405` for methods other than GET and HEAD, `502` when Bus Time fails,
 `503` when `MTA_BUS_TIME_KEY` is not set.
 
-Caching: the decoded fleet (every bus, a few hundred KB) is kept in Vercel's
+Caching: the decoded fleet (every bus, about 500 KB of JSON) is kept in Vercel's
 Runtime Cache for 30 s, shared by every instance and every bbox, so Bus Time is
 fetched at most about once per 30 s; misses on one instance share one fetch.
 Responses carry `Cache-Control: public, max-age=0, s-maxage=30`, so the CDN
-also answers repeats of the same URL. A whole-city response for a full fleet
-is about 1 MB, well under Vercel's 4.5 MB response limit.
+also answers repeats of the same URL. The CDN strips `s-maxage` from what
+the client sees (`public, max-age=0`).
 
-Tests run on a GTFS-RT fixture shaped like Bus Time's feed
-(`bus/test/fixtures/small.pb`, written by `bus/test/make-fixture.ts`):
+Measured on Nov 3, 2026 at 19:20 UTC: Bus Time answered in 69 ms with 350 KB of
+protobuf for 2,639 buses on 288 routes; every bus had a position, route, trip,
+direction, bearing, and fix time, the oldest fix 127 s old. A whole-city
+response is about 540 KB, well under Vercel's 4.5 MB limit; a peak-hour fleet
+of about 5,000 buses would be about 1 MB.
+
+Tests run on twelve buses recorded from the real Bus Time feed on Nov 3, 2026
+(`bus/test/fixtures/bus-time-2026-11-03.pb`, header included):
 
 ```sh
 cd apps/api/bus && npm ci && npm test && npm run typecheck

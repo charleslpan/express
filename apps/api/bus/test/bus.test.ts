@@ -1,30 +1,54 @@
 import { readFileSync } from "node:fs";
+import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { decodeFleet, filterFleet, parseQuery, type Bus, type Fleet } from "../lib/fleet.js";
 import { CACHE_KEY, FEED_URL, createHandler, type FleetCache } from "../lib/handler.js";
 
-const feed = readFileSync(new URL("./fixtures/small.pb", import.meta.url));
+// Twelve buses and the header from a real Bus Time feed, recorded on
+// Nov 3, 2026 at 19:20 UTC: six in Lower Manhattan, two S79+ (Select Bus
+// Service), and four elsewhere in the city.
+const feed = readFileSync(new URL("./fixtures/bus-time-2026-11-03.pb", import.meta.url));
+const FEED_TS = 1_793_733_639;
 const NYC = "40.49,-74.26,40.92,-73.70";
 const LOWER_MANHATTAN = "40.70,-74.02,40.72,-73.98";
 
 describe("decodeFleet", () => {
-  it("keeps vehicles with a position, in the compact shape", () => {
+  it("keeps every bus in the compact shape", () => {
     const fleet = decodeFleet(feed);
-    expect(fleet.updatedAt).toBe(1_793_731_200);
-    expect(fleet.vehicles.map((b) => b.id)).toEqual([
-      "MTA NYCT_7582", "MTA NYCT_5911", "MTA NYCT_4022", "MTA NYCT_1301", "MTABC_3990",
-    ]);
+    expect(fleet.updatedAt).toBe(FEED_TS);
+    expect(fleet.vehicles).toHaveLength(12);
     expect(fleet.vehicles[0]).toEqual({
-      id: "MTA NYCT_7582",
-      route: "M15",
-      directionId: 0,
-      tripId: "OH_D6-Weekday-SDon-108500_M15_402",
+      id: "MTA NYCT_9773",
+      route: "M9",
+      directionId: 1,
+      // Interlined: the bus runs an M21 trip while signed as the M9.
+      tripId: "MQ_D6-Weekday-082500_M21_203",
       headsign: null,
-      lat: 40.7075,
-      lon: -74.0021,
-      bearing: 212.4,
-      timestamp: 1_793_731_188,
+      lat: 40.71251,
+      lon: -74.00925,
+      bearing: 153.6,
+      timestamp: 1_793_733_636,
     });
+  });
+
+  it("drops vehicles without a usable position and keeps unset fields null", () => {
+    const { FeedMessage } = GtfsRealtimeBindings.transit_realtime;
+    const bytes = FeedMessage.encode(
+      FeedMessage.fromObject({
+        header: { gtfsRealtimeVersion: "1.0", timestamp: FEED_TS },
+        entity: [
+          { id: "a", vehicle: { trip: { routeId: "M1" }, vehicle: { id: "a" } } },
+          { id: "b", vehicle: { position: { latitude: 0, longitude: 0 }, vehicle: { id: "b" } } },
+          { id: "c", tripUpdate: { trip: { routeId: "M2" }, stopTimeUpdate: [] } },
+          { id: "d", vehicle: { trip: { routeId: "M3" }, position: { latitude: 40.7, longitude: -74 } } },
+          { id: "e", vehicle: { trip: { routeId: "M4", directionId: 0 }, position: { latitude: 40.7, longitude: -74, bearing: 0 } } },
+        ],
+      }),
+    ).finish();
+    expect(decodeFleet(bytes).vehicles).toEqual([
+      { id: "d", route: "M3", directionId: null, tripId: null, headsign: null, lat: 40.7, lon: -74, bearing: null, timestamp: null },
+      { id: "e", route: "M4", directionId: 0, tripId: null, headsign: null, lat: 40.7, lon: -74, bearing: 0, timestamp: null },
+    ]);
   });
 });
 
@@ -64,13 +88,16 @@ describe("filterFleet", () => {
   };
 
   it("filters to the bbox", () => {
-    expect(run(`bbox=${LOWER_MANHATTAN}`)).toEqual(["MTA NYCT_7582", "MTA NYCT_5911"]);
-    expect(run(`bbox=${NYC}`)).toHaveLength(5);
+    expect(run(`bbox=${LOWER_MANHATTAN}`)).toEqual([
+      "MTA NYCT_9773", "MTA NYCT_9708", "MTA NYCT_9723", "MTA NYCT_5359", "MTA NYCT_9717", "MTA NYCT_9718",
+    ]);
+    expect(run(`bbox=${NYC}`)).toHaveLength(12);
   });
 
   it("filters to the routes, matching route ids exactly", () => {
-    expect(run(`bbox=${LOWER_MANHATTAN}&routes=M15`)).toEqual(["MTA NYCT_7582"]);
-    expect(run(`bbox=${NYC}&routes=B44%2B,Q70%2B`)).toEqual(["MTA NYCT_1301", "MTABC_3990"]);
+    expect(run(`bbox=${LOWER_MANHATTAN}&routes=M9`)).toEqual(["MTA NYCT_9773", "MTA NYCT_9708"]);
+    expect(run(`bbox=${NYC}&routes=S79%2B,BX25`)).toEqual(["MTA NYCT_8583", "MTA NYCT_8580", "MTA NYCT_9770"]);
+    expect(run(`bbox=${NYC}&routes=S79`)).toEqual([]);
   });
 
   it("keeps a whole-city response of a full fleet well under 4.5 MB", () => {
@@ -114,7 +141,7 @@ describe("handler", () => {
   const get = (h: ReturnType<typeof createHandler>, qs: string) => h(new Request(`https://x.test/api/vehicles/bus?${qs}`));
 
   beforeEach(() => {
-    vi.useFakeTimers({ now: 1_793_731_200_000 });
+    vi.useFakeTimers({ now: FEED_TS * 1000 });
     fetchMock = vi.fn(async () => new Response(feed));
     mem = memoryCache();
     key = "test-key";
@@ -125,8 +152,8 @@ describe("handler", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("cache-control")).toBe("public, max-age=0, s-maxage=30");
     const body = (await res.json()) as Fleet;
-    expect(body.updatedAt).toBe(1_793_731_200);
-    expect(body.vehicles.map((b) => b.route)).toEqual(["M15", "M15+"]);
+    expect(body.updatedAt).toBe(FEED_TS);
+    expect(body.vehicles.map((b) => b.route)).toEqual(["M9", "M9", "M20", "M15", "M55", "M22"]);
     expect(fetchMock).toHaveBeenCalledWith(`${FEED_URL}?key=test-key`, expect.anything());
   });
 
@@ -135,7 +162,7 @@ describe("handler", () => {
     const b = handler(); // a second instance sharing the Runtime Cache
     await get(a, `bbox=${LOWER_MANHATTAN}`);
     await get(b, `bbox=${NYC}`);
-    await get(a, `bbox=${NYC}&routes=M42`);
+    await get(a, `bbox=${NYC}&routes=M9`);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(mem.store.has(CACHE_KEY)).toBe(true);
 

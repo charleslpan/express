@@ -54,6 +54,10 @@ function toNumber(value: number | { toNumber(): number } | null | undefined): nu
   return n > 0 ? n : null;
 }
 
+// protobufjs answers an unset optional field with its default (0), so tell
+// "unset" from "0" by whether the decoded message holds the field itself.
+const has = (message: object, field: string) => Object.hasOwn(message, field);
+
 /** Decodes a GTFS-RT vehicle positions feed into the compact fleet. */
 export function decodeFleet(bytes: Uint8Array): Fleet {
   const feed = FeedMessage.decode(bytes);
@@ -67,12 +71,12 @@ export function decodeFleet(bytes: Uint8Array): Fleet {
     vehicles.push({
       id: v.vehicle?.id || entity.id,
       route: v.trip?.routeId || null,
-      directionId: v.trip?.directionId ?? null,
+      directionId: v.trip && has(v.trip, "directionId") ? v.trip.directionId! : null,
       tripId: v.trip?.tripId || null,
       headsign: null,
       lat: round(pos.latitude, 5),
       lon: round(pos.longitude, 5),
-      bearing: pos.bearing != null && Number.isFinite(pos.bearing) ? round(pos.bearing, 1) : null,
+      bearing: has(pos, "bearing") && Number.isFinite(pos.bearing) ? round(pos.bearing!, 1) : null,
       timestamp: toNumber(v.timestamp),
     });
   }

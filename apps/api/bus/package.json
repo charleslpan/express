@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
-    "fixture": "node test/make-fixture.ts"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@vercel/functions": "^3.10.6",
