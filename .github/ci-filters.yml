@@ -4,22 +4,35 @@ shared: &shared
   - .github/**
   - Makefile
   - scripts/ci/**
+  - scripts/skip-unless.sh
+
+# The pnpm workspace's root files, which every workspace's install depends on.
+workspace: &workspace
+  - package.json
+  - pnpm-lock.yaml
+  - pnpm-workspace.yaml
+  - turbo.json
 
 # Lint (all Swift) and TransitKit's tests on Linux.
 swift:
   - *shared
-  - App/**
-  - Packages/**
+  - apps/ios/**
+  - packages/transitkit/**
+  - packages/glassui/**
   - .swiftformat
   - .swiftlint.yml
 
+# The API (MOTIS image and smoke test) and the pnpm workspace's TypeScript checks.
 server:
   - *shared
-  - server/**
+  - *workspace
+  - apps/api/**
+  - packages/tsconfig/**
+  - packages/eslint-config/**
 
 # Build and test the app on a macOS runner.
 ios:
   - *shared
-  - project.yml
-  - App/**
-  - Packages/**
+  - apps/ios/**
+  - packages/transitkit/**
+  - packages/glassui/**
