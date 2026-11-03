@@ -35,7 +35,8 @@ on every call.
   query time).
 - `motis/smoke-build.sh`: runs `smoke.sh` inside the Docker build (`smoke`
   stage) against the freshly imported data; a failure fails the deployment.
-- `cron/`: the daily Vercel Cron target, a self-contained TypeScript package.
+- `cron/`: the daily Vercel Cron target, the pnpm workspace `@express/cron`
+  (listed in `pnpm-workspace.yaml`, shared tsconfig and ESLint config).
   `api/cron/rebuild.ts` is the entrypoint; `lib/rebuild.ts` checks
   `CRON_SECRET` and POSTs `DEPLOY_HOOK_URL?buildCache=false`. Its route sits
   before the `/api/(.*)` catch-all. Keep `typescript` below 7 (Vercel's
@@ -76,10 +77,10 @@ with `build_index.py` from the same GTFS zips):
 python3 record.py subway_index.json [tests/fixtures/<name>]
 ```
 
-Cron function checks:
+Cron function checks (CI runs them through `scripts/ci/node.sh`):
 
 ```sh
-cd apps/api/cron && npm ci && npm run typecheck && npm test
+pnpm turbo run lint typecheck test --filter=@express/cron
 ```
 
 ## Deploy
