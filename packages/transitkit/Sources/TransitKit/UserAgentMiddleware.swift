@@ -2,7 +2,8 @@ import Foundation
 import HTTPTypes
 import OpenAPIRuntime
 
-/// Sets `User-Agent: Express/<version> (<contact URL>)` on every request, as Transitous's usage policy requires.
+/// Sets `User-Agent: Express/<version> (<contact URL>)` on every request, as Transitous's usage policy
+/// requires (kept for every server, so operators can always reach us).
 struct UserAgentMiddleware: ClientMiddleware {
     /// The header's value, such as `Express/1.0 (https://github.com/charleslpan/express)`.
     let userAgent: String

@@ -5,7 +5,7 @@ import OpenAPIURLSession
     import FoundationNetworking
 #endif
 
-/// Plans trips against a MOTIS 2 server (Transitous by default) through the client generated from MOTIS's spec.
+/// Plans trips against a MOTIS 2 server (Express's own by default) through the client generated from MOTIS's spec.
 ///
 /// ```swift
 /// let client = TransitClient()
@@ -32,6 +32,15 @@ public struct TransitClient: Sendable {
         self.transport = transport
         userAgent = UserAgentMiddleware(appVersion: appVersion)
         client = Client(serverURL: baseURL, transport: transport, middlewares: [userAgent])
+    }
+
+    /// Wakes the server with one cheap request (`GET /api/v1/health`), so the first real search lands warm.
+    ///
+    /// Call it when the app comes to the foreground: the server scales to zero about a minute after its last
+    /// request and takes over a second to start. Never call it on a timer. It never throws; any answer,
+    /// even an error, has done its job.
+    public func warmUp() async {
+        _ = try? await client.health()
     }
 
     /// Plans itineraries for a trip (`GET /api/v6/plan`).
