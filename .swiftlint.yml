@@ -4,21 +4,23 @@ excluded:
   - Packages/TransitKit/.build
   - Packages/GlassUI/.build
   - DerivedData
+  - build
   - Express.xcodeproj
 
 disabled_rules:
   - trailing_comma # SwiftFormat adds trailing commas
   - opening_brace # SwiftFormat decides brace placement
+  - sorted_imports # SwiftFormat sorts imports (testable imports last)
 
 opt_in_rules:
   - empty_count
   - first_where
-  - sorted_imports
   - toggle_bool
-  - unused_import
 
+# Only `swiftlint analyze` runs these; it needs a full build log, so CI doesn't run it yet.
 analyzer_rules:
   - unused_declaration
+  - unused_import
 
 line_length:
   warning: 120

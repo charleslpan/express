@@ -47,6 +47,27 @@ there costs the developer a manual push. Never edit them. Change what CI does th
 - `ci-ok` passes when every job passed or was skipped by its filter. It is the only required check on `main`.
 - The `ios` job uploads `build/screenshots/**` and `build/*.xcresult` as artifacts, so write output there.
 
+What each job runs:
+
+| Job | Runs on | Make target | What it does |
+| --- | --- | --- | --- |
+| `changes` | `ubuntu-latest` | none | Reads `ci-config.env` and evaluates `ci-filters.yml`. |
+| `swift` | `SWIFT_IMAGE` container | `ci-swift` | `scripts/ci/lint.sh` (pinned SwiftFormat `--lint` and SwiftLint `--strict`), then TransitKit's `swift test`. |
+| `server` | `ubuntu-latest` | `ci-server` | The server checks (`scripts/ci/server.sh`, owned by the server tasks). |
+| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates the project, runs the `Express` scheme's tests on the newest iPhone simulator, writes `build/Express.xcresult`. |
+| `ci-ok` | `ubuntu-latest` | none | `re-actors/alls-green` over every job: failed or cancelled fails it, skipped is fine. |
+
+- **Add a check** to the Make target (or its script) of the job it belongs to, and widen that job's filter if it now
+  covers new paths. Tool versions are pinned with checksums in the scripts; bump both together.
+- **A new job** means a workflow edit: ask the developer, and have it added to `ci-ok`'s `needs` (and to
+  `allowed-skips` if it has a path filter), or `ci-ok` won't wait for it.
+- **Read a failure** with `gh pr checks <number>`, then `gh run view <run-id> --log-failed`. For `ios`, the full
+  log is in the `ios-<attempt>` artifact's `.xcresult` (`gh run download <run-id> --name ios-1 --dir /tmp/ci-artifacts`,
+  then open it in Xcode or read it with `xcrun xcresulttool`).
+- **Locally**, `make lint` uses your Homebrew SwiftFormat and SwiftLint; keep them near the versions `lint.sh` pins.
+  Workflows can't cache SwiftPM yet (they're frozen and none of the packages has dependencies); ask for an
+  `actions/cache` step once one does.
+
 If a change truly needs a workflow edit, ask the developer for it rather than pushing.
 
 ### CI screenshots
