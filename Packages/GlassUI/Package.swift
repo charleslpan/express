@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "GlassUI",
     platforms: [
-        .iOS(.v26),
+        .iOS("27.0"),
     ],
     products: [
         .library(name: "GlassUI", targets: ["GlassUI"]),

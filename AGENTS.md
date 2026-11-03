@@ -11,7 +11,7 @@ Many agents work on it in parallel; follow this file so your work fits theirs.
 | `App/` | The `Express` app target: app entry point, root view, assets. |
 | `App/Features/<Feature>/` | One folder per feature (views, view models, feature-local helpers). Features don't reach into each other's folders; share code through the packages. |
 | `Packages/TransitKit/` | Transit models, networking, and routing logic. Platform-neutral: **no UIKit, SwiftUI, or CoreLocation**, so it builds and tests on Linux. Import `FoundationNetworking` behind `#if canImport(FoundationNetworking)`. |
-| `Packages/GlassUI/` | Shared SwiftUI components and Liquid Glass styling (iOS 26+). Depends on SwiftUI only, **never on TransitKit**. |
+| `Packages/GlassUI/` | Shared SwiftUI components and Liquid Glass styling (iOS 27+). Depends on SwiftUI only, **never on TransitKit**. |
 | `server/` | The backend the server tasks build. It has its own [`server/AGENTS.md`](server/AGENTS.md); read it before touching anything there. |
 | `.github/workflows/` | CI. The `ci-ok` job is the required check on `main`. |
 
