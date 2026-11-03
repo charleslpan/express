@@ -42,8 +42,8 @@ server/motis/smoke.sh http://localhost:8080
 server/motis/smoke.sh https://express-server-cyan-zeta.vercel.app
 ```
 
-Needs `curl` and `jq`. CI runs the same script against a freshly built image
-(`.github/workflows/ci.yml`, job `motis`, gated by `ci-ok`).
+Needs `curl` and `jq`. CI runs `scripts/ci/server.sh`, which builds the image,
+starts it, and runs the smoke test; run it locally the same way with Docker.
 
 ## Deploy
 
