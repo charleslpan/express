@@ -12,12 +12,14 @@ public extension Stop {
 
     /// The dataset tag MOTIS prefixes ids with, such as `us-ny-MTA-BusBrooklyn` for `us-ny-MTA-BusBrooklyn_404197`.
     internal var feed: String? {
-        stopId.flatMap { $0.firstIndex(of: "_").map { index in String($0[..<index]) } }
+        guard let stopId, let separator = stopId.firstIndex(of: "_") else { return nil }
+        return String(stopId[..<separator])
     }
 
     /// The stop's id within its feed, such as `404197` for `us-ny-MTA-BusBrooklyn_404197`.
     internal var feedStopId: String? {
-        stopId.flatMap { $0.firstIndex(of: "_").map { index in String($0[$0.index(after: index)...]) } }
+        guard let stopId, let separator = stopId.firstIndex(of: "_") else { return nil }
+        return String(stopId[stopId.index(after: separator)...])
     }
 }
 
