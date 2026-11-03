@@ -3,22 +3,26 @@
 
 ARG ALPINE_VERSION=3.22
 
-FROM alpine:${ALPINE_VERSION} AS build
+# Debian for the build stage: it packages osmium-tool, Alpine doesn't.
+FROM debian:bookworm-slim AS build
 ARG MOTIS_VERSION=v2.11.4
 WORKDIR /srv/motis
 
-RUN apk add --no-cache curl \
+RUN apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends ca-certificates curl bzip2 osmium-tool > /dev/null \
+ && rm -rf /var/lib/apt/lists/* \
  && curl -fsSL "https://github.com/motis-project/motis/releases/download/${MOTIS_VERSION}/motis-linux-amd64.tar.bz2" \
     | tar -xj ./motis \
  && ./motis --help > /dev/null
 
-# The OSM extract changes slowly, so a cached layer is fine. BBBike's main
-# host sometimes times out from CI, so retry and fall back to its mirror.
-RUN mkdir -p input && for host in download.bbbike.org download2.bbbike.org; do \
-      curl -fsSL --retry 3 --connect-timeout 20 -o input/nyc.osm.pbf \
-        "https://${host}/osm/bbbike/NewYork/NewYork.osm.pbf" && break; \
-    done \
- && test -s input/nyc.osm.pbf
+# OpenStreetMap: Geofabrik's New York State extract, clipped to the five
+# boroughs. (BBBike's NYC extract timed out from GitHub and Vercel builders.)
+# The map changes slowly, so a cached layer is fine.
+RUN mkdir -p input \
+ && curl -fsSL --retry 3 --connect-timeout 30 -o /tmp/ny.osm.pbf \
+      https://download.geofabrik.de/north-america/us/new-york-latest.osm.pbf \
+ && osmium extract --bbox=-74.28,40.48,-73.68,40.93 -o input/nyc.osm.pbf /tmp/ny.osm.pbf \
+ && rm /tmp/ny.osm.pbf
 
 # ADD with a URL re-checks the remote file on every build, so a new feed
 # busts the cache and the import below runs again.

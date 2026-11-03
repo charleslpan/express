@@ -25,7 +25,9 @@ The image is built with the data already imported (`server/motis/Dockerfile`):
 
 - MTA supplemented subway GTFS (includes SIR and planned work), the six MTA bus
   GTFS feeds (Bronx, Brooklyn, Manhattan, Queens, Staten Island, MTA Bus Co.),
-  and the BBBike New York OpenStreetMap extract.
+  and Geofabrik's New York State OpenStreetMap extract clipped with `osmium`
+  to the five boroughs (bbox -74.28,40.48,-73.68,40.93). New Jersey isn't in
+  that extract, so walking legs stop at the Hudson.
 - 14 days of timetable from the build day (`num_days: 14`). The data goes stale
   unless the image is rebuilt; the nightly rebuild is B3.
 - Dataset names match Transitous (`us-ny-MTA-NYCSubway`,
@@ -37,7 +39,8 @@ The image is built with the data already imported (`server/motis/Dockerfile`):
 ## Measurements
 
 Measured on Nov 3, 2026 against deployment `dpl_927ee3vvdAR6QWd7ib4Ugqr9PkG1`
-(iad1), and locally with the same release and data.
+(iad1, built from the BBBike extract), and locally with the same release and
+data. The clipped Geofabrik extract should be the same size or smaller.
 
 | What | Value | How |
 | --- | --- | --- |
@@ -69,9 +72,9 @@ above are the same binary and data.
 - The Docker build has network access, so feeds download during the build.
 - Builds run `buildah` with `--layers`; the first build had no cache ("Buildah
   store: cold"). `ADD <url>` re-checks each GTFS feed, so new feeds re-run
-  the import. The OSM extract is fetched with `curl` (cached layer), retrying
-  and falling back to `download2.bbbike.org`, because BBBike's main host timed
-  out from a GitHub runner.
+  the import. The OSM extract comes from Geofabrik with `curl` (a cached
+  layer): BBBike, the first source, timed out from both GitHub runners and
+  Vercel builders.
 - The container writes its runtime config to `/tmp`, which works.
 - The project is not yet linked to GitHub (Vercel's GitHub app is not installed
   on the repo), so deploys go through the Vercel API for now. Once linked, set
