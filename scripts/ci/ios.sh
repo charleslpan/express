@@ -37,6 +37,19 @@ fi
 xcodebuild -version
 echo "::endgroup::"
 
+# In CI, write the git-ignored Maps key file from the GOOGLE_MAPS_IOS_API_KEY secret, as testflight.sh does (empty
+# without it: the app builds and shows "Map unavailable"). Outside CI, keep the developer's own file.
+if [[ -n ${CI:-} ]]; then
+    secrets_xcconfig=apps/ios/Config/Secrets.xcconfig
+    trap 'rm -f "$secrets_xcconfig"' EXIT
+    if [[ -n ${GOOGLE_MAPS_IOS_API_KEY:-} ]]; then
+        printf 'GOOGLE_MAPS_IOS_API_KEY = %s\n' "$GOOGLE_MAPS_IOS_API_KEY" >"$secrets_xcconfig"
+    else
+        echo "::warning::GOOGLE_MAPS_IOS_API_KEY is missing: map screens will show \"Map unavailable\"."
+        printf 'GOOGLE_MAPS_IOS_API_KEY =\n' >"$secrets_xcconfig"
+    fi
+fi
+
 echo "::group::XcodeGen $XCODEGEN_VERSION"
 zip=build/tools/xcodegen.zip
 curl -fsSL --retry 3 -o "$zip" \
