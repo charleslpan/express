@@ -26,7 +26,7 @@ ci-swift:
 	swift test --package-path Packages/TransitKit
 
 ci-server:
-	@echo "ci-server: placeholder until B1 adds the server checks"
+	scripts/ci/server.sh
 
 ci-ios:
 	@echo "ci-ios: placeholder until F2 adds the iOS build, tests, and lint"
