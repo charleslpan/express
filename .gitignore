@@ -3,6 +3,8 @@
 *.xcworkspace
 
 # Xcode
+# Written from CI secrets (scripts/ci/testflight.sh); never commit it.
+apps/ios/Config/Secrets.xcconfig
 xcuserdata/
 DerivedData/
 *.xcresult
