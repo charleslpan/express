@@ -1,0 +1,14 @@
+# SwiftFormat options. Run `make format` to apply, `make lint` to check.
+--swiftversion 6.0
+--exclude .build,**/.build,DerivedData,*.xcodeproj
+
+--indent 4
+--maxwidth 120
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--commas always
+--ifdef indent
+--self remove
+--importgrouping testable-last
+--header ignore
