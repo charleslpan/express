@@ -23,7 +23,14 @@ on every call.
   (`us-ny-` + the name in Transitous's `feeds/us-ny.json`).
 - `motis/entrypoint.sh`: writes the config to `/tmp` with the port from
   `PORT` and starts `motis server`.
-- `motis/smoke.sh`: smoke test against any base URL.
+- `motis/smoke.sh`: smoke test against any base URL (`SMOKE_TIME` pins the
+  query time).
+- `motis/smoke-build.sh`: runs `smoke.sh` inside the Docker build (`smoke`
+  stage) against the freshly imported data; a failure fails the deployment.
+- `cron/api/cron/rebuild.js`: the daily Vercel Cron target. Checks
+  `CRON_SECRET`, POSTs `DEPLOY_HOOK_URL?buildCache=false`. The `cron` service
+  is a plain Node function with no dependencies; its route sits before the
+  `/api/(.*)` catch-all.
 
 ## Build and run locally
 
@@ -52,7 +59,22 @@ The project is linked to GitHub with Root Directory `apps/api`: pushes to a
 branch build a preview, and merges to `main` deploy production. To deploy by
 hand, run `vercel deploy --prod --scope charlespan-projects` from `apps/api/`.
 
+## Nightly rebuild
+
+Vercel Cron (`crons` in `vercel.json`, `0 9 * * *` UTC, ±59 min on Hobby)
+calls `/api/cron/rebuild`, which triggers a production build with no build
+cache. The build's smoke stage is the health check; a failing build leaves the
+previous production deployment serving and Vercel emails the developer. Do not
+add a GitHub Actions cron or an issue bot for this. Rebuild by hand, roll back,
+and retention: see `README.md`, "Nightly rebuild". After an Instant Rollback,
+new builds are not promoted until someone runs `vercel promote`.
+
 ## Environment variables
 
 - `PORT`: port MOTIS listens on (container default `80`, Vercel's default).
 - `MTA_BUS_TIME_KEY`: set in the project for B2 (bus realtime); not used yet.
+- `CRON_SECRET` (sensitive): bearer token Vercel Cron sends to
+  `/api/cron/rebuild`.
+- `DEPLOY_HOOK_URL` (sensitive): the project's Deploy Hook for `main`.
+
+Never print their values.

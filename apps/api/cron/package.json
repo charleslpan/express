@@ -1,0 +1,5 @@
+{
+  "name": "express-cron",
+  "private": true,
+  "type": "module"
+}

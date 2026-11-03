@@ -5,9 +5,16 @@
       "runtime": "container",
       "root": "motis/",
       "entrypoint": "Dockerfile"
+    },
+    "cron": {
+      "root": "cron/"
     }
   },
+  "crons": [
+    { "path": "/api/cron/rebuild", "schedule": "0 9 * * *" }
+  ],
   "rewrites": [
+    { "source": "/api/cron/(.*)", "destination": { "service": "cron" } },
     { "source": "/api/(.*)", "destination": { "service": "motis" } }
   ]
 }

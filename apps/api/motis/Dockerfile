@@ -38,8 +38,19 @@ RUN ./motis import \
  && rm -rf data/logs \
  && mv data/config.yml config.server.yml
 
+# Health check: serve the imported data and run the smoke test against it. A
+# failure fails the build, so production keeps serving the previous image.
+FROM build AS smoke
+RUN apt-get update -qq \
+ && apt-get install -y -qq --no-install-recommends bash jq > /dev/null \
+ && rm -rf /var/lib/apt/lists/*
+COPY smoke.sh smoke-build.sh ./
+RUN bash smoke-build.sh && touch /smoke-passed
+
 FROM alpine:${ALPINE_VERSION}
 WORKDIR /srv/motis
+# Depends on the smoke stage, so the build cannot skip it.
+COPY --from=smoke /smoke-passed /srv/motis/smoke-passed
 COPY --from=build /srv/motis/motis /usr/local/bin/motis
 COPY --from=build /srv/motis/data data
 COPY --from=build /srv/motis/config.server.yml ./

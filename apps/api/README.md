@@ -5,6 +5,7 @@ the developer's personal account "charlespan's projects", Hobby plan).
 
 | Path | Service | What |
 | --- | --- | --- |
+| `/api/cron/(.*)` | `cron` (Node function) | Daily rebuild trigger, called by Vercel Cron only. |
 | `/api/(.*)` | `motis` (container) | [MOTIS 2](https://github.com/motis-project/motis) v2.11.4 routing for NYC: subway with SIR, and MTA buses. Timetables only for now. |
 
 Production: <https://express-server-cyan-zeta.vercel.app> (also
@@ -28,13 +29,84 @@ The image is built with the data already imported (`server/motis/Dockerfile`):
   and Geofabrik's New York State OpenStreetMap extract clipped with `osmium`
   to the five boroughs (bbox -74.28,40.48,-73.68,40.93). New Jersey isn't in
   that extract, so walking legs stop at the Hudson.
-- 14 days of timetable from the build day (`num_days: 14`). The data goes stale
-  unless the image is rebuilt; the nightly rebuild is B3.
+- 14 days of timetable from the build day (`num_days: 14`). The image is
+  rebuilt every night (see [Nightly rebuild](#nightly-rebuild)).
 - Dataset names match Transitous (`us-ny-MTA-NYCSubway`,
   `us-ny-MTA-BusBronx`, …), so stop and trip ids such as
   `us-ny-MTA-NYCSubway_L03` are the same on both servers and the app can switch
   by base URL alone.
 - No tiles, geocoding, or reverse geocoding.
+
+## Nightly rebuild
+
+The MTA's supplemented subway feed changes hourly and covers planned work only
+7 days ahead, so production is rebuilt from scratch once a day.
+
+1. **Vercel Cron** calls `GET /api/cron/rebuild` on the production deployment
+   at `0 9 * * *` (09:00 UTC: 4 am EST, 5 am EDT). Hobby runs it once a day
+   somewhere inside that hour (±59 min). Configured in [`vercel.json`](vercel.json).
+2. The function ([`cron/api/cron/rebuild.js`](cron/api/cron/rebuild.js)) checks
+   `Authorization: Bearer $CRON_SECRET` and POSTs the project's Deploy Hook
+   with `?buildCache=false`, so the Docker build downloads fresh feeds and
+   re-imports them.
+3. The Docker build runs the **health check** in its `smoke` stage
+   ([`motis/smoke-build.sh`](motis/smoke-build.sh)): it serves the freshly
+   imported data inside the build and runs [`motis/smoke.sh`](motis/smoke.sh)
+   against it (Union Square → Bedford Av still returns the L, stoptimes at
+   14 St–Union Sq return departures, no out-of-scope agencies). It queries the
+   next weekday at 15:00 UTC rather than build time, so the check tests the
+   data, not the 4 am service pattern. A failure fails the build.
+4. A failed build never gets the production domains: Vercel assigns them only
+   to a deployment that reaches Ready, so the previous production deployment
+   keeps serving. The developer hears of it through Vercel's failed-deployment
+   notification (Account Settings → Notifications → Deployment Failures, on by
+   default for the deployment's creator; keep it on for this project).
+
+### Secrets and env vars (project `express-server`, Production)
+
+| Name | What | Who sets it |
+| --- | --- | --- |
+| `CRON_SECRET` | Random string (≥ 16 chars). Vercel Cron sends it as `Authorization: Bearer …`; the function rejects anything else. | Developer, Sensitive |
+| `DEPLOY_HOOK_URL` | URL of the project's Deploy Hook for branch `main` (Settings → Git → Deploy Hooks). Anyone with it can trigger a build. | Developer, Sensitive |
+
+Without either, the function answers 401 or 500 and nothing rebuilds.
+
+### Rebuild by hand
+
+- Dashboard: Deployments → latest production → ⋯ → **Redeploy**, untick
+  "Use existing Build Cache".
+- Or POST the hook: `curl -X POST "$DEPLOY_HOOK_URL?buildCache=false"`.
+- Or run the cron now: Settings → Cron Jobs → **Run**, or
+  `vercel crons run /api/cron/rebuild --scope charlespan-projects` from `server/`.
+
+### Roll back
+
+A failed nightly build needs no rollback; production stays on the last good
+deployment. If a build passed the smoke test but serves bad data:
+
+- Dashboard: Deployments → the previous production deployment → **Instant
+  Rollback**, or `vercel rollback --scope charlespan-projects`. Hobby can only
+  roll back to the immediately previous production deployment.
+- After a rollback Vercel stops assigning production domains to new
+  deployments, so the next nightly build will **not** go live until you
+  promote one (`vercel promote <deployment-url>` or **Promote** in the
+  dashboard). Fix the cause first.
+
+### Old deployments and images
+
+Cleanup is Vercel's own **Deployment Retention Policy** (Settings → Build and
+Deployment), not a script. Recommended for this project: Canceled 1 week,
+Errored 1 week, Preview 1 week, Production 1 week. Vercel always keeps the
+current production deployment and, on Hobby, the last 3 Ready production
+deployments, so rollback still works. That keeps roughly 7–10 deployments
+(each ≈ 181 MB of image) instead of the 30-day default's ≈ 30+ against Hobby's
+10 GB deployment storage and VCR's 50 images per repository.
+
+Vercel's docs do not say whether deleting a deployment deletes the image it
+pushed to the project's container registry (project → **Images**). Check once
+the first deployments have aged out: if the image count keeps growing past the
+deployment count, delete old untagged images with
+`vercel vcr image ls <repo> --untagged` and `vercel vcr image rm <repo> <id>`.
 
 ## Measurements
 

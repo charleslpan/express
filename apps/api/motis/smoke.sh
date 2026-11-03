@@ -2,10 +2,13 @@
 # Smoke test for the MOTIS server.
 # Usage: server/motis/smoke.sh [BASE_URL]   (default http://localhost:8080)
 # Needs curl and jq. Exits non-zero on the first failed check.
+# SMOKE_TIME (ISO 8601, e.g. 2026-11-04T15:00:00Z) queries at that time instead
+# of now; the Docker build sets it so the check does not depend on the hour.
 set -euo pipefail
 
 BASE_URL="${1:-${MOTIS_BASE_URL:-http://localhost:8080}}"
 BASE_URL="${BASE_URL%/}"
+AT="${SMOKE_TIME:+&time=$SMOKE_TIME}"
 
 # Union Square and Bedford Av.
 FROM="40.7359,-73.9906"
@@ -23,7 +26,7 @@ get() {
 }
 
 echo "plan Union Sq -> Bedford Av"
-plan="$(get "$BASE_URL/api/v6/plan?fromPlace=$FROM&toPlace=$TO")"
+plan="$(get "$BASE_URL/api/v6/plan?fromPlace=$FROM&toPlace=$TO$AT")"
 n_it="$(jq '.itineraries | length' <<<"$plan")"
 [ "$n_it" -gt 0 ] || fail "no itineraries"
 l_legs="$(jq '[.itineraries[].legs[] | select(.mode == "SUBWAY" and .routeShortName == "L")] | length' <<<"$plan")"
@@ -31,7 +34,7 @@ l_legs="$(jq '[.itineraries[].legs[] | select(.mode == "SUBWAY" and .routeShortN
 echo "  ok: $n_it itineraries, $l_legs L legs"
 
 echo "stoptimes at $STOP"
-st="$(get "$BASE_URL/api/v6/stoptimes?stopId=$STOP&n=10")"
+st="$(get "$BASE_URL/api/v6/stoptimes?stopId=$STOP&n=10$AT")"
 n_st="$(jq '.stopTimes | length' <<<"$st")"
 [ "$n_st" -gt 0 ] || fail "no departures at $STOP"
 echo "  ok: $n_st departures"
@@ -40,7 +43,7 @@ echo "no out-of-scope agencies or modes"
 for q in "$FROM&toPlace=40.7527,-73.9772" "$FROM&toPlace=40.7347,-74.0306" "40.7033,-74.0170&toPlace=40.6437,-74.0736"; do
   # Grand Central, Hoboken, and Whitehall -> St. George: places where LIRR,
   # Metro-North, PATH, NJ Transit, or ferries would show up if loaded.
-  p="$(get "$BASE_URL/api/v6/plan?fromPlace=$q")"
+  p="$(get "$BASE_URL/api/v6/plan?fromPlace=$q$AT")"
   bad="$(jq -r --arg ok "$ALLOWED_AGENCIES" '.itineraries[].legs[]
     | select(.mode != "WALK")
     | select(.mode == "FERRY" or ((.agencyName // "") | test($ok) | not))
