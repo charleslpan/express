@@ -16,6 +16,24 @@ final class ScreenshotTests: XCTestCase {
         capture("map-glass", fixtures: "nyc-evening", settledWhen: "map.settled")
     }
 
+    // GlassUI's gallery, one section per screen. The gallery shows no transit data; the fixtures only fix the clock.
+
+    func testGalleryColors() {
+        capture("gallery-colors", fixtures: "nyc-evening")
+    }
+
+    func testGalleryModes() {
+        capture("gallery-modes", fixtures: "nyc-evening")
+    }
+
+    func testGalleryTypography() {
+        capture("gallery-typography", fixtures: "nyc-evening")
+    }
+
+    func testGalleryLayout() {
+        capture("gallery-layout", fixtures: "nyc-evening")
+    }
+
     // MARK: - Harness
 
     /// The appearance and text size combinations every screen is captured in.
