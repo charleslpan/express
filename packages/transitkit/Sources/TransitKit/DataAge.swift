@@ -22,6 +22,10 @@ public struct RealtimeDataAge: Sendable, Hashable {
     public static let subwayFeedPrefix = "us-ny-MTA-NYCSubway"
 
     /// When the oldest of the feeds was produced; `nil` where it's unknown, such as a feed the server hasn't loaded.
+    ///
+    /// Our server reports a feed's timestamp as `0` until its first realtime update after waking from a cold start,
+    /// which reads as unknown here. Read the age again after the app's first successful request to the server, by
+    /// which time the feeds have usually updated.
     public var feedTimestamp: Date?
 
     public init(feedTimestamp: Date?) {
@@ -52,7 +56,7 @@ public struct RealtimeDataAge: Sendable, Hashable {
     }
 
     /// Each feed's timestamp by tag, from `nigiri_gtfsrt_feed_timestamp_seconds{tag="…"}` lines in Prometheus text;
-    /// `nil` for a feed that reports `0` (not fetched yet).
+    /// `nil` for a feed that reports `0` (not yet updated since the server woke).
     static func feedTimestamps(inMetrics metrics: String) -> [String: Date?] {
         let prefix = "nigiri_gtfsrt_feed_timestamp_seconds{"
         var timestamps: [String: Date?] = [:]
