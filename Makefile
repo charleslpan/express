@@ -23,13 +23,14 @@ test:
 
 # CI entry points: .github/workflows/ only call these. Grow them here or in scripts/ci/.
 ci-swift:
+	scripts/ci/lint.sh
 	swift test --package-path Packages/TransitKit
 
 ci-server:
 	@echo "ci-server: placeholder until B1 adds the server checks"
 
 ci-ios:
-	@echo "ci-ios: placeholder until F2 adds the iOS build, tests, and lint"
+	scripts/ci/ios.sh
 
 testflight:
 	@echo "testflight: placeholder until F4 adds the TestFlight upload"
