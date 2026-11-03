@@ -42,6 +42,28 @@ struct RequestTests {
         #expect(request.headerFields[.userAgent] == "Express/\(TransitKit.version) (\(TransitKit.contactURL))")
     }
 
+    @Test func warmUpAsksForHealth() async throws {
+        let transport = FixtureTransport(body: Data(#"{"rt":true,"gbfs":false}"#.utf8))
+        await TransitClient(transport: transport).warmUp()
+        let request = try #require(transport.requests.first)
+        #expect(transport.requests.count == 1)
+        #expect(request.method == .get)
+        #expect(request.path == "/api/v1/health")
+        #expect(request.headerFields[.userAgent] == "Express/\(TransitKit.version) (\(TransitKit.contactURL))")
+    }
+
+    @Test func warmUpIgnoresFailures() async {
+        let starting = FixtureTransport(
+            status: .serviceUnavailable,
+            body: Data(#"{"error":"motis is starting up"}"#.utf8)
+        )
+        await TransitClient(transport: starting).warmUp()
+        let offline = FixtureTransport(error: URLError(.notConnectedToInternet))
+        await TransitClient(transport: offline).warmUp()
+        #expect(starting.requests.count == 1)
+        #expect(offline.requests.count == 1)
+    }
+
     @Test func pageKeepsTheRequest() {
         let request = PlanRequest(from: .stop(id: "a"), to: .stop(id: "b"), time: .departAt(.distantFuture))
         let next = request.page("LATER|1")
