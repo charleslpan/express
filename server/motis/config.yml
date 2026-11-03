@@ -1,0 +1,37 @@
+# MOTIS 2 config for NYC timetables. Paths are relative to the working
+# directory the Dockerfile imports and serves from (/srv/motis).
+# Dataset names match Transitous (feeds/us-ny.json, prefixed "us-ny-") so
+# stop and trip ids are the same on both servers.
+server:
+  # The entrypoint rewrites this port to $PORT at start.
+  port: 8080
+osm: input/nyc.osm.pbf
+timetable:
+  first_day: TODAY
+  num_days: 14
+  railviz: true
+  with_shapes: true
+  adjust_footpaths: true
+  link_stop_distance: 100
+  max_footpath_length: 15
+  default_transfer_time: 2
+  datasets:
+    us-ny-MTA-NYCSubway:
+      path: input/gtfs_supplemented.zip
+    us-ny-MTA-BusBronx:
+      path: input/gtfs_bx.zip
+    us-ny-MTA-BusBrooklyn:
+      path: input/gtfs_b.zip
+    us-ny-MTA-BusManhattan:
+      path: input/gtfs_m.zip
+    us-ny-MTA-BusQueens:
+      path: input/gtfs_q.zip
+    us-ny-MTA-BusStatenIsland:
+      path: input/gtfs_si.zip
+    us-ny-MTA-BusCompany:
+      path: input/gtfs_busco.zip
+elevators: false
+street_routing: true
+osr_footpath: false
+geocoding: false
+reverse_geocoding: false
