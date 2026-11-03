@@ -35,3 +35,4 @@ identifier_name:
     - id
     - x
     - y
+    - to # PlanRequest.to, after MOTIS's fromPlace/toPlace

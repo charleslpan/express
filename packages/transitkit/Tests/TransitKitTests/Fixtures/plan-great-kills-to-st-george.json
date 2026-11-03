@@ -1,0 +1,646 @@
+{
+ "requestParameters": {},
+ "debugOutput": {
+  "algorithm": 1,
+  "direct": 7,
+  "execute_time": 14,
+  "fares": 0,
+  "fastest_direct": 0,
+  "fp_update_prevented_by_lower_bound": 0,
+  "gpu_supported": 1,
+  "gpu_used": 1,
+  "interval_extensions": 0,
+  "lb_time": 0,
+  "n_dest_offsets": 56,
+  "n_earliest_arrival_updated_by_footpath": 0,
+  "n_earliest_arrival_updated_by_route": 0,
+  "n_earliest_trip_calls": 0,
+  "n_events_skipped_by_early_termination": 0,
+  "n_execute_bwd": 2,
+  "n_execute_fwd": 2,
+  "n_footpaths_visited": 0,
+  "n_routes_visited": 0,
+  "n_routing_time": 0,
+  "n_start_offsets": 19,
+  "n_td_dest_offsets": 0,
+  "n_td_start_offsets": 0,
+  "prepare": 6,
+  "prepare_backward_WALK": 3,
+  "prepare_forward_WALK": 3,
+  "route_update_prevented_by_lower_bound": 0,
+  "search_interval_reduction_by_early_termination": 0
+ },
+ "from": {
+  "name": "START",
+  "lat": 40.5512,
+  "lon": -74.1515,
+  "vertexType": "NORMAL"
+ },
+ "to": {
+  "name": "END",
+  "lat": 40.6437,
+  "lon": -74.0736,
+  "vertexType": "NORMAL"
+ },
+ "direct": [],
+ "itineraries": [
+  {
+   "duration": 1740,
+   "startTime": "2026-11-03T20:33:00Z",
+   "endTime": "2026-11-03T21:02:00Z",
+   "transfers": 0,
+   "id": "ClIhEce6uI1GREApBFYOLbKJUsAyGHVzLW55LU1UQS1OWUNTdWJ3YXlfUzE5Tjl7SWO0jkZEQEFSJ6CJsIlSwEj8ianXBlCwi6nXBloEV0FMS2ABCsoBCgNTSVISTjIwMjYxMTAzXzE1OjE5X3VzLW55LU1UQS1OWUNTdWJ3YXlfU0lSLUZBMjAxNy1TSTAxNy1XZWVrZGF5LTA4XzA5MTkwMF9TSS4uTjAzUhoYdXMtbnktTVRBLU5ZQ1N1YndheV9TMTlOIXtJY7SORkRAKVInoImwiVLAMhh1cy1ueS1NVEEtTllDU3Vid2F5X1MzMU45Z2ZmZmZSREBBbVZ9rraEUsBIsIup1wZQjJep1wZaDVJFR0lPTkFMX1JBSUxgAQpSGhh1cy1ueS1NVEEtTllDU3Vid2F5X1MzMU4hZ2ZmZmZSREApbVZ9rraEUsA5tTf4wmRSREBBFD/G3LWEUsBIjJep1wZQyJep1wZaBFdBTEtgAQ==",
+   "legs": [
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "START",
+      "lat": 40.5512,
+      "lon": -74.1515,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T20:33:00Z",
+      "scheduledDeparture": "2026-11-03T20:33:00Z",
+      "vertexType": "NORMAL"
+     },
+     "to": {
+      "name": "Great Kills",
+      "stopId": "us-ny-MTA-NYCSubway_S19N",
+      "parentId": "us-ny-MTA-NYCSubway_S19",
+      "importance": 0.0018827301682904363,
+      "lat": 40.55123,
+      "lon": -74.1514,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:36:00Z",
+      "scheduledArrival": "2026-11-03T20:36:00Z",
+      "vertexType": "TRANSIT",
+      "modes": [
+       "REGIONAL_RAIL"
+      ]
+     },
+     "duration": 180,
+     "startTime": "2026-11-03T20:33:00Z",
+     "endTime": "2026-11-03T20:36:00Z",
+     "scheduledStartTime": "2026-11-03T20:33:00Z",
+     "scheduledEndTime": "2026-11-03T20:36:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 160.0,
+     "legGeometry": {
+      "points": "mr`jlAzdzllCtHvSxCvI??c@^iKsYcAsC??s@b@tClIe@ZqF{N??r@W??v@W??nBo@",
+      "precision": 6,
+      "length": 18
+     },
+     "steps": [
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 49.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "toOsmNode": 4483816730,
+       "polyline": {
+        "points": "mr`jlAzdzllCtHvSxCvI",
+        "precision": 6,
+        "length": 3
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 52.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 451560312,
+       "fromOsmNode": 4483816730,
+       "toOsmNode": 4483816752,
+       "polyline": {
+        "points": "}c`jlAjd{llCc@^iKsYcAsC",
+        "precision": 6,
+        "length": 4
+       },
+       "streetName": "Great Kills",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 47.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 451560310,
+       "fromOsmNode": 4483816752,
+       "toOsmNode": 4483816760,
+       "polyline": {
+        "points": "os`jlAbfzllCs@b@tClIe@ZqF{N",
+        "precision": 6,
+        "length": 5
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "STAIRS",
+       "distance": 3.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 451560294,
+       "fromOsmNode": 4483816760,
+       "toOsmNode": 4483816757,
+       "polyline": {
+        "points": "ey`jlAtbzllCr@W",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 3.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 451560302,
+       "fromOsmNode": 4483816757,
+       "toOsmNode": 4483816755,
+       "polyline": {
+        "points": "qw`jlA|azllCv@W",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 6.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "fromOsmNode": 4483816755,
+       "polyline": {
+        "points": "yu`jlAdazllCnBo@",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      }
+     ]
+    },
+    {
+     "mode": "REGIONAL_RAIL",
+     "from": {
+      "name": "Great Kills",
+      "stopId": "us-ny-MTA-NYCSubway_S19N",
+      "parentId": "us-ny-MTA-NYCSubway_S19",
+      "importance": 0.0018827301682904363,
+      "lat": 40.55123,
+      "lon": -74.1514,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T20:36:00Z",
+      "scheduledDeparture": "2026-11-03T20:36:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "REGIONAL_RAIL"
+      ]
+     },
+     "to": {
+      "name": "St George",
+      "stopId": "us-ny-MTA-NYCSubway_S31N",
+      "parentId": "us-ny-MTA-NYCSubway_S31",
+      "importance": 0.0018827301682904363,
+      "lat": 40.643750000000004,
+      "lon": -74.07365,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T21:01:00Z",
+      "scheduledArrival": "2026-11-03T21:01:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "REGIONAL_RAIL"
+      ]
+     },
+     "duration": 1500,
+     "startTime": "2026-11-03T20:36:00Z",
+     "endTime": "2026-11-03T21:01:00Z",
+     "scheduledStartTime": "2026-11-03T20:36:00Z",
+     "scheduledEndTime": "2026-11-03T21:01:00Z",
+     "realTime": false,
+     "scheduled": true,
+     "interlineWithPreviousLeg": false,
+     "headsign": "St George",
+     "tripFrom": {
+      "name": "Tottenville",
+      "stopId": "us-ny-MTA-NYCSubway_S09N",
+      "parentId": "us-ny-MTA-NYCSubway_S09",
+      "importance": 0.0016673911595717072,
+      "lat": 40.512764,
+      "lon": -74.25196000000001,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T20:19:00Z",
+      "scheduledDeparture": "2026-11-03T20:19:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "REGIONAL_RAIL"
+      ]
+     },
+     "tripTo": {
+      "name": "St George",
+      "stopId": "us-ny-MTA-NYCSubway_S31N",
+      "parentId": "us-ny-MTA-NYCSubway_S31",
+      "importance": 0.0018827301682904363,
+      "lat": 40.643750000000004,
+      "lon": -74.07365,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T21:01:00Z",
+      "scheduledArrival": "2026-11-03T21:01:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "REGIONAL_RAIL"
+      ]
+     },
+     "routeId": "us-ny-MTA-NYCSubway_SI",
+     "routeUrl": "https://www.mta.info/schedules/subway/staten-island-railway",
+     "directionId": "0",
+     "routeColor": "08179c",
+     "routeTextColor": "ffffff",
+     "routeType": 2,
+     "agencyName": "MTA New York City Transit",
+     "agencyUrl": "http://www.mta.info",
+     "agencyFareUrl": "",
+     "agencyId": "MTA NYCT",
+     "tripId": "20261103_15:19_us-ny-MTA-NYCSubway_SIR-FA2017-SI017-Weekday-08_091900_SI..N03R",
+     "routeShortName": "SIR",
+     "routeLongName": "Staten Island Railway",
+     "tripShortName": "",
+     "displayName": "SIR",
+     "cancelled": false,
+     "source": "us-ny_MTA-NYCSubway.gtfs.zip/stop_times.txt:559206:559226",
+     "intermediateStops": [
+      {
+       "name": "Bay Terrace",
+       "stopId": "us-ny-MTA-NYCSubway_S20N",
+       "parentId": "us-ny-MTA-NYCSubway_S20",
+       "importance": 0.0016967555275186896,
+       "lat": 40.5564,
+       "lon": -74.13691,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:38:00Z",
+       "departure": "2026-11-03T20:38:00Z",
+       "scheduledArrival": "2026-11-03T20:38:00Z",
+       "scheduledDeparture": "2026-11-03T20:38:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "REGIONAL_RAIL"
+       ]
+      },
+      {
+       "name": "Oakwood Heights",
+       "stopId": "us-ny-MTA-NYCSubway_S21N",
+       "parentId": "us-ny-MTA-NYCSubway_S21",
+       "importance": 0.0016967555275186896,
+       "lat": 40.56511000000001,
+       "lon": -74.12631999999999,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:40:00Z",
+       "departure": "2026-11-03T20:40:00Z",
+       "scheduledArrival": "2026-11-03T20:40:00Z",
+       "scheduledDeparture": "2026-11-03T20:40:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "REGIONAL_RAIL"
+       ]
+      },
+      {
+       "name": "New Dorp",
+       "stopId": "us-ny-MTA-NYCSubway_S22N",
+       "parentId": "us-ny-MTA-NYCSubway_S22",
+       "importance": 0.0016967555275186896,
+       "lat": 40.573479999999996,
+       "lon": -74.11721000000001,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:42:00Z",
+       "departure": "2026-11-03T20:42:00Z",
+       "scheduledArrival": "2026-11-03T20:42:00Z",
+       "scheduledDeparture": "2026-11-03T20:42:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "REGIONAL_RAIL"
+       ]
+      },
+      {
+       "name": "Grant City",
+       "stopId": "us-ny-MTA-NYCSubway_S23N",
+       "parentId": "us-ny-MTA-NYCSubway_S23",
+       "importance": 0.0016086623072624207,
+       "lat": 40.578964,
+       "lon": -74.10969999999999,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:44:00Z",
+       "departure": "2026-11-03T20:44:00Z",
+       "scheduledArrival": "2026-11-03T20:44:00Z",
+       "scheduledDeparture": "2026-11-03T20:44:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "REGIONAL_RAIL"
+       ]
+      },
+      {
+       "name": "Jefferson Av",
+       "stopId": "us-ny-MTA-NYCSubway_S24N",
+       "parentId": "us-ny-MTA-NYCSubway_S24",
+       "importance": 0.0016086623072624207,
+       "lat": 40.58359,
+       "lon": -74.10333999999999,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:45:00Z",
+       "departure": "2026-11-03T20:45:00Z",
+       "scheduledArrival": "2026-11-03T20:45:00Z",
+       "scheduledDeparture": "2026-11-03T20:45:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "REGIONAL_RAIL"
+       ]
+      },
+      {
+       "name": "Dongan Hills",
+       "stopId": "us-ny-MTA-NYCSubway_S25N",
+       "parentId": "us-ny-MTA-NYCSubway_S25",
+       "importance": 0.0016086623072624207,
+       "lat": 40.58885,
+       "lon": -74.09609,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:47:00Z",
+       "departure": "2026-11-03T20:47:00Z",
+       "scheduledArrival": "2026-11-03T20:47:00Z",
+       "scheduledDeparture": "2026-11-03T20:47:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "REGIONAL_RAIL"
+       ]
+      },
+      {
+       "name": "Old Town",
+       "stopId": "us-ny-MTA-NYCSubway_S26N",
+       "parentId": "us-ny-MTA-NYCSubway_S26",
+       "importance": 0.0016086623072624207,
+       "lat": 40.596610000000005,
+       "lon": -74.08736400000001,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:49:00Z",
+       "departure": "2026-11-03T20:49:00Z",
+       "scheduledArrival": "2026-11-03T20:49:00Z",
+       "scheduledDeparture": "2026-11-03T20:49:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "REGIONAL_RAIL"
+       ]
+      },
+      {
+       "name": "Grasmere",
+       "stopId": "us-ny-MTA-NYCSubway_S27N",
+       "parentId": "us-ny-MTA-NYCSubway_S27",
+       "importance": 0.0016086623072624207,
+       "lat": 40.603120000000004,
+       "lon": -74.08408,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:51:00Z",
+       "departure": "2026-11-03T20:51:00Z",
+       "scheduledArrival": "2026-11-03T20:51:00Z",
+       "scheduledDeparture": "2026-11-03T20:51:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "REGIONAL_RAIL"
+       ]
+      },
+      {
+       "name": "Clifton",
+       "stopId": "us-ny-MTA-NYCSubway_S28N",
+       "parentId": "us-ny-MTA-NYCSubway_S28",
+       "importance": 0.0016086623072624207,
+       "lat": 40.621320000000004,
+       "lon": -74.0714,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:54:00Z",
+       "departure": "2026-11-03T20:54:00Z",
+       "scheduledArrival": "2026-11-03T20:54:00Z",
+       "scheduledDeparture": "2026-11-03T20:54:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "REGIONAL_RAIL"
+       ]
+      },
+      {
+       "name": "Stapleton",
+       "stopId": "us-ny-MTA-NYCSubway_S29N",
+       "parentId": "us-ny-MTA-NYCSubway_S29",
+       "importance": 0.0016086623072624207,
+       "lat": 40.627914000000004,
+       "lon": -74.075165,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:56:00Z",
+       "departure": "2026-11-03T20:56:00Z",
+       "scheduledArrival": "2026-11-03T20:56:00Z",
+       "scheduledDeparture": "2026-11-03T20:56:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "REGIONAL_RAIL"
+       ]
+      },
+      {
+       "name": "Tompkinsville",
+       "stopId": "us-ny-MTA-NYCSubway_S30N",
+       "parentId": "us-ny-MTA-NYCSubway_S30",
+       "importance": 0.0016086623072624207,
+       "lat": 40.636948000000004,
+       "lon": -74.07484,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:58:00Z",
+       "departure": "2026-11-03T20:58:00Z",
+       "scheduledArrival": "2026-11-03T20:58:00Z",
+       "scheduledDeparture": "2026-11-03T20:58:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "REGIONAL_RAIL"
+       ]
+      }
+     ],
+     "legGeometry": {
+      "points": "{r`jlAn}yllCw[{|@kCgIkCaIaC}IaCsIqBsIqBgJkB{I{AsJ{AgJoAgJoAcKcA}J{@}Js@kKo@}JiM}{Ba@_Iq@_Iq@_Io@aIs@uH{@kH_A_I}@kHcAkHaAkHgAaHkAaHsAaHsAaHsAwGyAkHcBaHcBuHiBwGgBkHwBkHoBaHqBuHqBwGwBkHcCkH_CaHcCuH_CwGqCkHef@oqAuCiIiDiIeD_IgD_I_D_IeD_IiDkHiDkHmDkHeDwGsDkHcDcGoDwGoDwGmDoGe_@gl@s[we@cDqE_DeE_D_EuCgEuC{DqC_EyC}DkCiDkCsDkCiD_CiDiCuCyBuCcC_DwBkCw_M_{OsYg^sBkCoBwB{BkCsBwBoBkCsBwByBwBmBaCwByBwB_CqBwBsBwByBwBqBwByBkBgfFk{EeJgJaJgJsIsIsI{JkIsI_IgJyHgJyHgJgHgJiHgJ}GgJwGgJoGoJkG_JcGgJs`AgzAijEoyGu@oA{@oAu@oAs@oAu@eAu@eAs@{@u@oAu@oAm@{@s@oAo@{@s@{@u@{@m@{@guAwpBs[_g@c`HolKwgIcdM{aF{vHcLoPcLcPwL_OwLgOeMsNqM_NwM_N_NkMgNwLwNcLwNcLgOgKmOcKuOgJgP}Io_@aSwEkBeEcBmEoBgEkBkEyAcEmBgEwAgE{AgE{A{DwAeEoAaE{AcEcA}DoAaEoAaqCku@aHwBgHkCcHkCyGkCaHkCyG_DyG_DoGsD}G_DqGsDkG{DoGwDkGeEkGeEcGsE_d@k\\k~Hm|FuEiD}E_DuEsDqEkC{EsDqEkC}E_DuEkCuEuCsEaCoEkCsEkCuEwBuEkCuEwBy`KocFeIoE_I{EyHcFoHgFaHcG}GoFmGwGcGmGcGaHsFaHaFuH_FkHwE_IgEsIaEsIoN_]sA_D{A_D}AkCwA_D{AwCkBgCaBcCcBkCiBwBqBkCkBmBqByBoBkB{BcByBoByBwAyBmByBeAsBcBoBoAsBeAgBeAwBcAgB}@kB{@kBq@cBg@cBo@cB_@}A[cLyBcLeAcL?iLf@kLbBoL~CwLzEml@rX{Az@cBz@aBz@kBz@aBnAcBnAmBbAcBfAmBnAmBbBoBnAkBbBoBnAsBbBoBxAc`@l[o@r@m@Ze@n@o@^g@\\g@p@o@Rm@f@m@f@k@f@m@Rq@n@q@^m@\\k@p@c`@jWs~AlcAkCdAkCbBsCnA_DfAwCjAiDz@iD|@kDz@oD|@uDn@}Df@_Ep@eE\\gEf@qERws@dFgbAdFgEZgEJcER}DRwD?}DHsDHsD?mD?oD?iD?eD?gD?_D?wCIeEI}DSgES}DS}Dg@gEg@yDo@aEs@_E{@uD{@_EoA}DcAwDgAyDcByDwAa^sOoFwBoFwBoFwB_GoAsFoA{FoAwFg@}Fo@{F_@cGScG?}FRgG^_GZmGf@}g@zF_AFcARcA?{@RoARcAFgAJgARkA?kARkAFsAJkARuA?sAR_gArIs@Ru@?u@R{@Ju@?{@Fs@?{@R{@R{@R{@?{@Fu@J{@R}@RyAFcB^}ARcBRcBRcB\\mB\\mB^cBZwBf@gBRsBp@wB\\sB\\{Bp@_l@rMaC^yBR_CRaCRaCRaCJiC?cC?}B?iC?aCKiCSgC]iCIaCg@sfD{g@cF}@}EyAqE{A_FwA}EmBuEaCsEwBuEcCuEiCuEuCsE_DmEsDoE_DsE{DoE_E",
+      "precision": 6,
+      "length": 430
+     },
+     "bikesAllowed": false,
+     "wheelchairAccessible": "NOT_ACCESSIBLE",
+     "reservation": "NONE",
+     "alternatives": []
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "St George",
+      "stopId": "us-ny-MTA-NYCSubway_S31N",
+      "parentId": "us-ny-MTA-NYCSubway_S31",
+      "importance": 0.0018827301682904363,
+      "lat": 40.643750000000004,
+      "lon": -74.07365,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T21:01:00Z",
+      "departure": "2026-11-03T21:01:00Z",
+      "scheduledArrival": "2026-11-03T21:01:00Z",
+      "scheduledDeparture": "2026-11-03T21:01:00Z",
+      "vertexType": "TRANSIT",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "REGIONAL_RAIL"
+      ]
+     },
+     "to": {
+      "name": "END",
+      "lat": 40.6437,
+      "lon": -74.0736,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T21:02:00Z",
+      "scheduledArrival": "2026-11-03T21:02:00Z",
+      "vertexType": "NORMAL"
+     },
+     "duration": 60,
+     "startTime": "2026-11-03T21:01:00Z",
+     "endTime": "2026-11-03T21:02:00Z",
+     "scheduledStartTime": "2026-11-03T21:01:00Z",
+     "scheduledEndTime": "2026-11-03T21:02:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 6.0,
+     "legGeometry": {
+      "points": "kiuolAbbbhlCbBcB",
+      "precision": 6,
+      "length": 2
+     },
+     "steps": [
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 6.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "polyline": {
+        "points": "kiuolAbbbhlCbBcB",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "previousPageCursor": "EARLIER|1793737620",
+ "nextPageCursor": "LATER|1793739240"
+}
