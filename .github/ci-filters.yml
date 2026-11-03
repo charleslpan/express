@@ -5,18 +5,21 @@ shared: &shared
   - Makefile
   - scripts/ci/**
 
+# Lint (all Swift) and TransitKit's tests on Linux.
 swift:
   - *shared
-  - Packages/TransitKit/**
+  - App/**
+  - Packages/**
+  - .swiftformat
+  - .swiftlint.yml
 
 server:
   - *shared
   - server/**
 
+# Build and test the app on a macOS runner.
 ios:
   - *shared
   - project.yml
   - App/**
   - Packages/**
-  - .swiftformat
-  - .swiftlint.yml
