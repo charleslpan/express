@@ -1,0 +1,23 @@
+{
+  "name": "@express/alerts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Line status endpoint: MTA subway and bus service alerts per line, with the standard effect, cause, and severity.",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@vercel/functions": "^3.10.6"
+  },
+  "devDependencies": {
+    "@express/eslint-config": "workspace:*",
+    "@express/tsconfig": "workspace:*",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.14.0",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}
