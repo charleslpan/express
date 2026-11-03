@@ -84,6 +84,8 @@ describe("parseLines and selectLines", () => {
   it("reads + literally and %2B too", () => {
     expect(parseLines("?lines=A,C,M15+")).toEqual(["A", "C", "M15+"]);
     expect(parseLines("?x=1&lines=B44%2B,%20SI,A")).toEqual(["B44+", "SI", "A"]);
+    // What the Function sees on Vercel for `lines=M15+,A`: the bare + arrives as %20.
+    expect(parseLines("?lines=M15%20,A")).toEqual(["M15+", "A"]);
   });
 
   it("rejects bad queries", () => {
