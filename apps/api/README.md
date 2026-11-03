@@ -117,8 +117,9 @@ curl 'https://express-server-cyan-zeta.vercel.app/api/alerts?lines=A,L,M15+'
 ```
 
 Query: `lines` (required), up to 50 comma-separated GTFS `route_id`s, matched
-exactly (`A`, `6X`, `SI`, `GS`, `M15+`, `BM1`). `+` is read literally, so
-`M15+` works as typed; `%2B` works too.
+exactly (`A`, `6X`, `SI`, `GS`, `M15+`, `BM1`). `M15+` works as typed:
+Vercel hands the Function a bare `+` as a space, and since line ids never hold
+a space, the Function reads it back as `+`. `%2B` works too.
 
 Response (`200`, `application/json`): every requested line, with `[]` where it
 has no alerts.
