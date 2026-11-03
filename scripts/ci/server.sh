@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# CI for apps/api/: typecheck and test the cron function, then build the MOTIS
-# image (downloads feeds, runs the import and the build-time smoke test), start
-# it, and run the smoke test against it. Needs node, docker, curl, and jq.
+# CI for apps/api/: typecheck and test the cron function, test the realtime
+# adapter, build the MOTIS image (downloads feeds, runs the import and the
+# build-time smoke test), start it, and run the smoke test against it. Needs
+# node, docker, curl, jq, and python3 with pip.
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
@@ -12,6 +13,12 @@ NAME="express-motis-ci"
 echo "::group::apps/api/cron: npm ci, typecheck, test"
 (cd apps/api/cron && npm ci --no-audit --no-fund && npm run typecheck && npm test)
 echo "::endgroup::"
+
+# Realtime adapter unit tests, with the bindings and protobuf the image runs.
+deps="$(mktemp -d)"
+python3 -m pip install --quiet --target "$deps" \
+  gtfs-realtime-bindings==2.0.0 protobuf==5.29.4
+(cd apps/api/motis/adapter && PYTHONPATH="$deps" python3 -m unittest discover -s tests)
 
 docker build -t "$IMAGE" apps/api/motis
 docker image ls "$IMAGE"

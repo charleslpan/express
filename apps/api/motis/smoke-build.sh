@@ -12,7 +12,9 @@ now="$(date -u +%s)"
 day=$(( now / 86400 + 1 ))
 while [ "$(date -u -d "@$(( day * 86400 ))" +%u)" -gt 5 ]; do day=$(( day + 1 )); done
 SMOKE_TIME="$(date -u -d "@$(( day * 86400 + 15 * 3600 ))" +%Y-%m-%dT%H:%M:%SZ)"
-export SMOKE_TIME
+# No adapter runs in the build, so MOTIS's first realtime poll fails at once
+# and it serves the timetable; the live-feed checks belong to the deployed URL.
+export SMOKE_TIME SMOKE_SKIP_REALTIME=1
 echo "smoke time $SMOKE_TIME"
 
 sed "s/^  port: .*/  port: $PORT/" config.server.yml > data/config.yml
