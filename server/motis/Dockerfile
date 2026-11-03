@@ -12,6 +12,14 @@ RUN apk add --no-cache curl \
     | tar -xj ./motis \
  && ./motis --help > /dev/null
 
+# The OSM extract changes slowly, so a cached layer is fine. BBBike's main
+# host sometimes times out from CI, so retry and fall back to its mirror.
+RUN mkdir -p input && for host in download.bbbike.org download2.bbbike.org; do \
+      curl -fsSL --retry 3 --connect-timeout 20 -o input/nyc.osm.pbf \
+        "https://${host}/osm/bbbike/NewYork/NewYork.osm.pbf" && break; \
+    done \
+ && test -s input/nyc.osm.pbf
+
 # ADD with a URL re-checks the remote file on every build, so a new feed
 # busts the cache and the import below runs again.
 ADD https://rrgtfsfeeds.s3.amazonaws.com/gtfs_supplemented.zip input/gtfs_supplemented.zip
@@ -21,7 +29,6 @@ ADD https://rrgtfsfeeds.s3.amazonaws.com/gtfs_m.zip input/gtfs_m.zip
 ADD https://rrgtfsfeeds.s3.amazonaws.com/gtfs_q.zip input/gtfs_q.zip
 ADD https://rrgtfsfeeds.s3.amazonaws.com/gtfs_si.zip input/gtfs_si.zip
 ADD https://rrgtfsfeeds.s3.amazonaws.com/gtfs_busco.zip input/gtfs_busco.zip
-ADD https://download.bbbike.org/osm/bbbike/NewYork/NewYork.osm.pbf input/nyc.osm.pbf
 
 COPY config.yml ./
 RUN ./motis import \

@@ -68,8 +68,10 @@ above are the same binary and data.
 
 - The Docker build has network access, so feeds download during the build.
 - Builds run `buildah` with `--layers`; the first build had no cache ("Buildah
-  store: cold"). `ADD <url>` re-checks each remote file, so new feeds re-run
-  the import.
+  store: cold"). `ADD <url>` re-checks each GTFS feed, so new feeds re-run
+  the import. The OSM extract is fetched with `curl` (cached layer), retrying
+  and falling back to `download2.bbbike.org`, because BBBike's main host timed
+  out from a GitHub runner.
 - The container writes its runtime config to `/tmp`, which works.
 - The project is not yet linked to GitHub (Vercel's GitHub app is not installed
   on the repo), so deploys go through the Vercel API for now. Once linked, set
