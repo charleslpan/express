@@ -8,6 +8,7 @@
     }
   },
   "rewrites": [
+    { "source": "/metrics", "destination": { "service": "motis" } },
     { "source": "/api/(.*)", "destination": { "service": "motis" } }
   ]
 }

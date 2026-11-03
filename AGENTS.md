@@ -68,6 +68,7 @@ What each job runs:
 | `swift` | `SWIFT_IMAGE` container | `ci-swift` | `scripts/ci/lint.sh` (pinned SwiftFormat `--lint` and SwiftLint `--strict`), then TransitKit's `swift test` (directly: the container has no Node). |
 | `server` | `ubuntu-latest` | `ci-server` | `scripts/ci/node.sh` (pinned pnpm via Corepack, `pnpm install --frozen-lockfile`, then `pnpm turbo run lint typecheck build test` over every non-Swift workspace), then the API checks (`scripts/ci/server.sh`, owned by the server tasks). |
 | `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj`, runs the `Express` scheme's tests on the newest iPhone simulator, writes `build/Express.xcresult`. |
+| `testflight` (own workflow) | `IOS_RUNNER` | `testflight` | `scripts/ci/testflight.sh` on pushes to `main` and manual dispatch: archives, signs, and uploads to TestFlight (see [TestFlight](#testflight)). Not part of `ci-ok`. |
 | `ci-ok` | `ubuntu-latest` | none | `re-actors/alls-green` over every job: failed or cancelled fails it, skipped is fine. |
 
 - **Add a check** to the Make target (or its script) of the job it belongs to, and widen that job's filter if it now
@@ -82,6 +83,24 @@ What each job runs:
   `actions/cache` step once one does.
 
 If a change truly needs a workflow edit, ask the developer for it rather than pushing.
+
+### TestFlight
+
+`.github/workflows/testflight.yml` runs `make testflight` (`scripts/ci/testflight.sh`) on every push to `main` and on
+manual dispatch (Actions → TestFlight → Run workflow), never on pull requests. It archives the `Express` scheme in
+Release with the same Xcode and XcodeGen as the `ios` job, signs it with Xcode's automatic signing through an App
+Store Connect API key (`-allowProvisioningUpdates`, no certificates or profiles in the repository), and uploads it with
+`xcodebuild -exportArchive` (`method: app-store-connect`, `destination: upload`).
+
+- **Secrets:** `ASC_KEY_ID` (the key's id), `ASC_ISSUER_ID`, `ASC_KEY_P8` (the `AuthKey_<id>.p8` file, base64:
+  `base64 -i AuthKey_<id>.p8`), and `APPLE_TEAM_ID`. The key needs the **Admin** role, which cloud-managed distribution
+  signing requires. Without all four the job prints a notice and passes without uploading (forks, or before they're
+  added). The key is written to a temp file and deleted when the script exits.
+- **Versions:** the build number is the workflow's run number (`CURRENT_PROJECT_VERSION`); the marketing version is
+  `MARKETING_VERSION` in `apps/ios/project.yml`. Bump that for a new version.
+- **Google Maps:** the script writes `apps/ios/Config/Secrets.xcconfig` (git-ignored) with `GOOGLE_MAPS_IOS_API_KEY`
+  from its secret before archiving, and deletes it afterwards.
+- `ITSAppUsesNonExemptEncryption = NO` is set in `project.yml`, so builds skip the export-compliance question.
 
 ### Screenshot harness
 
