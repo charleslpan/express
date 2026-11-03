@@ -18,9 +18,9 @@ settings:
 
 packages:
   TransitKit:
-    path: Packages/TransitKit
+    path: ../../packages/transitkit
   GlassUI:
-    path: Packages/GlassUI
+    path: ../../packages/glassui
 
 targets:
   Express:

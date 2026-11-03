@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CI for server/: build the MOTIS image (downloads feeds, runs the import),
+# CI for apps/api/: build the MOTIS image (downloads feeds, runs the import),
 # start it, and run the smoke test. Needs docker, curl, and jq.
 set -euo pipefail
 
@@ -8,7 +8,7 @@ IMAGE="${IMAGE:-express-motis}"
 PORT="${PORT:-8080}"
 NAME="express-motis-ci"
 
-docker build -t "$IMAGE" server/motis
+docker build -t "$IMAGE" apps/api/motis
 docker image ls "$IMAGE"
 
 docker rm -f "$NAME" > /dev/null 2>&1 || true
@@ -20,4 +20,4 @@ for _ in $(seq 1 60); do
   sleep 1
 done
 
-server/motis/smoke.sh "http://localhost:$PORT"
+apps/api/motis/smoke.sh "http://localhost:$PORT"

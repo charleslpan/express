@@ -1,0 +1,10 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "test": {
+      "inputs": ["Package.swift", "Package.resolved", "Sources/**", "Tests/**"],
+      "outputs": []
+    }
+  }
+}

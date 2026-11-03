@@ -1,7 +1,8 @@
-# server/
+# apps/api/
 
 The Express backend: one Vercel project (`express-server`) whose services are
-declared in `vercel.json`. Today that is MOTIS in `motis/`. See `README.md`
+declared in `vercel.json`, and the pnpm workspace `@express/api` (see the root
+[`AGENTS.md`](../../AGENTS.md)). Today that is MOTIS in `motis/`. See `README.md`
 for what is deployed and the measured numbers.
 
 ## Vercel account
@@ -27,7 +28,7 @@ on every call.
 ## Build and run locally
 
 ```sh
-docker build -t express-motis server/motis
+docker build -t express-motis apps/api/motis
 docker run --rm -e PORT=8080 -p 8080:8080 express-motis
 ```
 
@@ -38,8 +39,8 @@ directory (see the Dockerfile for the URLs).
 ## Test
 
 ```sh
-server/motis/smoke.sh http://localhost:8080
-server/motis/smoke.sh https://express-server-cyan-zeta.vercel.app
+apps/api/motis/smoke.sh http://localhost:8080
+apps/api/motis/smoke.sh https://express-server-cyan-zeta.vercel.app
 ```
 
 Needs `curl` and `jq`. CI runs `scripts/ci/server.sh`, which builds the image,
@@ -47,9 +48,9 @@ starts it, and runs the smoke test; run it locally the same way with Docker.
 
 ## Deploy
 
-The project is linked to GitHub with Root Directory `server`: pushes to a
+The project is linked to GitHub with Root Directory `apps/api`: pushes to a
 branch build a preview, and merges to `main` deploy production. To deploy by
-hand, run `vercel deploy --prod --scope charlespan-projects` from `server/`.
+hand, run `vercel deploy --prod --scope charlespan-projects` from `apps/api/`.
 
 ## Environment variables
 

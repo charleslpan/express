@@ -1,11 +1,13 @@
 # SwiftLint rules. SwiftFormat owns formatting; SwiftLint catches the rest.
 excluded:
   - .build
-  - Packages/TransitKit/.build
-  - Packages/GlassUI/.build
+  - packages/transitkit/.build
+  - packages/glassui/.build
   - DerivedData
   - build
-  - Express.xcodeproj
+  - apps/ios/Express.xcodeproj
+  - node_modules
+  - "**/node_modules"
 
 disabled_rules:
   - trailing_comma # SwiftFormat adds trailing commas
