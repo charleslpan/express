@@ -69,6 +69,7 @@ echo "::endgroup::"
 
 rm -rf build/Express.xcresult
 # -quiet keeps the log to warnings, errors, and test failures; the .xcresult artifact has everything.
+# -skipPackagePluginValidation trusts TransitKit's OpenAPI generator build plugin, which CI cannot click through.
 xcodebuild "$MODE" \
     -quiet \
     -project apps/ios/Express.xcodeproj \
@@ -76,4 +77,5 @@ xcodebuild "$MODE" \
     -destination "id=$udid" \
     -derivedDataPath build/DerivedData \
     -resultBundlePath build/Express.xcresult \
+    -skipPackagePluginValidation \
     CODE_SIGNING_ALLOWED=NO

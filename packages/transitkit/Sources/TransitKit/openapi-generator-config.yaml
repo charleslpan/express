@@ -1,0 +1,6 @@
+# swift-openapi-generator's build plugin reads this beside openapi.yaml (MOTIS v2.11.4, vendored as is).
+generate:
+  - types
+  - client
+accessModifier: public
+namingStrategy: idiomatic

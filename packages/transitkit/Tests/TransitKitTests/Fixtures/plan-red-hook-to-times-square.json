@@ -1,0 +1,1490 @@
+{
+ "requestParameters": {},
+ "debugOutput": {
+  "algorithm": 1,
+  "direct": 4,
+  "execute_time": 37,
+  "fares": 0,
+  "fastest_direct": 0,
+  "fp_update_prevented_by_lower_bound": 0,
+  "gpu_supported": 1,
+  "gpu_used": 1,
+  "interval_extensions": 0,
+  "lb_time": 0,
+  "n_dest_offsets": 286,
+  "n_earliest_arrival_updated_by_footpath": 0,
+  "n_earliest_arrival_updated_by_route": 0,
+  "n_earliest_trip_calls": 0,
+  "n_events_skipped_by_early_termination": 0,
+  "n_execute_bwd": 10,
+  "n_execute_fwd": 5,
+  "n_footpaths_visited": 0,
+  "n_routes_visited": 0,
+  "n_routing_time": 0,
+  "n_start_offsets": 36,
+  "n_td_dest_offsets": 0,
+  "n_td_start_offsets": 0,
+  "prepare": 16,
+  "prepare_backward_WALK": 14,
+  "prepare_forward_WALK": 1,
+  "route_update_prevented_by_lower_bound": 0,
+  "search_interval_reduction_by_early_termination": 0
+ },
+ "from": {
+  "name": "START",
+  "lat": 40.6757,
+  "lon": -74.0086,
+  "vertexType": "NORMAL"
+ },
+ "to": {
+  "name": "END",
+  "lat": 40.758,
+  "lon": -73.9855,
+  "vertexType": "NORMAL"
+ },
+ "direct": [],
+ "itineraries": [
+  {
+   "duration": 3300,
+   "startTime": "2026-11-03T20:27:00Z",
+   "endTime": "2026-11-03T21:22:00Z",
+   "transfers": 1,
+   "id": "ClYhH/RsVn1WREApuK8D54yAUsAyHHVzLW55LU1UQS1CdXNCcm9va2x5bl8zMDYwODc5BFQ4glRWREBBkx0bgXiAUsBIlIep1wZQhImp1wZaBFdBTEtgAQq7AQoDQjU3EkEyMDI2MTEwM18xNToyOV91cy1ueS1NVEEtQnVzQnJvb2tseW5fR0FfRDYtV2Vla2RheS0wOTI5MDBfQjYyXzYyNhocdXMtbnktTVRBLUJ1c0Jyb29rbHluXzMwNjA4NyEEVDiCVFZEQCmTHRuBeIBSwDIcdXMtbnktTVRBLUJ1c0Jyb29rbHluXzMwNjk2MDl5KAr0iVhEQEF4vp8aL39SwEj8ianXBlCclanXBloDQlVTYAEKeRocdXMtbnktTVRBLUJ1c0Jyb29rbHluXzMwNjk2MCF5KAr0iVhEQCl4vp8aL39SwDIYdXMtbnktTVRBLU5ZQ1N1YndheV9BNDFOOchnsn+eWERAQReCHJQwf1LASPCSqdcGUOiTqdcGWgRXQUxLYAFxAAAAAAAAAMAKxgEKAUESSjIwMjYxMTAzXzE1OjA1X3VzLW55LU1UQS1OWUNTdWJ3YXlfQkZBMjZHRU4tQTA4Ny1XZWVrZGF5LTAwXzA5MDUwMF9BLi5ONTVSGhh1cy1ueS1NVEEtTllDU3Vid2F5X0E0MU4hyGeyf55YREApF4IclDB/UsAyGHVzLW55LU1UQS1OWUNTdWJ3YXlfQTI3TjmGd7mI72BEQEHB4nDmV39SwEjglKnXBlCYnanXBloGU1VCV0FZYAFpAAAAAAAAAMAKUhoYdXMtbnktTVRBLU5ZQ1N1YndheV9BMjdOIYZ3uYjvYERAKcHicOZXf1LAORsv3SQGYURAQVCNl24Sf1LASJidqdcGUPigqdcGWgRXQUxLYAE=",
+   "legs": [
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "START",
+      "lat": 40.6757,
+      "lon": -74.0086,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T20:27:00Z",
+      "scheduledDeparture": "2026-11-03T20:27:00Z",
+      "vertexType": "NORMAL"
+     },
+     "to": {
+      "name": "LORRAINE ST/COLUMBIA ST",
+      "stopId": "us-ny-MTA-BusBrooklyn_306087",
+      "importance": 3.797362296609208e-05,
+      "lat": 40.674454,
+      "lon": -74.007355,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:31:00Z",
+      "scheduledArrival": "2026-11-03T20:31:00Z",
+      "vertexType": "TRANSIT",
+      "modes": [
+       "BUS"
+      ]
+     },
+     "duration": 240,
+     "startTime": "2026-11-03T20:27:00Z",
+     "endTime": "2026-11-03T20:31:00Z",
+     "scheduledStartTime": "2026-11-03T20:27:00Z",
+     "scheduledEndTime": "2026-11-03T20:31:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 221.0,
+     "legGeometry": {
+      "points": "_osqlAbdcdlC`S{dA??z_@`O??ZP??pB`@??jB^??d@C??Fw@??r@}B??p@uB??L}@??bDsQ",
+      "precision": 6,
+      "length": 22
+     },
+     "steps": [
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 100.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "toOsmNode": 10028532870,
+       "polyline": {
+        "points": "_osqlAbdcdlC`S{dA",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 62.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 1095043289,
+       "fromOsmNode": 10028532870,
+       "toOsmNode": 10028532828,
+       "polyline": {
+        "points": "}zrqlAf~`dlCz_@`O",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 2.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 1095043289,
+       "fromOsmNode": 10028532828,
+       "toOsmNode": 10028508815,
+       "polyline": {
+        "points": "azqqlAhnadlCZP",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 6.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 1095043271,
+       "fromOsmNode": 10028508815,
+       "toOsmNode": 11777479880,
+       "polyline": {
+        "points": "eyqqlAznadlCpB`@",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 6.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 1095043271,
+       "fromOsmNode": 11777479880,
+       "toOsmNode": 10028508812,
+       "polyline": {
+        "points": "suqqlA|oadlCjB^",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 2.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 967721526,
+       "fromOsmNode": 10028508812,
+       "toOsmNode": 10022770513,
+       "polyline": {
+        "points": "grqqlA|padlCd@C",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 2.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 1153462676,
+       "fromOsmNode": 10022770513,
+       "toOsmNode": 8952798838,
+       "polyline": {
+        "points": "aqqqlAxpadlCFw@",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 6.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 967721527,
+       "fromOsmNode": 8952798838,
+       "toOsmNode": 11777479882,
+       "polyline": {
+        "points": "ypqqlA`oadlCr@}B",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 6.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 967721527,
+       "fromOsmNode": 11777479882,
+       "toOsmNode": 10022770514,
+       "polyline": {
+        "points": "eoqqlAbkadlCp@uB",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 3.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 1094350601,
+       "fromOsmNode": 10022770514,
+       "toOsmNode": 6681800244,
+       "polyline": {
+        "points": "smqqlAlgadlCL}@",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 26.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "fromOsmNode": 6681800244,
+       "polyline": {
+        "points": "emqqlAneadlCbDsQ",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      }
+     ]
+    },
+    {
+     "mode": "BUS",
+     "from": {
+      "name": "LORRAINE ST/COLUMBIA ST",
+      "stopId": "us-ny-MTA-BusBrooklyn_306087",
+      "importance": 3.797362296609208e-05,
+      "lat": 40.674454,
+      "lon": -74.007355,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T20:31:00Z",
+      "scheduledDeparture": "2026-11-03T20:33:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "PREDICTED",
+      "departureTimestampReason": "PREDICTED",
+      "modes": [
+       "BUS"
+      ]
+     },
+     "to": {
+      "name": "JAY ST/FULTON ST",
+      "stopId": "us-ny-MTA-BusBrooklyn_306960",
+      "importance": 3.988339813076891e-05,
+      "lat": 40.69171000000001,
+      "lon": -73.98725000000002,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:52:00Z",
+      "scheduledArrival": "2026-11-03T20:57:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "PREDICTED",
+      "departureTimestampReason": "PREDICTED",
+      "modes": [
+       "BUS"
+      ]
+     },
+     "duration": 1260,
+     "startTime": "2026-11-03T20:31:00Z",
+     "endTime": "2026-11-03T20:52:00Z",
+     "scheduledStartTime": "2026-11-03T20:33:00Z",
+     "scheduledEndTime": "2026-11-03T20:57:00Z",
+     "realTime": true,
+     "scheduled": true,
+     "interlineWithPreviousLeg": false,
+     "headsign": "MASPETH",
+     "tripFrom": {
+      "name": "BEARD ST/OTSEGO ST",
+      "stopId": "us-ny-MTA-BusBrooklyn_308560",
+      "importance": 3.797362296609208e-05,
+      "lat": 40.672264,
+      "lon": -74.01121000000002,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T20:29:00Z",
+      "scheduledDeparture": "2026-11-03T20:29:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "departureTimestampReason": "PREDICTED",
+      "modes": [
+       "BUS"
+      ]
+     },
+     "tripTo": {
+      "name": "GRAND AV/64 ST",
+      "stopId": "us-ny-MTA-BusBrooklyn_503743",
+      "importance": 7.744954928057268e-06,
+      "lat": 40.72272000000001,
+      "lon": -73.90182000000001,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T21:48:00Z",
+      "scheduledArrival": "2026-11-03T21:57:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "PROPAGATED",
+      "modes": [
+       "BUS"
+      ]
+     },
+     "routeId": "us-ny-MTA-BusBrooklyn_B57",
+     "routeUrl": "",
+     "directionId": "0",
+     "routeColor": "ee352e",
+     "routeTextColor": "ffffff",
+     "routeType": 3,
+     "agencyName": "MTA New York City Transit",
+     "agencyUrl": "http://www.mta.info",
+     "agencyFareUrl": "",
+     "agencyId": "MTA NYCT",
+     "tripId": "20261103_15:29_us-ny-MTA-BusBrooklyn_GA_D6-Weekday-092900_B62_626",
+     "routeShortName": "B57",
+     "routeLongName": "Gowanus - Maspeth",
+     "tripShortName": "",
+     "displayName": "B57",
+     "cancelled": false,
+     "source": "us-ny_MTA-BusBrooklyn.gtfs.zip/stop_times.txt:1332718:1332763",
+     "intermediateStops": [
+      {
+       "name": "LORRAINE ST/HICKS ST",
+       "stopId": "us-ny-MTA-BusBrooklyn_306088",
+       "importance": 5.7165623729815707e-05,
+       "lat": 40.673985,
+       "lon": -74.00565,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:32:00Z",
+       "departure": "2026-11-03T20:32:00Z",
+       "scheduledArrival": "2026-11-03T20:34:00Z",
+       "scheduledDeparture": "2026-11-03T20:34:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "PREDICTED",
+       "departureTimestampReason": "PREDICTED",
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "LORRAINE ST/HENRY ST",
+       "stopId": "us-ny-MTA-BusBrooklyn_306089",
+       "importance": 5.7165623729815707e-05,
+       "lat": 40.67354,
+       "lon": -74.00407,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:33:00Z",
+       "departure": "2026-11-03T20:33:00Z",
+       "scheduledArrival": "2026-11-03T20:35:00Z",
+       "scheduledDeparture": "2026-11-03T20:35:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "PREDICTED",
+       "departureTimestampReason": "PREDICTED",
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "CLINTON ST/LORRAINE ST",
+       "stopId": "us-ny-MTA-BusBrooklyn_308726",
+       "importance": 3.797362296609208e-05,
+       "lat": 40.673347,
+       "lon": -74.00243999999999,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:33:00Z",
+       "departure": "2026-11-03T20:33:00Z",
+       "scheduledArrival": "2026-11-03T20:36:00Z",
+       "scheduledDeparture": "2026-11-03T20:36:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "PREDICTED",
+       "departureTimestampReason": "PREDICTED",
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "MILL ST/CLINTON ST",
+       "stopId": "us-ny-MTA-BusBrooklyn_308727",
+       "importance": 1.9192000763723627e-05,
+       "lat": 40.675003000000004,
+       "lon": -74.00146500000001,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:34:00Z",
+       "departure": "2026-11-03T20:34:00Z",
+       "scheduledArrival": "2026-11-03T20:38:00Z",
+       "scheduledDeparture": "2026-11-03T20:38:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "PREDICTED",
+       "departureTimestampReason": "PREDICTED",
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "SMITH ST/W 9 ST",
+       "stopId": "us-ny-MTA-BusBrooklyn_307696",
+       "importance": 7.744954928057268e-06,
+       "lat": 40.674892,
+       "lon": -73.99767000000001,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:37:00Z",
+       "departure": "2026-11-03T20:37:00Z",
+       "scheduledArrival": "2026-11-03T20:41:00Z",
+       "scheduledDeparture": "2026-11-03T20:41:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "PREDICTED",
+       "departureTimestampReason": "PREDICTED",
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "SMITH ST/2 ST",
+       "stopId": "us-ny-MTA-BusBrooklyn_307909",
+       "importance": 7.744954928057268e-06,
+       "lat": 40.679700000000004,
+       "lon": -73.99515000000001,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:40:00Z",
+       "departure": "2026-11-03T20:40:00Z",
+       "scheduledArrival": "2026-11-03T20:45:00Z",
+       "scheduledDeparture": "2026-11-03T20:45:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "PREDICTED",
+       "departureTimestampReason": "PREDICTED",
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "SMITH ST/UNION ST",
+       "stopId": "us-ny-MTA-BusBrooklyn_307910",
+       "importance": 7.744954928057268e-06,
+       "lat": 40.681779999999996,
+       "lon": -73.99375,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:42:00Z",
+       "departure": "2026-11-03T20:42:00Z",
+       "scheduledArrival": "2026-11-03T20:47:00Z",
+       "scheduledDeparture": "2026-11-03T20:47:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "PREDICTED",
+       "departureTimestampReason": "PREDICTED",
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "SMITH ST/DOUGLASS ST",
+       "stopId": "us-ny-MTA-BusBrooklyn_307911",
+       "importance": 7.744954928057268e-06,
+       "lat": 40.683792000000004,
+       "lon": -73.99238,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:43:00Z",
+       "departure": "2026-11-03T20:43:00Z",
+       "scheduledArrival": "2026-11-03T20:49:00Z",
+       "scheduledDeparture": "2026-11-03T20:49:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "PREDICTED",
+       "departureTimestampReason": "PREDICTED",
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "SMITH ST/WARREN ST",
+       "stopId": "us-ny-MTA-BusBrooklyn_305554",
+       "importance": 7.744954928057268e-06,
+       "lat": 40.68573800000001,
+       "lon": -73.99106600000002,
+       "level": -1.0,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:45:00Z",
+       "departure": "2026-11-03T20:45:00Z",
+       "scheduledArrival": "2026-11-03T20:51:00Z",
+       "scheduledDeparture": "2026-11-03T20:51:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "PREDICTED",
+       "departureTimestampReason": "PREDICTED",
+       "modes": [
+        "BUS"
+       ]
+      },
+      {
+       "name": "SMITH ST/BERGEN ST",
+       "stopId": "us-ny-MTA-BusBrooklyn_306034",
+       "importance": 1.7739006580086425e-05,
+       "lat": 40.686974,
+       "lon": -73.99023000000001,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:46:00Z",
+       "departure": "2026-11-03T20:46:00Z",
+       "scheduledArrival": "2026-11-03T20:52:00Z",
+       "scheduledDeparture": "2026-11-03T20:52:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "PREDICTED",
+       "departureTimestampReason": "PREDICTED",
+       "modes": [
+        "BUS"
+       ]
+      }
+     ],
+     "legGeometry": {
+      "points": "khqqlAtr`dlCe@aCbV_oAlEwVxRkiAzEkWxXsyAuKgEiZoKgh@gSkf@_SxAoLnIsl@\\kC~E{TnLkf@b[caBog@oPwIgEo]oPgHmBy]aMqe@wQcq@_Xsj@gTgh@_SqMcG}YsR_NwHeEwBmU_N}TwL}JwGeEkC_DwBeEcBag@gYwIoFq[kRag@w[kf@oZcP_JeU_MkKkHuZoPag@{YqRyK}QyKcQoKoUsNuOqJeUiNcLwG}YwQag@oZoe@k[eg@c[qQgKqRgJaS{Jif@cViPg@?wB",
+      "precision": 6,
+      "length": 63
+     },
+     "bikesAllowed": false,
+     "wheelchairAccessible": "NOT_ACCESSIBLE",
+     "reservation": "NONE",
+     "alternatives": []
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "JAY ST/FULTON ST",
+      "stopId": "us-ny-MTA-BusBrooklyn_306960",
+      "importance": 3.988339813076891e-05,
+      "lat": 40.69171000000001,
+      "lon": -73.98725000000002,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:52:00Z",
+      "departure": "2026-11-03T20:52:00Z",
+      "scheduledArrival": "2026-11-03T20:57:00Z",
+      "scheduledDeparture": "2026-11-03T20:52:00Z",
+      "vertexType": "TRANSIT",
+      "cancelled": false,
+      "arrivalTimestampReason": "PREDICTED",
+      "departureTimestampReason": "PREDICTED",
+      "modes": [
+       "BUS"
+      ]
+     },
+     "to": {
+      "name": "Jay St-MetroTech",
+      "stopId": "us-ny-MTA-NYCSubway_A41N",
+      "parentId": "us-ny-MTA-NYCSubway_A41",
+      "importance": 0.013300208374857903,
+      "lat": 40.69233700000001,
+      "lon": -73.98734,
+      "level": -2.0,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T20:54:00Z",
+      "scheduledArrival": "2026-11-03T20:54:00Z",
+      "vertexType": "TRANSIT",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "duration": 120,
+     "startTime": "2026-11-03T20:52:00Z",
+     "endTime": "2026-11-03T20:54:00Z",
+     "scheduledStartTime": "2026-11-03T20:52:00Z",
+     "scheduledEndTime": "2026-11-03T20:54:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 69.0,
+     "legGeometry": {
+      "points": "c_srlAjqyblC}e@aA",
+      "precision": 6,
+      "length": 2
+     },
+     "steps": [
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 69.0,
+       "fromLevel": -2.0,
+       "toLevel": -2.0,
+       "osmWay": 904597216,
+       "polyline": {
+        "points": "c_srlAjqyblC}e@aA",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "Jay Street-MetroTech (A,C,F,R)",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      }
+     ]
+    },
+    {
+     "mode": "SUBWAY",
+     "from": {
+      "name": "Jay St-MetroTech",
+      "stopId": "us-ny-MTA-NYCSubway_A41N",
+      "parentId": "us-ny-MTA-NYCSubway_A41",
+      "importance": 0.013300208374857903,
+      "lat": 40.69233700000001,
+      "lon": -73.98734,
+      "level": -2.0,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T20:56:00Z",
+      "scheduledDeparture": "2026-11-03T20:56:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "to": {
+      "name": "42 St-Port Authority Bus Terminal",
+      "stopId": "us-ny-MTA-NYCSubway_A27N",
+      "parentId": "us-ny-MTA-NYCSubway_A27",
+      "importance": 0.011068352498114109,
+      "lat": 40.757310000000004,
+      "lon": -73.98974,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T21:14:00Z",
+      "scheduledArrival": "2026-11-03T21:14:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY",
+       "BUS"
+      ]
+     },
+     "duration": 1080,
+     "startTime": "2026-11-03T20:56:00Z",
+     "endTime": "2026-11-03T21:14:00Z",
+     "scheduledStartTime": "2026-11-03T20:56:00Z",
+     "scheduledEndTime": "2026-11-03T21:14:00Z",
+     "realTime": false,
+     "scheduled": true,
+     "interlineWithPreviousLeg": false,
+     "headsign": "Inwood-207 St",
+     "tripFrom": {
+      "name": "Far Rockaway-Mott Av",
+      "stopId": "us-ny-MTA-NYCSubway_H11N",
+      "parentId": "us-ny-MTA-NYCSubway_H11",
+      "importance": 0.0019141247030347586,
+      "lat": 40.603996,
+      "lon": -73.7554,
+      "tz": "America/New_York",
+      "departure": "2026-11-03T20:05:00Z",
+      "scheduledDeparture": "2026-11-03T20:05:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "tripTo": {
+      "name": "Inwood-207 St",
+      "stopId": "us-ny-MTA-NYCSubway_A02N",
+      "parentId": "us-ny-MTA-NYCSubway_A02",
+      "importance": 0.0034205408301204443,
+      "lat": 40.868073,
+      "lon": -73.91990000000001,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T21:42:00Z",
+      "scheduledArrival": "2026-11-03T21:42:00Z",
+      "vertexType": "TRANSIT",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY"
+      ]
+     },
+     "routeId": "us-ny-MTA-NYCSubway_A",
+     "routeUrl": "https://www.mta.info/schedules/subway/a-train",
+     "directionId": "0",
+     "routeColor": "0062cf",
+     "routeTextColor": "ffffff",
+     "routeType": 1,
+     "agencyName": "MTA New York City Transit",
+     "agencyUrl": "http://www.mta.info",
+     "agencyFareUrl": "",
+     "agencyId": "MTA NYCT",
+     "tripId": "20261103_15:05_us-ny-MTA-NYCSubway_BFA26GEN-A087-Weekday-00_090500_A..N55R",
+     "routeShortName": "A",
+     "routeLongName": "8 Avenue Express",
+     "tripShortName": "",
+     "displayName": "A",
+     "cancelled": false,
+     "source": "us-ny_MTA-NYCSubway.gtfs.zip/stop_times.txt:161217:161253",
+     "intermediateStops": [
+      {
+       "name": "High St",
+       "stopId": "us-ny-MTA-NYCSubway_A40N",
+       "parentId": "us-ny-MTA-NYCSubway_A40",
+       "importance": 0.005835818126797676,
+       "lat": 40.69933700000001,
+       "lon": -73.99053,
+       "level": -2.0,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T20:58:00Z",
+       "departure": "2026-11-03T20:58:00Z",
+       "scheduledArrival": "2026-11-03T20:58:00Z",
+       "scheduledDeparture": "2026-11-03T20:58:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "SUBWAY"
+       ]
+      },
+      {
+       "name": "Fulton St",
+       "stopId": "us-ny-MTA-NYCSubway_A38N",
+       "parentId": "us-ny-MTA-NYCSubway_A38",
+       "importance": 0.021772241219878197,
+       "lat": 40.710197,
+       "lon": -74.00769000000001,
+       "level": -2.0,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T21:01:00Z",
+       "departure": "2026-11-03T21:01:00Z",
+       "scheduledArrival": "2026-11-03T21:01:00Z",
+       "scheduledDeparture": "2026-11-03T21:01:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "SUBWAY"
+       ]
+      },
+      {
+       "name": "Chambers St",
+       "stopId": "us-ny-MTA-NYCSubway_A36N",
+       "parentId": "us-ny-MTA-NYCSubway_A36",
+       "importance": 0.019986072555184364,
+       "lat": 40.714110000000005,
+       "lon": -74.00858,
+       "level": -2.0,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T21:02:00Z",
+       "departure": "2026-11-03T21:02:00Z",
+       "scheduledArrival": "2026-11-03T21:02:00Z",
+       "scheduledDeparture": "2026-11-03T21:02:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "SUBWAY"
+       ]
+      },
+      {
+       "name": "Canal St",
+       "stopId": "us-ny-MTA-NYCSubway_A34N",
+       "parentId": "us-ny-MTA-NYCSubway_A34",
+       "importance": 0.03459693491458893,
+       "lat": 40.720825000000005,
+       "lon": -74.00522600000001,
+       "level": -2.0,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T21:04:00Z",
+       "departure": "2026-11-03T21:04:00Z",
+       "scheduledArrival": "2026-11-03T21:04:00Z",
+       "scheduledDeparture": "2026-11-03T21:04:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "SUBWAY"
+       ]
+      },
+      {
+       "name": "W 4 St-Wash Sq",
+       "stopId": "us-ny-MTA-NYCSubway_A32N",
+       "parentId": "us-ny-MTA-NYCSubway_A32",
+       "importance": 0.020203065127134323,
+       "lat": 40.73233800000001,
+       "lon": -74.000496,
+       "level": -4.0,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T21:07:00Z",
+       "departure": "2026-11-03T21:07:00Z",
+       "scheduledArrival": "2026-11-03T21:07:00Z",
+       "scheduledDeparture": "2026-11-03T21:07:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "SUBWAY"
+       ]
+      },
+      {
+       "name": "14 St",
+       "stopId": "us-ny-MTA-NYCSubway_A31N",
+       "parentId": "us-ny-MTA-NYCSubway_A31",
+       "importance": 0.02637704461812973,
+       "lat": 40.740894,
+       "lon": -74.00169000000001,
+       "level": -2.0,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T21:09:00Z",
+       "departure": "2026-11-03T21:09:00Z",
+       "scheduledArrival": "2026-11-03T21:09:00Z",
+       "scheduledDeparture": "2026-11-03T21:09:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "SUBWAY"
+       ]
+      },
+      {
+       "name": "34 St-Penn Station",
+       "stopId": "us-ny-MTA-NYCSubway_A28N",
+       "parentId": "us-ny-MTA-NYCSubway_A28",
+       "importance": 0.021237561479210854,
+       "lat": 40.75229,
+       "lon": -73.99339,
+       "level": -1.0,
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T21:12:00Z",
+       "departure": "2026-11-03T21:12:00Z",
+       "scheduledArrival": "2026-11-03T21:12:00Z",
+       "scheduledDeparture": "2026-11-03T21:12:00Z",
+       "vertexType": "TRANSIT",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false,
+       "arrivalTimestampReason": "NO_RT_DATA",
+       "departureTimestampReason": "NO_RT_DATA",
+       "modes": [
+        "SUBWAY"
+       ]
+      }
+     ],
+     "legGeometry": {
+      "points": "aftrlAvoyblCO?urAcC{@?gA?aA?cAGaA?gAScA?cASgA?aA?cASmA?cAGkAKcA?cGg@}@G{@?}@K{@SgA?{@?{@ScA?gA?aAIcA?aA?oA?cAIgA?i_DcGqMR{LnAoKjB{JvC{IrDwHnFwGjGcGvH{EhIaEzJ_DxKiCjMaBfNeArOg@bQiAfkA}@bo@MxFOdFMzESnFYzEa@zE[zEe@zEa@zEg@nEo@~Dm@zEu@fEs@rE{@zD{w@~kEoGrXiHrXoHjWeIvVyInUeJzTwJrScK~R{KvQcLbQwLzOkMfOwM~MgNjMwNvLwvHdqFeCxAyBjB_CxB{BlBoBvBwBjCmBjCqB`CkBtCkB~CcBrCcBjD_B~C{ArDsArD}w@znBk_Ax~BaCdEaCvDiCrCsCvBkCbBqCnA_Dz@yCH_D?gDIgD{@mD{@oDwBmDwB_EsCoiBcsAstFc`EaCoAiCcBiCoAeCeAkC{@kC}@eCo@qCg@kCg@kCSqCSqCSsCIkC?yC?khB`CsAGmy@hCaCHaC?_C?yB?yB?_C?{BIsBIwBSsB_@qBGqBg@sB[qB_@iBg@}}EsyAirCw~@kASkAo@uA_@sA]qA]{Ag@sAs@cB[{A{@cBq@cBq@cBg@cB{@mBo@mB{@g_B{s@s@So@[s@_@u@]u@]s@]u@]m@_@s@[w@g@s@Su@o@u@_@{@g@s@g@kcAkp@w@o@k@_@c{@wj@gCcBkC{@kC{@eCg@gCg@iCGqCKqC?gCJoCZqCf@oCz@uCz@sCz@wCvAcsGvcDwCbB_DnA_Df@wCf@_Dz@yCF_D?wCG_DSyCg@wC{@wC{@_DgA{CwAuCmBmx@ei@ixHccF}mKsaHwxHccF",
+      "precision": 6,
+      "length": 223
+     },
+     "bikesAllowed": false,
+     "wheelchairAccessible": "NOT_ACCESSIBLE",
+     "reservation": "NONE",
+     "alternatives": []
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "42 St-Port Authority Bus Terminal",
+      "stopId": "us-ny-MTA-NYCSubway_A27N",
+      "parentId": "us-ny-MTA-NYCSubway_A27",
+      "importance": 0.011068352498114109,
+      "lat": 40.757310000000004,
+      "lon": -73.98974,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T21:14:00Z",
+      "departure": "2026-11-03T21:14:00Z",
+      "scheduledArrival": "2026-11-03T21:14:00Z",
+      "scheduledDeparture": "2026-11-03T21:14:00Z",
+      "vertexType": "TRANSIT",
+      "cancelled": false,
+      "arrivalTimestampReason": "NO_RT_DATA",
+      "departureTimestampReason": "NO_RT_DATA",
+      "modes": [
+       "SUBWAY",
+       "BUS"
+      ]
+     },
+     "to": {
+      "name": "END",
+      "lat": 40.758,
+      "lon": -73.9855,
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T21:22:00Z",
+      "scheduledArrival": "2026-11-03T21:22:00Z",
+      "vertexType": "NORMAL"
+     },
+     "duration": 480,
+     "startTime": "2026-11-03T21:14:00Z",
+     "endTime": "2026-11-03T21:22:00Z",
+     "scheduledStartTime": "2026-11-03T21:14:00Z",
+     "scheduledEndTime": "2026-11-03T21:22:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 512.0,
+     "legGeometry": {
+      "points": "gdsvlAtd~blC@E??fBiF??]Km^{V??yByA??sBuA??QK??q^sU??eBiA??yBwA??w^sV??oBqA??sBsA??NOrf@i~A??~Ki^??tJ}Z??`@sB??R{@??Nw@??XsA??tA_E??FM",
+      "precision": 6,
+      "length": 44
+     },
+     "steps": [
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 0.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "toOsmNode": 9235539541,
+       "polyline": {
+        "points": "gdsvlAtd~blC@E",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 11.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 1149185707,
+       "fromOsmNode": 9235539541,
+       "toOsmNode": 6597498415,
+       "polyline": {
+        "points": "edsvlAnd~blCfBiF",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 66.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702543830,
+       "fromOsmNode": 6597498415,
+       "toOsmNode": 6597498413,
+       "polyline": {
+        "points": "}`svlAd}}blC]Km^{V",
+        "precision": 6,
+        "length": 3
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 8.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702543825,
+       "fromOsmNode": 6597498413,
+       "toOsmNode": 6597498398,
+       "polyline": {
+        "points": "iatvlA|d}blCyByA",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 7.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702543825,
+       "fromOsmNode": 6597498398,
+       "toOsmNode": 6597498408,
+       "polyline": {
+        "points": "cetvlAbb}blCsBuA",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 1.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702543827,
+       "fromOsmNode": 6597498408,
+       "toOsmNode": 10168088470,
+       "polyline": {
+        "points": "whtvlAl_}blCQK",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 64.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702543827,
+       "fromOsmNode": 10168088470,
+       "toOsmNode": 6597498399,
+       "polyline": {
+        "points": "iitvlA`_}blCq^sU",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 6.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 1111240022,
+       "fromOsmNode": 6597498399,
+       "toOsmNode": 10168088476,
+       "polyline": {
+        "points": "{huvlAlh|blCeBiA",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 8.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 1111240022,
+       "fromOsmNode": 10168088476,
+       "toOsmNode": 6598535223,
+       "polyline": {
+        "points": "aluvlAbf|blCyBwA",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 65.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 1346429372,
+       "fromOsmNode": 6598535223,
+       "toOsmNode": 6598535220,
+       "polyline": {
+        "points": "{ouvlAjc|blCw^sV",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 7.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702648002,
+       "fromOsmNode": 6598535220,
+       "toOsmNode": 6598535204,
+       "polyline": {
+        "points": "sovvlAvk{blCoBqA",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 7.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702648002,
+       "fromOsmNode": 6598535204,
+       "toOsmNode": 6598535212,
+       "polyline": {
+        "points": "csvvlAdi{blCsBsA",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 148.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702648004,
+       "fromOsmNode": 6598535212,
+       "toOsmNode": 6598535205,
+       "polyline": {
+        "points": "wvvvlApf{blCNOrf@i~A",
+        "precision": 6,
+        "length": 3
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 48.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702648004,
+       "fromOsmNode": 6598535205,
+       "toOsmNode": 9354852637,
+       "polyline": {
+        "points": "snuvlAvfxblC~Ki^",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 43.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702648004,
+       "fromOsmNode": 9354852637,
+       "toOsmNode": 9354852636,
+       "polyline": {
+        "points": "sauvlAlgwblCtJ}Z",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 5.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702648001,
+       "fromOsmNode": 9354852636,
+       "toOsmNode": 6598535214,
+       "polyline": {
+        "points": "}utvlAnkvblC`@sB",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 3.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702648001,
+       "fromOsmNode": 6598535214,
+       "toOsmNode": 6598535203,
+       "polyline": {
+        "points": "{ttvlAzgvblCR{@",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 2.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702648001,
+       "fromOsmNode": 6598535203,
+       "toOsmNode": 10228962377,
+       "polyline": {
+        "points": "gttvlA~evblCNw@",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 4.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702648001,
+       "fromOsmNode": 10228962377,
+       "toOsmNode": 4707407257,
+       "polyline": {
+        "points": "wstvlAfdvblCXsA",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 9.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "osmWay": 702465447,
+       "fromOsmNode": 4707407257,
+       "toOsmNode": 4707407261,
+       "polyline": {
+        "points": "}rtvlAravblCtA_E",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      },
+      {
+       "relativeDirection": "CONTINUE",
+       "distance": 0.0,
+       "fromLevel": 0.0,
+       "toLevel": 0.0,
+       "fromOsmNode": 4707407261,
+       "polyline": {
+        "points": "gptvlAr{ublCFM",
+        "precision": 6,
+        "length": 2
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false,
+       "toll": false,
+       "elevationUp": 0,
+       "elevationDown": 0
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "previousPageCursor": "EARLIER|1793737620",
+ "nextPageCursor": "LATER|1793738580"
+}
