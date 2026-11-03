@@ -11,6 +11,11 @@
       "framework": "node",
       "entrypoint": "api/vehicles/bus.ts"
     },
+    "alerts": {
+      "root": "alerts/",
+      "framework": "node",
+      "entrypoint": "api/alerts.ts"
+    },
     "cron": {
       "root": "cron/",
       "framework": "node",
@@ -22,6 +27,7 @@
   ],
   "rewrites": [
     { "source": "/api/vehicles/bus", "destination": { "service": "bus" } },
+    { "source": "/api/alerts", "destination": { "service": "alerts" } },
     { "source": "/api/cron/(.*)", "destination": { "service": "cron" } },
     { "source": "/metrics", "destination": { "service": "motis" } },
     { "source": "/api/(.*)", "destination": { "service": "motis" } }

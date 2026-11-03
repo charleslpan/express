@@ -29,8 +29,11 @@ on every call.
   `matcher.py` matches MTA subway realtime trips to static trips (delete it
   if MOTIS ever does this itself); `adapter.py` serves `/subway/<feed>` and
   `/bus/<dataset>`; `build_index.py` runs at image build; `record.py` records
-  live feeds as test fixtures and prints match rates. To add a feed (alerts,
-  A1), add it to `adapter.py` and a `rt` entry to `config.yml`.
+  live feeds as test fixtures and prints match rates. `alerts.py` fills the
+  MTA alerts' standard effect, cause, and severity from `alert_types.json`
+  for `/alerts/subway` and `/alerts/bus/<dataset>`. To add a feed, add it to
+  `adapter.py` and a `rt` entry to `config.yml` (alert feeds first in a
+  dataset's list: the last feed listed sets its feed-timestamp metric).
 - `motis/smoke.sh`: smoke test against any base URL (`SMOKE_TIME` pins the
   query time).
 - `motis/smoke-build.sh`: runs `smoke.sh` inside the Docker build (`smoke`
@@ -50,6 +53,10 @@ on every call.
   alone Vercel builds nothing. Keep TypeScript below 7: Vercel's Node builder
   type-checks with the local `typescript` package, and TypeScript 7 lacks the
   JavaScript API it calls.
+- `alerts/`: the line status Function (`api/alerts.ts`, `GET /api/alerts`),
+  the pnpm workspace `@express/alerts`, set up like `bus/`. Its
+  `lib/alert-types.ts` is a checked copy of `motis/adapter/alert_types.json`
+  (a test fails when they differ): edit the JSON, then mirror it.
 
 ## Build and run locally
 
@@ -92,8 +99,8 @@ Cron function checks (CI runs them through `scripts/ci/node.sh`):
 pnpm turbo run lint typecheck test --filter=@express/cron
 ```
 
-Bus Function: `pnpm turbo run lint typecheck test --filter=@express/bus` from the
-repository root. CI runs the same through `scripts/ci/node.sh` (`make ci-server`).
+Bus and alerts Functions: `pnpm turbo run lint typecheck test --filter=@express/bus`
+(or `@express/alerts`) from the repository root. CI runs the same through `scripts/ci/node.sh` (`make ci-server`).
 
 ## Deploy
 
