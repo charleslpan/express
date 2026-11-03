@@ -1,6 +1,6 @@
 # SwiftFormat options. Run `make format` to apply, `make lint` to check.
 --swiftversion 6.0
---exclude .build,**/.build,DerivedData,build,*.xcodeproj
+--exclude .build,**/.build,DerivedData,build,**/*.xcodeproj,**/node_modules
 
 --indent 4
 --maxwidth 120

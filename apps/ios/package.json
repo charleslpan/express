@@ -1,0 +1,14 @@
+{
+  "name": "@express/ios",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "generate": "xcodegen generate",
+    "build": "../../scripts/skip-unless.sh xcodebuild ../../scripts/ci/ios.sh build",
+    "test": "../../scripts/skip-unless.sh xcodebuild ../../scripts/ci/ios.sh test"
+  },
+  "dependencies": {
+    "@express/glassui": "workspace:*",
+    "@express/transitkit": "workspace:*"
+  }
+}

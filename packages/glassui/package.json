@@ -1,0 +1,6 @@
+{
+  "name": "@express/glassui",
+  "version": "0.0.0",
+  "private": true,
+  "description": "iOS-only SwiftUI package; built and tested by the Express scheme in apps/ios."
+}

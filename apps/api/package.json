@@ -1,0 +1,9 @@
+{
+  "name": "@express/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "smoke": "motis/smoke.sh",
+    "ci": "../../scripts/ci/server.sh"
+  }
+}

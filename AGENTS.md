@@ -5,31 +5,43 @@ Many agents work on it in parallel; follow this file so your work fits theirs.
 
 ## Layout
 
+A Turborepo monorepo over pnpm workspaces: deployables in `apps/`, shared code in `packages/`.
+
 | Path | What lives there |
 | --- | --- |
-| `project.yml` | XcodeGen spec for `Express.xcodeproj`. The project is generated and git-ignored: edit `project.yml`, never the `.xcodeproj`. |
-| `App/` | The `Express` app target: app entry point, root view, assets. |
-| `App/Features/<Feature>/` | One folder per feature (views, view models, feature-local helpers). Features don't reach into each other's folders; share code through the packages. |
-| `Packages/TransitKit/` | Transit models, networking, and routing logic. Platform-neutral: **no UIKit, SwiftUI, or CoreLocation**, so it builds and tests on Linux. Import `FoundationNetworking` behind `#if canImport(FoundationNetworking)`. |
-| `Packages/GlassUI/` | Shared SwiftUI components and Liquid Glass styling (iOS 27+). Depends on SwiftUI only, **never on TransitKit**. |
-| `server/` | The backend the server tasks build. It has its own [`server/AGENTS.md`](server/AGENTS.md); read it before touching anything there. |
+| `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `pnpm-lock.yaml` | The workspace root: pnpm 10 (pinned in `packageManager`), Turborepo 2 tasks (`build`, `test`, `lint`, `typecheck`). Every workspace has a `package.json` whose scripts Turborepo runs. |
+| `apps/ios/` | The iOS app: `project.yml` (XcodeGen spec for `Express.xcodeproj`, which is generated and git-ignored: edit `project.yml`, never the `.xcodeproj`) and `App/` (app target: entry point, root view, assets). |
+| `apps/ios/App/Features/<Feature>/` | One folder per feature (views, view models, feature-local helpers). Features don't reach into each other's folders; share code through the packages. |
+| `apps/api/` | The backend: the Vercel project `express-server` (`vercel.json` and its services, such as `motis/`). It has its own [`apps/api/AGENTS.md`](apps/api/AGENTS.md); read it before touching anything there. |
+| `packages/transitkit/` | TransitKit: transit models, networking, and routing logic. Platform-neutral: **no UIKit, SwiftUI, or CoreLocation**, so it builds and tests on Linux. Import `FoundationNetworking` behind `#if canImport(FoundationNetworking)`. |
+| `packages/glassui/` | GlassUI: shared SwiftUI components and Liquid Glass styling (iOS 27+). Depends on SwiftUI only, **never on TransitKit**. |
+| `packages/tsconfig/` | Shared strict TypeScript base config: extend `@express/tsconfig/base.json`. |
+| `packages/eslint-config/` | Shared flat ESLint config: `export { default } from "@express/eslint-config"` in a workspace's `eslint.config.js`. |
 | `.github/` | CI. Workflows are frozen (see [CI](#ci)); `ci-filters.yml` and `ci-config.env` are editable. `ci-ok` is the required check on `main`. |
-| `scripts/ci/` | Scripts the CI Make targets call. |
+| `scripts/ci/` | Scripts the CI Make targets (and some workspace scripts) call. `scripts/skip-unless.sh` skips a task cleanly where its toolchain is missing. |
 
-The app target depends on both packages.
+The app target depends on both Swift packages, by relative path from `apps/ios/project.yml`. A new TypeScript
+workspace goes in `apps/` or `packages/` with a `package.json` named `@express/<name>`, extends the shared tsconfig
+and ESLint config, and keeps `typescript` below 7 (Vercel's Node builder crashes on TS 7).
 
 ## Build and test
 
-First step on a Mac, after every pull that changes `project.yml`:
+First step on a Mac, after every pull that changes `apps/ios/project.yml`:
 
 ```sh
-brew install xcodegen swiftformat swiftlint   # XcodeGen 2.46.0
-xcodegen generate                             # or: make generate
-open Express.xcodeproj
+brew install node xcodegen swiftformat swiftlint   # XcodeGen 2.46.0, Node 22 or 24
+corepack enable                                    # the pnpm that package.json pins
+pnpm install
+cd apps/ios && xcodegen generate                   # or: make generate
+open apps/ios/Express.xcodeproj
 ```
 
-- **Toolchain:** Xcode 27.2, iOS 27.0 deployment target, iPhone only.
-- **On Linux** (agent sandboxes) only TransitKit builds: `swift test --package-path Packages/TransitKit` (or `make test`).
+- **Toolchain:** Xcode 27.2, iOS 27.0 deployment target, iPhone only. Node 22+ with pnpm 10 (via Corepack).
+- **Everything at once:** `pnpm turbo run test` (or `make test`) runs every workspace's tests that apply on the host;
+  `build`, `lint`, and `typecheck` work the same way. Narrow it with `--filter`, such as
+  `pnpm turbo run test --filter=@express/transitkit`. Swift and Xcode tasks print `Skipping …` and pass where
+  `swift` or `xcodebuild` is missing. Turborepo caches by each task's inputs; add `--force` to rerun anyway.
+- **On Linux** (agent sandboxes) only TransitKit builds: `swift test --package-path packages/transitkit`.
   Everything iOS (the app, GlassUI) is built and tested by CI; don't try to run Xcode.
 - **Lint before you push:** `make lint` checks SwiftFormat and SwiftLint; `make format` fixes what it can.
 
@@ -52,9 +64,9 @@ What each job runs:
 | Job | Runs on | Make target | What it does |
 | --- | --- | --- | --- |
 | `changes` | `ubuntu-latest` | none | Reads `ci-config.env` and evaluates `ci-filters.yml`. |
-| `swift` | `SWIFT_IMAGE` container | `ci-swift` | `scripts/ci/lint.sh` (pinned SwiftFormat `--lint` and SwiftLint `--strict`), then TransitKit's `swift test`. |
-| `server` | `ubuntu-latest` | `ci-server` | The server checks (`scripts/ci/server.sh`, owned by the server tasks). |
-| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates the project, runs the `Express` scheme's tests on the newest iPhone simulator, writes `build/Express.xcresult`. |
+| `swift` | `SWIFT_IMAGE` container | `ci-swift` | `scripts/ci/lint.sh` (pinned SwiftFormat `--lint` and SwiftLint `--strict`), then TransitKit's `swift test` (directly: the container has no Node). |
+| `server` | `ubuntu-latest` | `ci-server` | `scripts/ci/node.sh` (pinned pnpm via Corepack, `pnpm install --frozen-lockfile`, then `pnpm turbo run lint typecheck build test` over every non-Swift workspace), then the API checks (`scripts/ci/server.sh`, owned by the server tasks). |
+| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj`, runs the `Express` scheme's tests on the newest iPhone simulator, writes `build/Express.xcresult`. |
 | `ci-ok` | `ubuntu-latest` | none | `re-actors/alls-green` over every job: failed or cancelled fails it, skipped is fine. |
 
 - **Add a check** to the Make target (or its script) of the job it belongs to, and widen that job's filter if it now
@@ -89,7 +101,7 @@ gh run download <run-id> --name <artifact> --dir /tmp/ci-artifacts
 - **Libraries over hand-rolled code.** Reach for Apple's and Google's SDKs first, then well-maintained open-source
   Swift packages, before writing your own. Name every new dependency, and why, in the pull request that adds it.
   Planned so far: swift-openapi-generator and `Polyline` in TransitKit; Google Maps and Places SDKs in the app.
-- **One feature folder per feature** under `App/Features/`.
+- **One feature folder per feature** under `apps/ios/App/Features/`.
 - **Formatting** is SwiftFormat's (`.swiftformat`); linting is SwiftLint's (`.swiftlint.yml`). Don't hand-format against them.
 - Keep pull requests small and focused on one task; don't rebase or restack other agents' branches.
 
