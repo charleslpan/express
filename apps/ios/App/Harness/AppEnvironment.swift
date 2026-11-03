@@ -1,12 +1,13 @@
 import Foundation
 import Observation
 
-/// The app's data clients, live or fixture-backed, injected into the view tree with `.environment(_:)`.
+/// The launch's fixture set and clock, injected into the view tree with `.environment(_:)`.
 ///
-/// Each data client a feature adds (trip planning, arrivals, vehicle positions, …) gets a property here, set to its
-/// live implementation, or, when `fixtures` is set, to a fixture-backed one that returns that set's data without
-/// touching the network. Views read clients from here rather than creating their own, so the screenshot harness can
-/// show any screen on fixture data.
+/// Data clients follow `fixtures`: when it is set, a client returns that set's data without touching the network.
+/// `TransitClient` (the `\.transitClient` environment value, set in `ExpressApp`) takes this through its
+/// `transport:`; the first screen that reads it on fixture data adds a fixture transport and passes it there when
+/// `fixtures` is set. Views read clients and `now` from the environment rather than making their own, so the
+/// screenshot harness can show any screen on fixture data.
 @MainActor
 @Observable
 final class AppEnvironment {

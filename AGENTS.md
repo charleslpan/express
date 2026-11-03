@@ -115,14 +115,14 @@ The app reads these launch arguments (`apps/ios/App/Harness/`):
 | Argument | Effect |
 | --- | --- |
 | `-screenshot <screen>` | Show only that `ScreenshotScreen` case, with animations off. |
-| `-fixtures <set>` | Back the data clients in `AppEnvironment` with that `FixtureSet` (such as `nyc-evening`) instead of live data. `AppEnvironment.now` returns the set's reference date. |
+| `-fixtures <set>` | Back the data clients with that `FixtureSet` (such as `nyc-evening`) instead of live data: `AppEnvironment.fixtures` names it, and `AppEnvironment.now` returns its reference date. `TransitClient` takes fixtures through its `transport:` (see `AppEnvironment`'s doc comment). Screenshot launches skip the foreground warm-up request. |
 | `-appearance light\|dark` | Force the appearance. |
 | `-UIPreferredContentSizeCategoryName <category>` | The system's own text-size override. |
 
 **Add a screen** in the same pull request that builds it:
 
 1. Add a case to `ScreenshotScreen` (`App/Harness/ScreenshotScreen.swift`) that returns the screen's view. Set it up
-   from `AppEnvironment` (its clients and `now`), never from live services or the clock.
+   from the environment (`\.transitClient`, `AppEnvironment.now`), never from live services or the clock.
 2. Add a `FixtureSet` case if you need new data. Your fixture-backed client switches over it to decide what to return.
 3. Add a test to `UITests/ScreenshotTests.swift` that calls `capture("<screen>", fixtures: "<set>")`. Name a
    screen and its fixtures in lowercase with hyphens. Each test writes `<screen>-<fixtures>-<variant>.png`.

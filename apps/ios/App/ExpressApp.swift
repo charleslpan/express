@@ -1,10 +1,13 @@
 import SwiftUI
+import TransitKit
 import UIKit
 
 @main
 struct ExpressApp: App {
+    @Environment(\.scenePhase) private var scenePhase
     private let launch = LaunchConfiguration()
     @State private var environment: AppEnvironment
+    private let transitClient = TransitClient(baseURL: ExpressApp.transitServer.baseURL)
 
     init() {
         _environment = State(initialValue: AppEnvironment(fixtures: launch.fixtures))
@@ -25,7 +28,32 @@ struct ExpressApp: App {
                 }
             }
             .environment(environment)
+            .environment(\.transitClient, transitClient)
             .preferredColorScheme(launch.colorScheme)
         }
+        .onChange(of: scenePhase) { _, phase in
+            // One cheap request as the app comes to the foreground, so the first search lands on a warm server.
+            // Never on a timer, and never for the screenshot harness, which stays off the network.
+            guard phase == .active, !launch.isScreenshot else { return }
+            Task { await transitClient.warmUp() }
+        }
     }
+
+    /// The MOTIS server the app talks to: Express's own, or in debug builds Transitous when launched with
+    /// `-TransitServer transitous` (Edit Scheme → Run → Arguments).
+    static var transitServer: TransitServer {
+        #if DEBUG
+            if let name = UserDefaults.standard.string(forKey: "TransitServer"),
+               let server = TransitServer(rawValue: name)
+            {
+                return server
+            }
+        #endif
+        return .express
+    }
+}
+
+extension EnvironmentValues {
+    /// The app's one ``TransitClient``, pointed at ``ExpressApp/transitServer``.
+    @Entry var transitClient = TransitClient()
 }
