@@ -12,6 +12,10 @@ final class ScreenshotTests: XCTestCase {
         capture("root", fixtures: "nyc-evening")
     }
 
+    func testMapGlass() {
+        capture("map-glass", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
     // MARK: - Harness
 
     /// The appearance and text size combinations every screen is captured in.
@@ -35,13 +39,19 @@ final class ScreenshotTests: XCTestCase {
 
     /// Launches the app on `screen` with `fixtures` in every variant and attaches a screenshot of each, named
     /// `<screen>-<fixtures>-<variant>` (such as `root-nyc-evening-dark`).
-    private func capture(_ screen: String, fixtures: String) {
+    ///
+    /// `settledWhen` names an element the screen shows once it has finished loading what the network serves it,
+    /// such as map tiles; the capture waits for it a while, then goes ahead without it rather than fail.
+    private func capture(_ screen: String, fixtures: String, settledWhen settled: String? = nil) {
         for variant in Variant.allCases {
             let app = XCUIApplication()
             app.launchArguments = ["-screenshot", screen, "-fixtures", fixtures] + variant.arguments
             app.launch()
             let ready = app.descendants(matching: .any)["screenshot.\(screen)"]
             XCTAssertTrue(ready.waitForExistence(timeout: 15), "\(screen) never appeared")
+            if let settled, !app.descendants(matching: .any)[settled].waitForExistence(timeout: 30) {
+                XCTContext.runActivity(named: "\(screen) never showed \(settled); capturing anyway") { _ in }
+            }
 
             let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
             attachment.name = "\(screen)-\(fixtures)-\(variant.rawValue)"

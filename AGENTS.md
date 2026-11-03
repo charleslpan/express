@@ -12,6 +12,8 @@ A Turborepo monorepo over pnpm workspaces: deployables in `apps/`, shared code i
 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `pnpm-lock.yaml` | The workspace root: pnpm 10 (pinned in `packageManager`), Turborepo 2 tasks (`build`, `test`, `lint`, `typecheck`). Every workspace has a `package.json` whose scripts Turborepo runs. |
 | `apps/ios/` | The iOS app: `project.yml` (XcodeGen spec for `Express.xcodeproj`, which is generated and git-ignored: edit `project.yml`, never the `.xcodeproj`) and `App/` (app target: entry point, root view, assets). |
 | `apps/ios/App/Features/<Feature>/` | One folder per feature (views, view models, feature-local helpers). Features don't reach into each other's folders; share code through the packages. |
+| `apps/ios/App/Map/` | `MapView`, the one Google map every map screen uses (`GMSMapView` wrapped for SwiftUI), its JSON map styles, and the SDK key setup. |
+| `apps/ios/Config/` | `Express.xcconfig` and the Info.plist keys it feeds. `Secrets.xcconfig` (git-ignored; copy `Secrets.example.xcconfig`) holds `GOOGLE_MAPS_IOS_API_KEY`. |
 | `apps/ios/UITests/`, `apps/ios/App/Harness/` | The screenshot harness: the `ExpressUITests` target and the app's launch-argument and fixture plumbing (see [Screenshot harness](#screenshot-harness)). |
 | `apps/api/` | The backend: the Vercel project `express-server` (`vercel.json` and its services, such as `motis/`). It has its own [`apps/api/AGENTS.md`](apps/api/AGENTS.md); read it before touching anything there. |
 | `packages/transitkit/` | TransitKit: transit models, networking, and routing logic. Platform-neutral: **no UIKit, SwiftUI, or CoreLocation**, so it builds and tests on Linux. Import `FoundationNetworking` behind `#if canImport(FoundationNetworking)`. |
@@ -37,6 +39,10 @@ cd apps/ios && xcodegen generate                   # or: make generate
 open apps/ios/Express.xcodeproj
 ```
 
+- **Google Maps key:** copy `apps/ios/Config/Secrets.example.xcconfig` to `Secrets.xcconfig` and paste a key. Without
+  one the app still builds and map screens show "Map unavailable". CI (`ios.sh`) and TestFlight write that file from
+  the `GOOGLE_MAPS_IOS_API_KEY` secret. Style the map with the JSON styles in `App/Map/Styles/`, never a map ID:
+  map loads without a map ID are free, and a map ID makes them billed.
 - **Toolchain:** Xcode 27.2, iOS 27.0 deployment target, iPhone only. Node 22+ with pnpm 10 (via Corepack).
 - **Everything at once:** `pnpm turbo run test` (or `make test`) runs every workspace's tests that apply on the host;
   `build`, `lint`, and `typecheck` work the same way. Narrow it with `--filter`, such as
