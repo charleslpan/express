@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # The `ios` CI job (macOS runner, IOS_RUNNER in .github/ci-config.env): select Xcode, install the pinned XcodeGen,
 # generate apps/ios/Express.xcodeproj, and run the Express scheme's tests on an iOS simulator.
-# Writes build/Express.xcresult, which the workflow uploads as an artifact.
+# Writes build/Express.xcresult and, in test mode, the screenshot harness's PNGs in build/screenshots/ (exported from
+# the result bundle by scripts/ci/screenshots.sh); the workflow uploads both in the ios-<attempt> artifact.
 # Usage: ios.sh [test|build] (default test). Outside CI it keeps the selected Xcode instead of switching to
 # XCODE_VERSION, so `pnpm turbo run test` works on a Mac without sudo.
 set -euo pipefail
@@ -65,11 +66,20 @@ if [[ -z $udid ]]; then
     echo "::error::No available iPhone simulator" && xcrun simctl list runtimes
     exit 1
 fi
+if [[ $MODE == test ]]; then
+    # Boot it now to give screenshots a fixed status bar (9:41, full signal and battery).
+    xcrun simctl bootstatus "$udid" -b >/dev/null
+    xcrun simctl status_bar "$udid" override --time 9:41 --dataNetwork wifi --wifiMode active --wifiBars 3 \
+        --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100 ||
+        echo "::warning::Couldn't override the simulator's status bar"
+fi
 echo "::endgroup::"
 
-rm -rf build/Express.xcresult
+rm -rf build/Express.xcresult build/screenshots
 # -quiet keeps the log to warnings, errors, and test failures; the .xcresult artifact has everything.
 # -skipPackagePluginValidation trusts TransitKit's OpenAPI generator build plugin, which CI cannot click through.
+# Export screenshots even when a test fails, so a broken screen can still be seen.
+status=0
 xcodebuild "$MODE" \
     -quiet \
     -project apps/ios/Express.xcodeproj \
@@ -78,4 +88,11 @@ xcodebuild "$MODE" \
     -derivedDataPath build/DerivedData \
     -resultBundlePath build/Express.xcresult \
     -skipPackagePluginValidation \
-    CODE_SIGNING_ALLOWED=NO
+    CODE_SIGNING_ALLOWED=NO || status=$?
+
+if [[ $MODE == test && -d build/Express.xcresult ]]; then
+    if ! scripts/ci/screenshots.sh build/Express.xcresult build/screenshots && [[ $status -eq 0 ]]; then
+        status=1
+    fi
+fi
+exit "$status"

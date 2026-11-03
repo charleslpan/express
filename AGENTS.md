@@ -12,6 +12,7 @@ A Turborepo monorepo over pnpm workspaces: deployables in `apps/`, shared code i
 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `pnpm-lock.yaml` | The workspace root: pnpm 10 (pinned in `packageManager`), Turborepo 2 tasks (`build`, `test`, `lint`, `typecheck`). Every workspace has a `package.json` whose scripts Turborepo runs. |
 | `apps/ios/` | The iOS app: `project.yml` (XcodeGen spec for `Express.xcodeproj`, which is generated and git-ignored: edit `project.yml`, never the `.xcodeproj`) and `App/` (app target: entry point, root view, assets). |
 | `apps/ios/App/Features/<Feature>/` | One folder per feature (views, view models, feature-local helpers). Features don't reach into each other's folders; share code through the packages. |
+| `apps/ios/UITests/`, `apps/ios/App/Harness/` | The screenshot harness: the `ExpressUITests` target and the app's launch-argument and fixture plumbing (see [Screenshot harness](#screenshot-harness)). |
 | `apps/api/` | The backend: the Vercel project `express-server` (`vercel.json` and its services, such as `motis/`). It has its own [`apps/api/AGENTS.md`](apps/api/AGENTS.md); read it before touching anything there. |
 | `packages/transitkit/` | TransitKit: transit models, networking, and routing logic. Platform-neutral: **no UIKit, SwiftUI, or CoreLocation**, so it builds and tests on Linux. Import `FoundationNetworking` behind `#if canImport(FoundationNetworking)`. |
 | `packages/glassui/` | GlassUI: shared SwiftUI components and Liquid Glass styling (iOS 27+). Depends on SwiftUI only, **never on TransitKit**. |
@@ -101,15 +102,41 @@ Store Connect API key (`-allowProvisioningUpdates`, no certificates or profiles 
   from its secret before archiving, and deletes it afterwards.
 - `ITSAppUsesNonExemptEncryption = NO` is set in `project.yml`, so builds skip the export-compliance question.
 
-### CI screenshots
+### Screenshot harness
 
-CI uploads simulator screenshots as workflow artifacts. Fetch them with the GitHub CLI:
+You can't open a simulator, so judge your UI from the screenshots CI takes. The `ios` job runs the
+`ExpressUITests` target (`apps/ios/UITests/`), which launches the app once per screen and variant and attaches
+a screenshot of each. `scripts/ci/screenshots.sh` then exports those attachments to `build/screenshots/` with
+Xcode's `xcrun xcresulttool export attachments`. Every screen is captured in three variants: `light`, `dark`, and
+`light-ax5` (the largest accessibility text size). The status bar is fixed at 9:41 with full signal.
+
+The app reads these launch arguments (`apps/ios/App/Harness/`):
+
+| Argument | Effect |
+| --- | --- |
+| `-screenshot <screen>` | Show only that `ScreenshotScreen` case, with animations off. |
+| `-fixtures <set>` | Back the data clients with that `FixtureSet` (such as `nyc-evening`) instead of live data: `AppEnvironment.fixtures` names it, and `AppEnvironment.now` returns its reference date. `TransitClient` takes fixtures through its `transport:` (see `AppEnvironment`'s doc comment). Screenshot launches skip the foreground warm-up request. |
+| `-appearance light\|dark` | Force the appearance. |
+| `-UIPreferredContentSizeCategoryName <category>` | The system's own text-size override. |
+
+**Add a screen** in the same pull request that builds it:
+
+1. Add a case to `ScreenshotScreen` (`App/Harness/ScreenshotScreen.swift`) that returns the screen's view. Set it up
+   from the environment (`\.transitClient`, `AppEnvironment.now`), never from live services or the clock.
+2. Add a `FixtureSet` case if you need new data. Your fixture-backed client switches over it to decide what to return.
+3. Add a test to `UITests/ScreenshotTests.swift` that calls `capture("<screen>", fixtures: "<set>")`. Name a
+   screen and its fixtures in lowercase with hyphens. Each test writes `<screen>-<fixtures>-<variant>.png`.
+
+**Look at the screenshots** once the `ios` job has finished. Its run summary lists the PNGs.
 
 ```sh
-gh run list --branch <your-branch> --workflow CI   # find the run id
-gh run download <run-id> --dir /tmp/ci-artifacts   # all artifacts
-gh run download <run-id> --name <artifact> --dir /tmp/ci-artifacts
+gh run list --branch <your-branch> --workflow CI                  # find the run id
+gh run download <run-id> -n ios-1 -D /tmp/ci-artifacts            # ios-<attempt>; the PNGs are in screenshots/
+ls /tmp/ci-artifacts/screenshots                                  # then open each PNG with your Read tool
 ```
+
+The frozen workflow uploads the PNGs inside the `ios-<attempt>` artifact (next to `Express.xcresult`), not in an
+artifact of their own. The PNGs are exported even when a test fails.
 
 ## Conventions
 

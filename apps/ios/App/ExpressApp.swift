@@ -1,20 +1,40 @@
 import SwiftUI
 import TransitKit
+import UIKit
 
 @main
 struct ExpressApp: App {
     @Environment(\.scenePhase) private var scenePhase
+    private let launch = LaunchConfiguration()
+    @State private var environment: AppEnvironment
     private let transitClient = TransitClient(baseURL: ExpressApp.transitServer.baseURL)
+
+    init() {
+        _environment = State(initialValue: AppEnvironment(fixtures: launch.fixtures))
+        if launch.isScreenshot {
+            UIView.setAnimationsEnabled(false)
+        }
+    }
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environment(\.transitClient, transitClient)
+            Group {
+                if let screen = launch.screen {
+                    screen.view
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier(screen.accessibilityIdentifier)
+                } else {
+                    RootView()
+                }
+            }
+            .environment(environment)
+            .environment(\.transitClient, transitClient)
+            .preferredColorScheme(launch.colorScheme)
         }
         .onChange(of: scenePhase) { _, phase in
             // One cheap request as the app comes to the foreground, so the first search lands on a warm server.
-            // Never on a timer.
-            guard phase == .active else { return }
+            // Never on a timer, and never for the screenshot harness, which stays off the network.
+            guard phase == .active, !launch.isScreenshot else { return }
             Task { await transitClient.warmUp() }
         }
     }
