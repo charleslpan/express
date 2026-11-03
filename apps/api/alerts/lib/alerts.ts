@@ -140,8 +140,9 @@ export const MAX_LINES = 50;
 const LINE_ID = /^[A-Za-z0-9+-]{1,16}$/;
 
 /**
- * Parses `lines=A,C,M15+` from the raw query string. `+` is read literally, not as a space: Select Bus Service
- * routes end in it (`M15+`), and `%2B` works too.
+ * Parses `lines=A,C,M15+` from the raw query string. Select Bus Service routes end in `+` (`M15+`). Vercel hands the
+ * Function a bare `+` as `%20`, and line ids never hold a space, so a space inside or after an id is read as `+`;
+ * `%2B` works too.
  */
 export function parseLines(search: string): string[] | { error: string } {
   const raw = search
@@ -156,7 +157,7 @@ export function parseLines(search: string): string[] | { error: string } {
   } catch {
     return { error: "lines is not valid percent-encoding" };
   }
-  const ids = [...new Set(decoded.split(",").map((l) => l.trim()).filter(Boolean))];
+  const ids = [...new Set(decoded.split(",").map((l) => l.trimStart().replaceAll(" ", "+")).filter(Boolean))];
   if (ids.length === 0) return { error: "lines must list at least one line" };
   if (ids.length > MAX_LINES) return { error: `lines may list at most ${MAX_LINES} lines` };
   if (!ids.every((id) => LINE_ID.test(id))) return { error: "lines holds an invalid line id" };
