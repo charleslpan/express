@@ -26,7 +26,11 @@ on every call.
 - `motis/smoke.sh`: smoke test against any base URL.
 - `bus/`: the bus GPS Function (`api/vehicles/bus.ts`, Node.js, TypeScript).
   Logic lives in `lib/`, tests in `test/` (Vitest). It is routed by the
-  `/api/vehicles/bus` rewrite ahead of the catch-all.
+  `/api/vehicles/bus` rewrite ahead of the catch-all. The service needs
+  `"framework": "node"` and its `entrypoint` in `vercel.json`: with `root`
+  alone Vercel builds nothing. Keep TypeScript below 7: Vercel's Node builder
+  type-checks with the local `typescript` package, and TypeScript 7 lacks the
+  JavaScript API it calls.
 
 ## Build and run locally
 

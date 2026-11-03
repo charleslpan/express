@@ -7,7 +7,9 @@
       "entrypoint": "Dockerfile"
     },
     "bus": {
-      "root": "bus/"
+      "root": "bus/",
+      "framework": "node",
+      "entrypoint": "api/vehicles/bus.ts"
     }
   },
   "rewrites": [
