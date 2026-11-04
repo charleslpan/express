@@ -70,6 +70,8 @@ mode = sys.argv[1]
 data = json.load(sys.stdin)
 pro = re.compile(r"iPhone (\d+) Pro")
 if mode == "devicetype":
+    phones = [t["name"] for t in data["devicetypes"] if t["name"].startswith("iPhone")]
+    print("iPhone device types:", ", ".join(phones) or "none", file=sys.stderr)
     types = [t for t in data["devicetypes"] if pro.fullmatch(t["name"])]
     types.sort(key=lambda t: int(pro.fullmatch(t["name"]).group(1)))
     if types:
@@ -95,8 +97,10 @@ runtime="" udid="" name="" kind=""
 IFS=$'\t' read -r runtime udid name kind < <(xcrun simctl list devices available --json | python3 -c "$pick" devices) || true
 if [[ -n ${udid:-} && $kind != pro ]]; then
     if IFS=$'\t' read -r type_id type_name < <(xcrun simctl list devicetypes --json | python3 -c "$pick" devicetype) &&
-        [[ -n ${type_id:-} ]] && created=$(xcrun simctl create "$type_name" "$type_id" "$runtime" 2>/dev/null); then
+        [[ -n ${type_id:-} ]] && created=$(xcrun simctl create "$type_name" "$type_id" "$runtime"); then
         udid=$created name=$type_name kind=created
+    else
+        echo "::warning::Couldn't create a standard iPhone Pro simulator on $runtime; using $name"
     fi
 fi
 echo "Simulator: ${name:-none} (${kind:-none}) on ${runtime:-no runtime}, ${udid:-no udid}"
