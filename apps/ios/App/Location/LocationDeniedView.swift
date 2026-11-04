@@ -23,6 +23,7 @@ struct LocationDeniedView: View {
                 .accessibilityHint("Opens Express's settings, where you can let it use your location.")
             }
         }
+        .scrollsWhenTooTall()
     }
 
     private var message: LocalizedStringKey {
@@ -33,6 +34,19 @@ struct LocationDeniedView: View {
             Express uses your location to find stops near you and plan trips from where you are. \
             You can still search for a place or pick one on the map.
             """
+        }
+    }
+}
+
+extension View {
+    /// Shows the view as it is where it fits, and in a scroll view where it doesn't, such as a
+    /// `ContentUnavailableView` with a button at the largest text sizes, so the button stays reachable.
+    func scrollsWhenTooTall() -> some View {
+        ViewThatFits(in: .vertical) {
+            self
+            ScrollView {
+                self
+            }
         }
     }
 }

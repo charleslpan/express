@@ -29,6 +29,7 @@ struct NearbyView: View {
                 }
                 .buttonStyle(.glassProminent)
             }
+            .scrollsWhenTooTall()
         case .denied, .restricted:
             LocationDeniedView(authorization: location.authorization)
         case .authorized:

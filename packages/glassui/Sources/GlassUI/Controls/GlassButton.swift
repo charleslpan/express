@@ -79,8 +79,6 @@ public struct GlassIconButton: View {
     private let prominence: GlassProminence
     private let action: () -> Void
 
-    @ScaledMetric(relativeTo: .title3) private var diameter = GlassMetrics.floatingControl
-
     /// A round glass button showing `systemImage`, labelled `title` for VoiceOver.
     public init(
         _ title: LocalizedStringKey,
@@ -95,6 +93,22 @@ public struct GlassIconButton: View {
     }
 
     public var body: some View {
+        // The clamp applies to the views inside it, so the scaled diameter lives in a child view that sees it.
+        GlassIconButtonBody(title: title, systemImage: systemImage, prominence: prominence, action: action)
+            .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+            .accessibilityShowsLargeContentViewer()
+    }
+}
+
+private struct GlassIconButtonBody: View {
+    let title: LocalizedStringKey
+    let systemImage: String
+    let prominence: GlassProminence
+    let action: () -> Void
+
+    @ScaledMetric(relativeTo: .title3) private var diameter = GlassMetrics.floatingControl
+
+    var body: some View {
         let side = max(diameter, GlassMetrics.minimumTarget)
         Button(action: action) {
             Label(title, systemImage: systemImage)
@@ -103,8 +117,6 @@ public struct GlassIconButton: View {
                 .frame(width: side, height: side)
         }
         .buttonStyle(GlassControlStyle(shape: Circle(), prominence: prominence))
-        .dynamicTypeSize(...DynamicTypeSize.accessibility1)
-        .accessibilityShowsLargeContentViewer()
     }
 }
 
