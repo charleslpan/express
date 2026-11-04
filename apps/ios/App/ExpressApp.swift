@@ -16,7 +16,8 @@ struct ExpressApp: App {
         let screen = launch.screen
         _router = State(initialValue: AppRouter(selectedTab: screen?.tab ?? .go, sheet: screen?.sheet))
         // The screenshot harness never asks for the location; it fixes the permission each screen shows.
-        let location = screen.map { LocationService(fixed: $0.locationAuthorization) } ?? LocationService()
+        let location = screen
+            .map { LocationService(fixed: $0.locationAuthorization, location: $0.location) } ?? LocationService()
         _location = State(initialValue: location)
         GoogleMapsServices.configure()
         if launch.isScreenshot {

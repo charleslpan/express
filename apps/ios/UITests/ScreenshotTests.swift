@@ -34,6 +34,12 @@ final class ScreenshotTests: XCTestCase {
         capture("about", fixtures: "nyc-evening", settledWhen: "about.sheet")
     }
 
+    // The map home (S2).
+
+    func testHomeOutsideNYC() {
+        capture("home-outside-nyc", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
     func testMapGlass() {
         capture("map-glass", fixtures: "nyc-evening", settledWhen: "map.settled")
     }

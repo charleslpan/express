@@ -1,5 +1,6 @@
 import GlassUI
 import SwiftUI
+import TransitKit
 
 /// The screens the screenshot harness can show, selected with `-screenshot <rawValue>`.
 /// To add a screen, add a case here and a test in `UITests/ScreenshotTests.swift` (see AGENTS.md).
@@ -12,6 +13,8 @@ enum ScreenshotScreen: String, CaseIterable {
     case saved
     case search
     case about
+    /// The map home while the user is outside New York, with the banner saying Express covers the city (S2).
+    case homeOutsideNYC = "home-outside-nyc"
     /// Liquid Glass controls and a glass sheet over the Google map, for judging the look (F5).
     case mapGlass = "map-glass"
 
@@ -34,7 +37,7 @@ enum ScreenshotScreen: String, CaseIterable {
     @MainActor @ViewBuilder
     var view: some View {
         switch self {
-        case .go, .nearby, .nearbyLocationOff, .saved, .search, .about: RootView()
+        case .go, .nearby, .nearbyLocationOff, .saved, .search, .about, .homeOutsideNYC: RootView()
         case .mapGlass: MapGlassScreen()
         #if DEBUG
             case .gallery: GlassUIGallery()
@@ -69,7 +72,16 @@ enum ScreenshotScreen: String, CaseIterable {
 
     /// The location permission the screen shows; the harness never asks for it.
     var locationAuthorization: LocationService.Authorization {
-        self == .nearbyLocationOff ? .denied : .notDetermined
+        switch self {
+        case .nearbyLocationOff: .denied
+        case .homeOutsideNYC: .authorized
+        default: .notDetermined
+        }
+    }
+
+    /// The location the screen shows the user at, if any: Philadelphia's City Hall for the outside-NYC banner.
+    var location: Coordinate? {
+        self == .homeOutsideNYC ? Coordinate(latitude: 39.9526, longitude: -75.1652) : nil
     }
 
     /// The accessibility identifier the harness puts on the screen, which the UI test waits for before capturing.

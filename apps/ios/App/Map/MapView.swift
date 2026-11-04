@@ -3,10 +3,12 @@ import GoogleMaps
 import SwiftUI
 import TransitKit
 
-/// Where the map looks: a center and a Google zoom level (0 is the world, about 13 a neighborhood, 18 a block).
+/// Where the map looks: a center, a Google zoom level (0 is the world, about 13 a neighborhood, 18 a block), and a
+/// bearing in degrees clockwise from north, which rotating the map with two fingers changes.
 struct MapCamera: Equatable {
     var center: Coordinate
     var zoom: Float
+    var bearing: Double = 0
 
     /// Lower Manhattan to Downtown Brooklyn.
     static let newYork = MapCamera(center: Coordinate(latitude: 40.7128, longitude: -74.0060), zoom: 12.5)
@@ -170,7 +172,8 @@ extension GoogleMapRepresentable.Coordinator: @preconcurrency GMSMapViewDelegate
     func mapView(_: GMSMapView, idleAt position: GMSCameraPosition) {
         let settled = MapCamera(
             center: Coordinate(latitude: position.target.latitude, longitude: position.target.longitude),
-            zoom: position.zoom
+            zoom: position.zoom,
+            bearing: position.bearing
         )
         guard settled != shownCamera else { return }
         shownCamera = settled
@@ -183,7 +186,13 @@ extension GoogleMapRepresentable.Coordinator: @preconcurrency GMSMapViewDelegate
 }
 
 private func cameraPosition(for camera: MapCamera) -> GMSCameraPosition {
-    GMSCameraPosition(latitude: camera.center.latitude, longitude: camera.center.longitude, zoom: camera.zoom)
+    GMSCameraPosition(
+        latitude: camera.center.latitude,
+        longitude: camera.center.longitude,
+        zoom: camera.zoom,
+        bearing: camera.bearing,
+        viewingAngle: 0
+    )
 }
 
 private extension CLLocationCoordinate2D {

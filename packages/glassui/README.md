@@ -41,6 +41,9 @@ Rules of thumb:
   With Reduce Transparency on, swap glass for `.surface`.
 - A gap that sits beside text that grows with Dynamic Type can grow too: `@ScaledMetric private var gap = Spacing.xs`.
 - At accessibility text sizes (`dynamicTypeSize.isAccessibilitySize`), stack what normally sits side by side.
+- For a row of buttons or chips, use `AdaptiveStack(spacing:)`: side by side where they fit, stacked where they
+  don't. It measures the row rather than shrinking text, which doesn't take for capsule `GlassButton`s inside a
+  `GlassEffectContainer`.
 
 ## Glass controls
 
