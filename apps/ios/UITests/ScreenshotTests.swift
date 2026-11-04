@@ -34,6 +34,18 @@ final class ScreenshotTests: XCTestCase {
         capture("gallery-layout", fixtures: "nyc-evening")
     }
 
+    func testGalleryLines() {
+        capture("gallery-lines", fixtures: "nyc-evening")
+    }
+
+    func testGalleryJourneys() {
+        capture("gallery-journeys", fixtures: "nyc-evening")
+    }
+
+    func testGalleryDepartures() {
+        capture("gallery-departures", fixtures: "nyc-evening")
+    }
+
     // MARK: - Harness
 
     /// The appearance and text size combinations every screen is captured in.
