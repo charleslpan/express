@@ -12,6 +12,7 @@ A Turborepo monorepo over pnpm workspaces: deployables in `apps/`, shared code i
 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `pnpm-lock.yaml` | The workspace root: pnpm 10 (pinned in `packageManager`), Turborepo 2 tasks (`build`, `test`, `lint`, `typecheck`). Every workspace has a `package.json` whose scripts Turborepo runs. |
 | `apps/ios/` | The iOS app: `project.yml` (XcodeGen spec for `Express.xcodeproj`, which is generated and git-ignored: edit `project.yml`, never the `.xcodeproj`) and `App/` (app target: entry point, root view, assets). |
 | `apps/ios/App/Features/<Feature>/` | One folder per feature (views, view models, feature-local helpers). Features don't reach into each other's folders; share code through the packages. |
+| `apps/ios/App/Navigation/`, `apps/ios/App/Location/` | The app shell's shared state: `AppRouter` (`@Observable`: the selected tab, each tab's `NavigationPath`, the sheet on top) and `LocationService` (When In Use permission, asked only when needed, and live updates), both injected with `.environment(_:)`. `RootView` is the tab bar over `Features/Go`, `Nearby`, `Saved`, and `Search`. A feature navigates by calling a router method, which it adds in an extension in its own folder (such as `showJourneys(to:)`), never by wiring navigation into views. |
 | `apps/ios/App/Map/` | `MapView`, the one Google map every map screen uses (`GMSMapView` wrapped for SwiftUI), its JSON map styles, and the SDK key setup. |
 | `apps/ios/Config/` | `Express.xcconfig` and the Info.plist keys it feeds. `Secrets.xcconfig` (git-ignored; copy `Secrets.example.xcconfig`) holds `GOOGLE_MAPS_IOS_API_KEY`. |
 | `apps/ios/UITests/`, `apps/ios/App/Harness/` | The screenshot harness: the `ExpressUITests` target and the app's launch-argument and fixture plumbing (see [Screenshot harness](#screenshot-harness)). |
@@ -114,7 +115,11 @@ You can't open a simulator, so judge your UI from the screenshots CI takes. The 
 `ExpressUITests` target (`apps/ios/UITests/`), which launches the app once per screen and variant and attaches
 a screenshot of each. `scripts/ci/screenshots.sh` then exports those attachments to `build/screenshots/` with
 Xcode's `xcrun xcresulttool export attachments`. Every screen is captured in three variants: `light`, `dark`, and
-`light-ax5` (the largest accessibility text size). The status bar is fixed at 9:41 with full signal.
+`light-ax5` (the largest accessibility text size). The status bar is fixed at 9:41 with full signal. The simulator
+is the newest standard iPhone Pro (such as "iPhone 17 Pro") on the newest iOS runtime, never a wide device such as
+the iPhone Duo, which puts the status bar and tab bar down the side; `ios.sh` logs the device it chose in its
+Simulator group, and creates one from the newest `iPhone <n> Pro` device type where the runtime has none, and falls back to the
+newest iPhone of any kind only when it cannot.
 
 The app reads these launch arguments (`apps/ios/App/Harness/`):
 

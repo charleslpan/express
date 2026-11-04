@@ -4,8 +4,14 @@ import SwiftUI
 /// The screens the screenshot harness can show, selected with `-screenshot <rawValue>`.
 /// To add a screen, add a case here and a test in `UITests/ScreenshotTests.swift` (see AGENTS.md).
 enum ScreenshotScreen: String, CaseIterable {
-    /// The placeholder root view.
-    case root
+    /// The app shell on each tab, and with the About sheet up (S1).
+    case go
+    case nearby
+    /// Nearby when Express may not use the location: the friendly denied state.
+    case nearbyLocationOff = "nearby-location-off"
+    case saved
+    case search
+    case about
     /// Liquid Glass controls and a glass sheet over the Google map, for judging the look (F5).
     case mapGlass = "map-glass"
 
@@ -28,7 +34,7 @@ enum ScreenshotScreen: String, CaseIterable {
     @MainActor @ViewBuilder
     var view: some View {
         switch self {
-        case .root: RootView()
+        case .go, .nearby, .nearbyLocationOff, .saved, .search, .about: RootView()
         case .mapGlass: MapGlassScreen()
         #if DEBUG
             case .gallery: GlassUIGallery()
@@ -44,6 +50,26 @@ enum ScreenshotScreen: String, CaseIterable {
             case .galleryControlFallbacks: GlassUIGallery(sections: [.controlFallbacks])
         #endif
         }
+    }
+
+    /// The tab the shell opens on for this screen.
+    var tab: AppTab {
+        switch self {
+        case .nearby, .nearbyLocationOff: .nearby
+        case .saved: .saved
+        case .search: .search
+        default: .go
+        }
+    }
+
+    /// The sheet the shell opens with for this screen.
+    var sheet: AppSheet? {
+        self == .about ? .about : nil
+    }
+
+    /// The location permission the screen shows; the harness never asks for it.
+    var locationAuthorization: LocationService.Authorization {
+        self == .nearbyLocationOff ? .denied : .notDetermined
     }
 
     /// The accessibility identifier the harness puts on the screen, which the UI test waits for before capturing.

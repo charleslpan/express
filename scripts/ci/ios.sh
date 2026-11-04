@@ -60,21 +60,50 @@ build/tools/xcodegen/bin/xcodegen generate --spec apps/ios/project.yml
 echo "::endgroup::"
 
 echo "::group::Simulator"
-# The newest available iPhone on the newest iOS runtime of the selected Xcode.
-udid=$(xcrun simctl list devices available --json | python3 -c '
-import json, sys
-devices = json.load(sys.stdin)["devices"]
+# The newest standard iPhone Pro (such as "iPhone 17 Pro") on the newest iOS runtime of the selected Xcode, so
+# screenshots show the phone most people hold. Wide devices such as the iPhone Duo lay the status bar and tab bar out
+# down the side. Where the runtime has no such device but Xcode knows the device type, create one; failing that, fall
+# back to the newest available iPhone of any kind.
+pick='
+import json, re, sys
+mode = sys.argv[1]
+data = json.load(sys.stdin)
+pro = re.compile(r"iPhone (\d+) Pro")
+if mode == "devicetype":
+    phones = [t["name"] for t in data["devicetypes"] if t["name"].startswith("iPhone")]
+    print("iPhone device types:", ", ".join(phones) or "none", file=sys.stderr)
+    types = [t for t in data["devicetypes"] if pro.fullmatch(t["name"])]
+    types.sort(key=lambda t: int(pro.fullmatch(t["name"]).group(1)))
+    if types:
+        print(types[-1]["identifier"], types[-1]["name"], sep="\t")
+    sys.exit()
+devices = data["devices"]
 runtimes = sorted(
     (r for r in devices if ".SimRuntime.iOS-" in r),
     key=lambda r: [int(p) for p in r.rsplit("iOS-", 1)[1].split("-")],
 )
 for runtime in reversed(runtimes):
     phones = [d for d in devices[runtime] if d["name"].startswith("iPhone")]
-    if phones:
-        print(runtime, phones[-1]["udid"], phones[-1]["name"], sep="\t", file=sys.stderr)
-        print(phones[-1]["udid"])
-        break
-')
+    if not phones:
+        continue
+    print("iPhones on", runtime + ":", ", ".join(d["name"] for d in phones), file=sys.stderr)
+    pros = [d for d in phones if pro.fullmatch(d["name"])]
+    pros.sort(key=lambda d: int(pro.fullmatch(d["name"]).group(1)))
+    chosen = pros[-1] if pros else phones[-1]
+    print(runtime, chosen["udid"], chosen["name"], "pro" if pros else "other", sep="\t")
+    break
+'
+runtime="" udid="" name="" kind=""
+IFS=$'\t' read -r runtime udid name kind < <(xcrun simctl list devices available --json | python3 -c "$pick" devices) || true
+if [[ -n ${udid:-} && $kind != pro ]]; then
+    if IFS=$'\t' read -r type_id type_name < <(xcrun simctl list devicetypes --json | python3 -c "$pick" devicetype) &&
+        [[ -n ${type_id:-} ]] && created=$(xcrun simctl create "$type_name" "$type_id" "$runtime"); then
+        udid=$created name=$type_name kind=created
+    else
+        echo "::warning::Couldn't create a standard iPhone Pro simulator on $runtime; using $name"
+    fi
+fi
+echo "Simulator: ${name:-none} (${kind:-none}) on ${runtime:-no runtime}, ${udid:-no udid}"
 if [[ -z $udid ]]; then
     echo "::error::No available iPhone simulator" && xcrun simctl list runtimes
     exit 1
