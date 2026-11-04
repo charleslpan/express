@@ -17,6 +17,9 @@ enum ScreenshotScreen: String, CaseIterable {
         case galleryModes = "gallery-modes"
         case galleryTypography = "gallery-typography"
         case galleryLayout = "gallery-layout"
+        case galleryLines = "gallery-lines"
+        case galleryJourneys = "gallery-journeys"
+        case galleryDepartures = "gallery-departures"
         case galleryControls = "gallery-controls"
         case galleryControlStates = "gallery-control-states"
         case galleryControlFallbacks = "gallery-control-fallbacks"
@@ -33,6 +36,9 @@ enum ScreenshotScreen: String, CaseIterable {
             case .galleryModes: GlassUIGallery(sections: [.modes])
             case .galleryTypography: GlassUIGallery(sections: [.typography])
             case .galleryLayout: GlassUIGallery(sections: [.layout])
+            case .galleryLines: GlassUIGallery(sections: [.lines])
+            case .galleryJourneys: GlassUIGallery(sections: [.journeys])
+            case .galleryDepartures: GlassUIGallery(sections: [.departures])
             case .galleryControls: GlassUIGallery(sections: [.controls])
             case .galleryControlStates: GlassUIGallery(sections: [.controlStates])
             case .galleryControlFallbacks: GlassUIGallery(sections: [.controlFallbacks])

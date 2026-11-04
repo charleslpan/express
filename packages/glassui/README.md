@@ -16,6 +16,23 @@ Use the tokens instead of literals, in every screen and component.
 | Semantic colours | `ShapeStyle` members for light and dark: `canvas`, `canvasGrouped`, `surface`, `surfaceRaised`, `separatorLine`, `textPrimary`, `textSecondary`, `textTertiary`, `brand`, `statusOnTime`, `statusDelayed`, `statusDisrupted`, `statusInfo`. | `.foregroundStyle(.statusDelayed)` |
 | `TravelMode` | Walk, bus, tram, subway, rail, ferry, cable car: each with a `title`, `symbolName`, accent `color`, and a legible `onColor`. | `.background(TravelMode.bus.color, in: Capsule())` |
 
+## Transit components
+
+Each takes plain values (`TransitLine`, `DepartureTime`, `JourneyLeg`), never TransitKit types, and has
+previews in light, dark, and the largest text size.
+
+| Component | What it draws | Example |
+| --- | --- | --- |
+| `ModeIcon` | A mode's SF Symbol, as a glyph or on a tile in the mode's accent. | `ModeIcon(.bus, style: .tile)` |
+| `LinePill` | A line's badge in the MTA's style: a round bullet, a diamond for express variants (the <6>), and a rounded rectangle for buses and SIR. `.compact` for small places. | `LinePill(line)` |
+| `JourneySegmentBar` | A journey's legs to scale: walks as grey dots, rides in the line's colour with its pill. | `JourneySegmentBar(legs: [.walk(minutes: 4), .ride(line, minutes: 12)])` |
+| `RealtimeBadge` | A departure time styled by status: live (green, pulsing glyph), scheduled, delayed (amber), cancelled (struck through in red), and "may not be real time". | `RealtimeBadge(DepartureTime(minutes: 3, status: .live))` |
+| `DepartureRow` | A line's pill, headsign, and next two or three times; one VoiceOver element, at least 44 points tall. | `DepartureRow(line: line, headsign: "South Ferry", departures: times)` |
+
+`TransitLine` holds a line's name, mode, and `LineColor` (from the feed's hex, such as `LineColor(hex: "EE352E")`).
+Where the feed gives no text colour, `LineColor.legibleText` picks white where it reaches 3:1, and otherwise whichever
+of black and white contrasts more.
+
 Line colours are not tokens: they come from the transit feed at runtime (the MTA's official palette).
 
 Rules of thumb:
@@ -52,8 +69,8 @@ The controls that float over the map, all on native Liquid Glass (`glassEffect`)
 
 `GlassUIGallery` (debug builds only) shows every token, one `GallerySection` each. The app shows it through the
 screenshot harness: `-screenshot gallery` for all of it, or `-screenshot gallery-<section>` (`gallery-colors`,
-`gallery-modes`, `gallery-typography`, `gallery-layout`, `gallery-controls`, `gallery-control-states`,
-`gallery-control-fallbacks`) for one, and CI captures each section in light, dark, and
+`gallery-modes`, `gallery-typography`, `gallery-layout`, `gallery-lines`, `gallery-journeys`, `gallery-departures`,
+`gallery-controls`, `gallery-control-states`, `gallery-control-fallbacks`) for one, and CI captures each section in light, dark, and
 the largest accessibility text size.
 
 When you add components, add a `GallerySection` case and its view under `Sources/GlassUI/Gallery/`, a matching
