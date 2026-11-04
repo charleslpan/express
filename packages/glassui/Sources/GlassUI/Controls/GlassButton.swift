@@ -51,6 +51,10 @@ public struct GlassButton: View {
                 }
             }
             .typography(.button)
+            // A one-word title can't wrap, so at accessibility sizes it shrinks to fit rather than push the layout
+            // off the screen.
+            .lineLimit(1)
+            .minimumScaleFactor(0.5)
             .padding(.horizontal, Spacing.md)
             .padding(.vertical, Spacing.sm)
             .frame(minWidth: GlassMetrics.minimumTarget, minHeight: GlassMetrics.minimumTarget)
