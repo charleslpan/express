@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Exports the screenshot harness's attachments (apps/ios/UITests) from a result bundle as PNGs named after each
-# attachment, such as root-nyc-evening-dark.png, and lists them in the GitHub Actions run summary.
+# attachment, such as go-nyc-evening-dark.png, and lists them in the GitHub Actions run summary.
 # Xcode's own `xcresulttool export attachments` does the exporting; this only renames its output using the
 # manifest.json it writes.
 # Usage: screenshots.sh <result.xcresult> <output dir>

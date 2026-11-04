@@ -7,10 +7,17 @@ struct ExpressApp: App {
     @Environment(\.scenePhase) private var scenePhase
     private let launch = LaunchConfiguration()
     @State private var environment: AppEnvironment
+    @State private var router: AppRouter
+    @State private var location: LocationService
     private let transitClient = TransitClient(baseURL: ExpressApp.transitServer.baseURL)
 
     init() {
         _environment = State(initialValue: AppEnvironment(fixtures: launch.fixtures))
+        let screen = launch.screen
+        _router = State(initialValue: AppRouter(selectedTab: screen?.tab ?? .go, sheet: screen?.sheet))
+        // The screenshot harness never asks for the location; it fixes the permission each screen shows.
+        let location = screen.map { LocationService(fixed: $0.locationAuthorization) } ?? LocationService()
+        _location = State(initialValue: location)
         GoogleMapsServices.configure()
         if launch.isScreenshot {
             UIView.setAnimationsEnabled(false)
@@ -29,6 +36,8 @@ struct ExpressApp: App {
                 }
             }
             .environment(environment)
+            .environment(router)
+            .environment(location)
             .environment(\.transitClient, transitClient)
             .preferredColorScheme(launch.colorScheme)
         }
