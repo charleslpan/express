@@ -118,7 +118,8 @@ Xcode's `xcrun xcresulttool export attachments`. Every screen is captured in thr
 `light-ax5` (the largest accessibility text size). The status bar is fixed at 9:41 with full signal. The simulator
 is the newest standard iPhone Pro (such as "iPhone 17 Pro") on the newest iOS runtime, never a wide device such as
 the iPhone Duo, which puts the status bar and tab bar down the side; `ios.sh` logs the device it chose in its
-Simulator group, and falls back to the newest iPhone of any kind where there is no standard Pro.
+Simulator group, and creates one from the newest `iPhone <n> Pro` device type where the runtime has none, and falls back to the
+newest iPhone of any kind only when it cannot.
 
 The app reads these launch arguments (`apps/ios/App/Harness/`):
 
