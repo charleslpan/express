@@ -115,7 +115,10 @@ You can't open a simulator, so judge your UI from the screenshots CI takes. The 
 `ExpressUITests` target (`apps/ios/UITests/`), which launches the app once per screen and variant and attaches
 a screenshot of each. `scripts/ci/screenshots.sh` then exports those attachments to `build/screenshots/` with
 Xcode's `xcrun xcresulttool export attachments`. Every screen is captured in three variants: `light`, `dark`, and
-`light-ax5` (the largest accessibility text size). The status bar is fixed at 9:41 with full signal.
+`light-ax5` (the largest accessibility text size). The status bar is fixed at 9:41 with full signal. The simulator
+is the newest standard iPhone Pro (such as "iPhone 17 Pro") on the newest iOS runtime, never a wide device such as
+the iPhone Duo, which puts the status bar and tab bar down the side; `ios.sh` logs the device it chose in its
+Simulator group, and falls back to the newest iPhone of any kind where there is no standard Pro.
 
 The app reads these launch arguments (`apps/ios/App/Harness/`):
 

@@ -60,9 +60,11 @@ build/tools/xcodegen/bin/xcodegen generate --spec apps/ios/project.yml
 echo "::endgroup::"
 
 echo "::group::Simulator"
-# The newest available iPhone on the newest iOS runtime of the selected Xcode.
+# The newest standard iPhone Pro (such as "iPhone 17 Pro") on the newest iOS runtime of the selected Xcode, so
+# screenshots show the phone most people hold. Wide devices such as the iPhone Duo lay the status bar and tab bar out
+# down the side. Falls back to the newest available iPhone of any kind where the runtime has no standard Pro.
 udid=$(xcrun simctl list devices available --json | python3 -c '
-import json, sys
+import json, re, sys
 devices = json.load(sys.stdin)["devices"]
 runtimes = sorted(
     (r for r in devices if ".SimRuntime.iOS-" in r),
@@ -70,10 +72,14 @@ runtimes = sorted(
 )
 for runtime in reversed(runtimes):
     phones = [d for d in devices[runtime] if d["name"].startswith("iPhone")]
-    if phones:
-        print(runtime, phones[-1]["udid"], phones[-1]["name"], sep="\t", file=sys.stderr)
-        print(phones[-1]["udid"])
-        break
+    if not phones:
+        continue
+    pros = [d for d in phones if re.fullmatch(r"iPhone (\d+) Pro", d["name"])]
+    pros.sort(key=lambda d: int(re.fullmatch(r"iPhone (\d+) Pro", d["name"]).group(1)))
+    chosen, why = (pros[-1], "newest standard Pro") if pros else (phones[-1], "no standard Pro; newest iPhone")
+    print("Simulator:", chosen["name"], f"({why}) on", runtime, chosen["udid"], file=sys.stderr)
+    print(chosen["udid"])
+    break
 ')
 if [[ -z $udid ]]; then
     echo "::error::No available iPhone simulator" && xcrun simctl list runtimes
