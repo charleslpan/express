@@ -46,6 +46,18 @@ final class ScreenshotTests: XCTestCase {
         capture("gallery-departures", fixtures: "nyc-evening")
     }
 
+    func testGalleryControls() {
+        capture("gallery-controls", fixtures: "nyc-evening")
+    }
+
+    func testGalleryControlStates() {
+        capture("gallery-control-states", fixtures: "nyc-evening")
+    }
+
+    func testGalleryControlFallbacks() {
+        capture("gallery-control-fallbacks", fixtures: "nyc-evening")
+    }
+
     // MARK: - Harness
 
     /// The appearance and text size combinations every screen is captured in.

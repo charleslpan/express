@@ -11,6 +11,9 @@
         case lines
         case journeys
         case departures
+        case controls
+        case controlStates
+        case controlFallbacks
 
         public var id: Self {
             self
@@ -25,6 +28,9 @@
             case .lines: "Lines"
             case .journeys: "Journeys"
             case .departures: "Departures"
+            case .controls: "Glass Controls"
+            case .controlStates: "Control States"
+            case .controlFallbacks: "Accessibility Fallbacks"
             }
         }
 
@@ -37,6 +43,9 @@
             case .lines: "Mode icons and line pills in the MTA's style. Colours come from the feed."
             case .journeys: "Legs to scale: walks as grey dots, rides in the line's colour."
             case .departures: "Next departures, and how sure each time is."
+            case .controls: "Search, buttons, and a card on Liquid Glass, floating over a stand-in map."
+            case .controlStates: "Empty and filled search; standard, prominent, and disabled buttons."
+            case .controlFallbacks: "Opaque with Reduce Transparency on; bordered with Increase Contrast on."
             }
         }
     }
@@ -92,6 +101,9 @@
             case .lines: LinesGallery()
             case .journeys: JourneysGallery()
             case .departures: DeparturesGallery()
+            case .controls: ControlsGallery()
+            case .controlStates: ControlStatesGallery()
+            case .controlFallbacks: ControlFallbacksGallery()
             }
         }
     }

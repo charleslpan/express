@@ -20,6 +20,9 @@ enum ScreenshotScreen: String, CaseIterable {
         case galleryLines = "gallery-lines"
         case galleryJourneys = "gallery-journeys"
         case galleryDepartures = "gallery-departures"
+        case galleryControls = "gallery-controls"
+        case galleryControlStates = "gallery-control-states"
+        case galleryControlFallbacks = "gallery-control-fallbacks"
     #endif
 
     @MainActor @ViewBuilder
@@ -36,6 +39,9 @@ enum ScreenshotScreen: String, CaseIterable {
             case .galleryLines: GlassUIGallery(sections: [.lines])
             case .galleryJourneys: GlassUIGallery(sections: [.journeys])
             case .galleryDepartures: GlassUIGallery(sections: [.departures])
+            case .galleryControls: GlassUIGallery(sections: [.controls])
+            case .galleryControlStates: GlassUIGallery(sections: [.controlStates])
+            case .galleryControlFallbacks: GlassUIGallery(sections: [.controlFallbacks])
         #endif
         }
     }
