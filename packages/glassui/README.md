@@ -42,11 +42,35 @@ Rules of thumb:
 - A gap that sits beside text that grows with Dynamic Type can grow too: `@ScaledMetric private var gap = Spacing.xs`.
 - At accessibility text sizes (`dynamicTypeSize.isAccessibilitySize`), stack what normally sits side by side.
 
+## Glass controls
+
+The controls that float over the map, all on native Liquid Glass (`glassEffect`), interactive where they're tappable:
+
+| Control | What it is |
+| --- | --- |
+| `GlassSearchField(_:text:onSubmit:accessory:)` | A floating capsule search field, as at the top of Apple Maps, with a clear button and an optional trailing accessory (plain, not glass). |
+| `GlassCard { … }`, `GlassCard { action } content: { … }` | A glass panel in a `Radius.lg` shape; with an action, the whole card is one button. |
+| `GlassButton(_:systemImage:prominence:action:)` | A capsule button; `.prominent` tints it with `.brand` for the one primary action. |
+| `GlassIconButton(_:systemImage:prominence:action:)` | A round, icon-only button, 48 points across; its title is its VoiceOver label and large content viewer text. |
+| `.glassSurface(in:tint:isInteractive:)` | The glass under all of them, with their accessibility fallbacks, for a floating control of your own. |
+
+- **Glass on the navigation layer only:** floating controls, bars, and sheets, never content. Never put glass inside
+  glass: float buttons beside a card, not in it. Leave sheets to the system, which gives a half-height sheet glass on
+  its own; don't give sheets custom backgrounds.
+- **Group and morph:** wrap controls that sit together in `GlassEffectContainer(spacing: Spacing.floatingInset)` and
+  give each `.glassEffectID(_:in:)`, so they blend and morph as they appear and disappear (see the gallery's
+  "Morphing" preview).
+- **Accessibility:** with Reduce Transparency on, every control draws on an opaque `.surface` with a hairline border;
+  with Increase Contrast on, it gets a stronger border. Previews and the gallery force these with
+  `.environment(\.forcesOpaqueGlass, true)` and `.environment(\.forcesHighContrastGlass, true)`. Every control has a
+  target of at least 44 points and a VoiceOver label.
+
 ## Gallery
 
 `GlassUIGallery` (debug builds only) shows every token, one `GallerySection` each. The app shows it through the
 screenshot harness: `-screenshot gallery` for all of it, or `-screenshot gallery-<section>` (`gallery-colors`,
-`gallery-modes`, `gallery-typography`, `gallery-layout`, `gallery-lines`, `gallery-journeys`, `gallery-departures`) for one, and CI captures each section in light, dark, and
+`gallery-modes`, `gallery-typography`, `gallery-layout`, `gallery-lines`, `gallery-journeys`, `gallery-departures`,
+`gallery-controls`, `gallery-control-states`, `gallery-control-fallbacks`) for one, and CI captures each section in light, dark, and
 the largest accessibility text size.
 
 When you add components, add a `GallerySection` case and its view under `Sources/GlassUI/Gallery/`, a matching
