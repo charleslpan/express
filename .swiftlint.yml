@@ -41,3 +41,4 @@ identifier_name:
     - md
     - lg
     - xl
+    - go # AppTab.go, the Go tab

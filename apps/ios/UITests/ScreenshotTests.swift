@@ -8,8 +8,30 @@ final class ScreenshotTests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testRoot() {
-        capture("root", fixtures: "nyc-evening")
+    // The app shell (S1): each tab, the friendly location-off state, and the About sheet.
+
+    func testGo() {
+        capture("go", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testNearby() {
+        capture("nearby", fixtures: "nyc-evening")
+    }
+
+    func testNearbyLocationOff() {
+        capture("nearby-location-off", fixtures: "nyc-evening")
+    }
+
+    func testSaved() {
+        capture("saved", fixtures: "nyc-evening")
+    }
+
+    func testSearch() {
+        capture("search", fixtures: "nyc-evening")
+    }
+
+    func testAbout() {
+        capture("about", fixtures: "nyc-evening", settledWhen: "about.sheet")
     }
 
     func testMapGlass() {
@@ -80,7 +102,7 @@ final class ScreenshotTests: XCTestCase {
     }
 
     /// Launches the app on `screen` with `fixtures` in every variant and attaches a screenshot of each, named
-    /// `<screen>-<fixtures>-<variant>` (such as `root-nyc-evening-dark`).
+    /// `<screen>-<fixtures>-<variant>` (such as `go-nyc-evening-dark`).
     ///
     /// `settledWhen` names an element the screen shows once it has finished loading what the network serves it,
     /// such as map tiles; the capture waits for it a while, then goes ahead without it rather than fail.
