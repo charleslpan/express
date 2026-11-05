@@ -1,6 +1,7 @@
 // Rebuilds production without the build cache, so the MOTIS image downloads
 // fresh MTA feeds and re-imports them. The image's own smoke test
-// (motis/smoke-build.sh) gates the new deployment.
+// (motis/smoke-build.sh) gates the new deployment. Old `motis` images are
+// pruned first (lib/prune.ts), so the build has room to push its own.
 import { timingSafeEqual } from "node:crypto";
 
 export const PATH = "/api/cron/rebuild";
@@ -9,6 +10,8 @@ export interface RebuildDeps {
   cronSecret: () => string | undefined;
   hookUrl: () => string | undefined;
   fetch: typeof fetch;
+  /** Frees registry space before the build. Its failure never stops the rebuild. */
+  prune?: () => Promise<unknown>;
 }
 
 function authorized(request: Request, secret: string | undefined): boolean {
@@ -28,6 +31,14 @@ export function createHandler(deps: RebuildDeps): (request: Request) => Promise<
     const hookUrl = deps.hookUrl();
     if (!hookUrl) {
       return Response.json({ ok: false, error: "DEPLOY_HOOK_URL is not set" }, { status: 500 });
+    }
+
+    if (deps.prune) {
+      try {
+        await deps.prune();
+      } catch (error) {
+        console.warn(`prune skipped: ${(error as Error).message}`);
+      }
     }
 
     const hook = new URL(hookUrl);

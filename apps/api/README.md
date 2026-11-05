@@ -247,7 +247,8 @@ The MTA's supplemented subway feed changes hourly and covers planned work only
    at `0 9 * * *` (09:00 UTC: 4 am EST, 5 am EDT). Hobby runs it once a day
    somewhere inside that hour (±59 min). Configured in [`vercel.json`](vercel.json).
 2. The function ([`cron/lib/rebuild.ts`](cron/lib/rebuild.ts)) checks
-   `Authorization: Bearer $CRON_SECRET` and POSTs the project's Deploy Hook
+   `Authorization: Bearer $CRON_SECRET`, prunes old `motis` images (see
+   [Old deployments and images](#old-deployments-and-images)), and POSTs the project's Deploy Hook
    with `?buildCache=false`, so the Docker build downloads fresh feeds and
    re-imports them.
 3. The Docker build runs the **health check** in its `smoke` stage
@@ -269,6 +270,7 @@ The MTA's supplemented subway feed changes hourly and covers planned work only
 | --- | --- | --- |
 | `CRON_SECRET` | Random string (≥ 16 chars). Vercel Cron sends it as `Authorization: Bearer …`; the function rejects anything else. | Developer, Sensitive |
 | `DEPLOY_HOOK_URL` | URL of the project's Deploy Hook for branch `main` (Settings → Git → Deploy Hooks). Anyone with it can trigger a build. | Developer, Sensitive |
+| `VERCEL_API_TOKEN` | Vercel access token scoped to charlespan's projects, used only to prune old `motis` images (see [Old deployments and images](#old-deployments-and-images)). Optional: without it nothing is pruned. | Developer, Sensitive |
 
 Without either, the function answers 401 or 500 and nothing rebuilds.
 
@@ -295,20 +297,49 @@ deployment. If a build passed the smoke test but serves bad data:
 
 ### Old deployments and images
 
-Cleanup is Vercel's own **Deployment Retention Policy** (Settings → Build and
-Deployment), not a script. Recommended for this project: Canceled 1 week,
-Errored 1 week, Preview 1 week, Production 1 week. Vercel always keeps the
-current production deployment and, on Hobby, the last 3 Ready production
-deployments, so rollback still works. That keeps roughly 7–10 deployments
-(each ≈ 181 MB of image) instead of the 30-day default's ≈ 30+ against Hobby's
-10 GB deployment storage and VCR's 50 images per repository.
+**What Hobby keeps.** Deployments follow Vercel's Deployment Retention Policy
+(Settings → Build and Deployment); on Hobby every state defaults to 30 days.
+Whatever the policy, Vercel keeps the deployment holding the production
+domains, the last 3 deployments created, the last 3 Ready production
+deployments, and the latest preview of every branch whose pull request is
+still open. Vercel's docs don't say whether deleting a deployment deletes
+its image, and the pruning below doesn't rely on it.
 
-Each build pushes its image to the project's registry repository `motis`,
-tagged with the deployment id (`motis:dpl_…`; project → **Images**). Vercel's
-docs do not say whether deleting a deployment deletes that image. Check once
-the first deployments have aged out (after Nov 10, 2026 with a 1-week policy):
-if `vercel vcr image ls motis` lists tags for deployments that no longer
-exist, delete those with `vercel vcr image rm motis <image-id>`.
+**Images.** Every build, preview or production, pushes its MOTIS image to the
+project's Container Registry repository `motis`
+(`vcr.vercel.com/charlespan-projects/express/motis`), tagged with its
+deployment id (`dpl_…`; project → **Images**). Nothing on Vercel deletes them,
+and once the repository reaches its image limit every build fails with
+"repository has reached the maximum allowed number of images", which leaves
+production on stale timetables. So the nightly cron prunes it first
+([`cron/lib/prune.ts`](cron/lib/prune.ts)), before it calls the Deploy Hook:
+
+1. It reads the project's current production deployment
+   (`GET /v9/projects/{id}`, `targets.production`) and lists the repository
+   (`GET /v1/vcr/repository/motis/images`, every page).
+2. It keeps production's image (tagged with production's deployment id, or
+   the one the cron itself runs in), every image pushed since production's
+   deployment was created (so production's image stays even if its tag ever
+   changes form), and the newest 5 tagged images, which normally include the
+   previous production build that Instant Rollback needs. Untagged images
+   (platform manifests and attestations of an image index) go only when they
+   are more than an hour older than everything kept.
+3. It deletes the rest, oldest builds first
+   (`DELETE /v1/vcr/repository/motis/images/{imageId}`), and logs
+   `prune: motis had N images; kept K, deleted D` in the cron's runtime log.
+
+Without `VERCEL_API_TOKEN`, or when an API call fails or production can't be
+found, it deletes nothing, logs `prune skipped: …`, and still triggers the
+rebuild. To prune by hand: `vercel vcr image ls motis` and
+`vercel vcr image rm motis <image-id>` from `apps/api/`.
+
+**Skipped previews.** `ignoreCommand` in [`vercel.json`](vercel.json) runs
+[`ignore-build.sh`](ignore-build.sh): a preview builds only when `apps/api/`,
+the shared TypeScript packages, or the pnpm workspace's root files changed
+since the branch's last successful deployment (or since it left `main`), the
+same paths as CI's `server` filter. iOS-only pull requests are skipped (shown
+as Canceled, "Ignored Build Step"). Production always builds, so the nightly
+Deploy Hook rebuild is never skipped.
 
 ## Measurements
 
