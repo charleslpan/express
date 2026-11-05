@@ -307,9 +307,12 @@ its image, and the pruning below doesn't rely on it.
 
 **Images.** Every build, preview or production, pushes its MOTIS image to the
 project's Container Registry repository `motis`
-(`vcr.vercel.com/charlespan-projects/express/motis`), tagged with its
-deployment id (`dpl_…`; project → **Images**). Nothing on Vercel deletes them,
-and once the repository reaches its image limit every build fails with
+(`vcr.vercel.com/charlespan-projects/express/motis`), tagged with the first
+12 characters of its commit SHA (`motis:bdcc5b5b7c92`; project → **Images**).
+A rebuild of the same commit moves the tag to the new image and leaves the old
+one untagged. Nothing on Vercel deletes them,
+and once the repository reaches its image limit (50 images per repository on
+Hobby, per Vercel's Container Registry limits) every build fails with
 "repository has reached the maximum allowed number of images", which leaves
 production on stale timetables. So the nightly cron prunes it first
 ([`cron/lib/prune.ts`](cron/lib/prune.ts)), before it calls the Deploy Hook:
@@ -317,13 +320,13 @@ production on stale timetables. So the nightly cron prunes it first
 1. It reads the project's current production deployment
    (`GET /v9/projects/{id}`, `targets.production`) and lists the repository
    (`GET /v1/vcr/repository/motis/images`, every page).
-2. It keeps production's image (tagged with production's deployment id, or
-   the one the cron itself runs in), every image pushed since production's
+2. It keeps production's image (tagged with production's commit, or the
+   commit the cron itself runs in), every image pushed since production's
    deployment was created (so production's image stays even if its tag ever
-   changes form), and the newest 5 tagged images, which normally include the
-   previous production build that Instant Rollback needs. Untagged images
-   (platform manifests and attestations of an image index) go only when they
-   are more than an hour older than everything kept.
+   changes form), and the newest 5 images, which normally include the
+   previous production build that Instant Rollback needs. Older untagged
+   images go only when they are more than an hour older than every tagged
+   image kept.
 3. It deletes the rest, oldest builds first
    (`DELETE /v1/vcr/repository/motis/images/{imageId}`), and logs
    `prune: motis had N images; kept K, deleted D` in the cron's runtime log.
@@ -333,7 +336,8 @@ found, it deletes nothing, logs `prune skipped: …`, and still triggers the
 rebuild. To prune by hand: `vercel vcr image ls motis` and
 `vercel vcr image rm motis <image-id>` from `apps/api/`.
 
-**Skipped previews.** `ignoreCommand` in [`vercel.json`](vercel.json) runs
+**Skipped previews.** The `motis` service's `ignoreCommand` in
+[`vercel.json`](vercel.json) runs
 [`ignore-build.sh`](ignore-build.sh): a preview builds only when `apps/api/`,
 the shared TypeScript packages, or the pnpm workspace's root files changed
 since the branch's last successful deployment (or since it left `main`), the
