@@ -74,7 +74,7 @@ What each job runs:
 | `changes` | `ubuntu-latest` | none | Reads `ci-config.env` and evaluates `ci-filters.yml`. |
 | `swift` | `SWIFT_IMAGE` container | `ci-swift` | `scripts/ci/lint.sh` (pinned SwiftFormat `--lint` and SwiftLint `--strict`), then TransitKit's `swift test` (directly: the container has no Node). |
 | `server` | `ubuntu-latest` | `ci-server` | `scripts/ci/node.sh` (pinned pnpm via Corepack, `pnpm install --frozen-lockfile`, then `pnpm turbo run lint typecheck build test` over every non-Swift workspace), then the API checks (`scripts/ci/server.sh`, owned by the server tasks). |
-| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj`, runs the `Express` scheme's tests on the newest iPhone simulator, writes `build/Express.xcresult`. |
+| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj`, runs the `Express` scheme's tests on the newest standard iPhone Pro simulator (see [Screenshot harness](#screenshot-harness)), writes `build/Express.xcresult`. |
 | `testflight` (own workflow) | `IOS_RUNNER` | `testflight` | `scripts/ci/testflight.sh` on pushes to `main` and manual dispatch: archives, signs, and uploads to TestFlight (see [TestFlight](#testflight)). Not part of `ci-ok`. |
 | `ci-ok` | `ubuntu-latest` | none | `re-actors/alls-green` over every job: failed or cancelled fails it, skipped is fine. |
 
@@ -116,10 +116,14 @@ You can't open a simulator, so judge your UI from the screenshots CI takes. The 
 a screenshot of each. `scripts/ci/screenshots.sh` then exports those attachments to `build/screenshots/` with
 Xcode's `xcrun xcresulttool export attachments`. Every screen is captured in three variants: `light`, `dark`, and
 `light-ax5` (the largest accessibility text size). The status bar is fixed at 9:41 with full signal. The simulator
-is the newest standard iPhone Pro (such as "iPhone 17 Pro") on the newest iOS runtime, never a wide device such as
-the iPhone Duo, which puts the status bar and tab bar down the side; `ios.sh` logs the device it chose in its
-Simulator group, and creates one from the newest `iPhone <n> Pro` device type where the runtime has none, and falls back to the
-newest iPhone of any kind only when it cannot.
+is the newest standard iPhone Pro (such as "iPhone 18 Pro"), never a wide device such as the iPhone Duo, which puts
+the status bar and tab bar down the side. `scripts/ci/pick-simulator.py` chooses it: it walks the runner's iOS
+runtimes at or above the deployment target, newest first, and takes an existing `iPhone <n> Pro` or creates the
+newest one the runtime's `supportedDeviceTypes` lists (Xcode ships device types a runtime can't run, and simctl
+refuses those with "Incompatible device"). On `xcode-27` the newest runtime, iOS 27.1, runs only the Duo, so CI uses
+an older runtime that runs a Pro. Where no runtime does, it downloads the iOS platform
+(`xcodebuild -downloadPlatform iOS`) and looks again, and failing that falls back to the newest iPhone of any kind
+with a `::warning::`. The `ios` job's Simulator group logs every runtime, each simctl error, and the device chosen.
 
 The app reads these launch arguments (`apps/ios/App/Harness/`):
 
