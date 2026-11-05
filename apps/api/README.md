@@ -336,14 +336,19 @@ found, it deletes nothing, logs `prune skipped: …`, and still triggers the
 rebuild. To prune by hand: `vercel vcr image ls motis` and
 `vercel vcr image rm motis <image-id>` from `apps/api/`.
 
-**Skipped previews.** The `motis` service's `ignoreCommand` in
-[`vercel.json`](vercel.json) runs
-[`ignore-build.sh`](ignore-build.sh): a preview builds only when `apps/api/`,
-the shared TypeScript packages, or the pnpm workspace's root files changed
-since the branch's last successful deployment (or since it left `main`), the
-same paths as CI's `server` filter. iOS-only pull requests are skipped (shown
-as Canceled, "Ignored Build Step"). Production always builds, so the nightly
-Deploy Hook rebuild is never skipped.
+**Skipped previews.** [`ignore-build.sh`](ignore-build.sh) decides: a
+preview builds only when `apps/api/`, the shared TypeScript packages, or the
+pnpm workspace's root files changed on its branch, measured from where it left
+`main` (`git merge-base`), so merging `main` into an iOS branch doesn't count
+`main`'s own API changes. These are the same paths as CI's `server` filter.
+Production always builds, so the nightly Deploy Hook rebuild is never skipped.
+It logs `ignore-build: building (…)` or `skipping (…)`, and builds when unsure.
+Vercel rejects a top-level `ignoreCommand` in a `services` project and doesn't
+run the one under the `motis` service in [`vercel.json`](vercel.json) (an
+iOS-only preview on Nov 5, 2026 built anyway), so the script is meant to run
+from the project's **Ignored Build Step** setting (Settings → Build and
+Deployment → Custom: `bash ignore-build.sh`). Skipped previews show as
+Canceled.
 
 ## Measurements
 

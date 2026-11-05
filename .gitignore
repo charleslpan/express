@@ -19,5 +19,8 @@ build/
 
 # Node, pnpm, Turborepo, Vercel
 node_modules/
+# pnpm's content store, which pnpm puts in the checkout when its global store
+# isn't writable (as in some agent sandboxes).
+.pnpm-store/
 .turbo/
 .vercel/
