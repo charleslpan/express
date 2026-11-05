@@ -4,7 +4,8 @@
     "motis": {
       "runtime": "container",
       "root": "motis/",
-      "entrypoint": "Dockerfile"
+      "entrypoint": "Dockerfile",
+      "ignoreCommand": "bash \"$(git rev-parse --show-toplevel)/apps/api/ignore-build.sh\""
     },
     "bus": {
       "root": "bus/",

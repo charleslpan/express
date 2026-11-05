@@ -38,10 +38,16 @@ on every call.
   query time).
 - `motis/smoke-build.sh`: runs `smoke.sh` inside the Docker build (`smoke`
   stage) against the freshly imported data; a failure fails the deployment.
+- `ignore-build.sh`: Vercel's Ignored Build Step (the `motis` service's
+  `ignoreCommand`; Vercel rejects a top-level one with `services`). Previews
+  build only when the API's paths changed (the same as CI's `server` filter);
+  production always builds. Add a path there if the API starts depending on
+  one outside them.
 - `cron/`: the daily Vercel Cron target, the pnpm workspace `@express/cron`
   (listed in `pnpm-workspace.yaml`, shared tsconfig and ESLint config).
   `api/cron/rebuild.ts` is the entrypoint; `lib/rebuild.ts` checks
-  `CRON_SECRET` and POSTs `DEPLOY_HOOK_URL?buildCache=false`. Its route sits
+  `CRON_SECRET`, runs `lib/prune.ts` (deletes old `motis` registry images,
+  never production's), and POSTs `DEPLOY_HOOK_URL?buildCache=false`. Its route sits
   before the `/api/(.*)` catch-all. Keep `typescript` below 7 (Vercel's
   builder crashes on TS 7).
 - `bus/`: the bus GPS Function (`api/vehicles/bus.ts`, Node.js, TypeScript),
@@ -128,5 +134,7 @@ new builds are not promoted until someone runs `vercel promote`.
 - `CRON_SECRET` (sensitive): bearer token Vercel Cron sends to
   `/api/cron/rebuild`.
 - `DEPLOY_HOOK_URL` (sensitive): the project's Deploy Hook for `main`.
+- `VERCEL_API_TOKEN` (sensitive, Production, optional): Vercel token the cron
+  uses to prune `motis` images. Without it the cron warns and still rebuilds.
 
 Never print their values.
