@@ -309,7 +309,8 @@ its image, and the pruning below doesn't rely on it.
 project's Container Registry repository `motis`
 (`vcr.vercel.com/charlespan-projects/express/motis`), tagged with its
 deployment id (`dpl_…`; project → **Images**). Nothing on Vercel deletes them,
-and once the repository reaches its image limit every build fails with
+and once the repository reaches its image limit (50 images per repository on
+Hobby, per Vercel's Container Registry limits) every build fails with
 "repository has reached the maximum allowed number of images", which leaves
 production on stale timetables. So the nightly cron prunes it first
 ([`cron/lib/prune.ts`](cron/lib/prune.ts)), before it calls the Deploy Hook:
@@ -333,7 +334,8 @@ found, it deletes nothing, logs `prune skipped: …`, and still triggers the
 rebuild. To prune by hand: `vercel vcr image ls motis` and
 `vercel vcr image rm motis <image-id>` from `apps/api/`.
 
-**Skipped previews.** `ignoreCommand` in [`vercel.json`](vercel.json) runs
+**Skipped previews.** The `motis` service's `ignoreCommand` in
+[`vercel.json`](vercel.json) runs
 [`ignore-build.sh`](ignore-build.sh): a preview builds only when `apps/api/`,
 the shared TypeScript packages, or the pnpm workspace's root files changed
 since the branch's last successful deployment (or since it left `main`), the
