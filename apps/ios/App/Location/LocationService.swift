@@ -29,6 +29,13 @@ final class LocationService: NSObject {
     private let manager: CLLocationManager?
     private var updates: Task<Void, Never>?
 
+    /// Whether this is the live service over Core Location, rather than one fixed for the screenshot harness or
+    /// previews. A fixed service's permission is pretend, so views keep the map's own location dot (which asks
+    /// Core Location) off for it.
+    var isLive: Bool {
+        manager != nil
+    }
+
     /// The live service, reading the current permission without asking for it.
     override init() {
         let manager = CLLocationManager()

@@ -20,6 +20,16 @@ enum AppSheet: String, Identifiable {
     }
 }
 
+/// How far the Go tab's home sheet is pulled up over the map.
+enum HomeSheetDetent: String, CaseIterable, Hashable {
+    /// Just the search field, with the map filling the screen.
+    case peek
+    /// About half the screen: the search field, saved places, and the nearest departures.
+    case half
+    /// Nearly the whole screen, with the sheet's content scrolling.
+    case full
+}
+
 /// Where the app is: the selected tab, each tab's navigation stack, and the sheet on top.
 ///
 /// Views never wire navigation themselves: they read the router from the environment (`@Environment(AppRouter.self)`)
@@ -37,10 +47,13 @@ final class AppRouter {
     var searchPath = NavigationPath()
     /// The sheet shown over the tabs, if any.
     var sheet: AppSheet?
+    /// How far the Go tab's home sheet is pulled up.
+    var homeDetent: HomeSheetDetent
 
-    init(selectedTab: AppTab = .go, sheet: AppSheet? = nil) {
+    init(selectedTab: AppTab = .go, sheet: AppSheet? = nil, homeDetent: HomeSheetDetent = .peek) {
         self.selectedTab = selectedTab
         self.sheet = sheet
+        self.homeDetent = homeDetent
     }
 
     /// Shows `tab`. Selecting the tab that is already showing pops it to its root, as the system's tab bars do.

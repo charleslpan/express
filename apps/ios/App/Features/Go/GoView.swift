@@ -1,9 +1,11 @@
 import GlassUI
 import SwiftUI
+import TransitKit
 import UIKit
 
-/// The Go tab: the map, full screen under the tab bar, with glass controls floating over it. S2 builds the home
-/// sheet and the rest of the map home on top of this.
+/// The Go tab, the map home: the map full screen under the tab bar, centred on the user where they're in New York
+/// and on New York otherwise, with glass controls floating over it (About, a compass while the map is rotated, and
+/// "Show my location"), and a banner while the user is outside the area Express serves.
 struct GoView: View {
     @Environment(AppRouter.self) private var router
     @Environment(LocationService.self) private var location
@@ -13,6 +15,8 @@ struct GoView: View {
     /// Whether the map should move to the next location fix, after "Show my location" asked for one.
     @State private var centersOnNextFix = false
     @State private var showsLocationOff = false
+    /// Whether the map has moved to the user's first location fix in New York, which it does once.
+    @State private var hasCenteredOnUser = false
     @Namespace private var glass
 
     var body: some View {
@@ -20,20 +24,32 @@ struct GoView: View {
         NavigationStack(path: $router.goPath) {
             MapView(
                 camera: $camera,
-                showsUserLocation: location.authorization == .authorized,
+                showsUserLocation: location.isLive && location.authorization == .authorized,
                 onTilesRendered: { tilesRendered = true }
             )
             .ignoresSafeArea()
-            .overlay(alignment: .topTrailing) {
-                controls
+            .overlay(alignment: .top) {
+                topControls
                     .padding(Spacing.floatingInset)
             }
             .toolbarVisibility(.hidden, for: .navigationBar)
         }
+        .onAppear {
+            // Already allowed: start updates, which asks nothing. Otherwise wait for "Show my location".
+            if location.authorization == .authorized {
+                location.requestLocation()
+            }
+            centerOnUserInNewYork(location.location)
+        }
         .onChange(of: location.location) { _, fix in
-            guard centersOnNextFix, let fix else { return }
-            centersOnNextFix = false
-            camera = MapCamera(center: fix, zoom: 16)
+            guard let fix else { return }
+            if centersOnNextFix {
+                centersOnNextFix = false
+                hasCenteredOnUser = true
+                camera = MapCamera(center: fix, zoom: 16)
+            } else {
+                centerOnUserInNewYork(fix)
+            }
         }
         .alert("Location Is Off", isPresented: $showsLocationOff) {
             if location.authorization == .denied, let settings = URL(string: UIApplication.openSettingsURLString) {
@@ -45,6 +61,18 @@ struct GoView: View {
         }
     }
 
+    /// The banner (when it shows) across the top, with the button column under it at the trailing edge, so the
+    /// two never overlap at any text size.
+    private var topControls: some View {
+        VStack(alignment: .trailing, spacing: Spacing.floatingInset) {
+            if isOutsideServiceArea {
+                OutsideServiceAreaBanner()
+            }
+            controls
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+    }
+
     private var controls: some View {
         GlassEffectContainer(spacing: Spacing.floatingInset) {
             VStack(spacing: Spacing.floatingInset) {
@@ -52,6 +80,14 @@ struct GoView: View {
                     router.showAbout()
                 }
                 .glassEffectID("about", in: glass)
+                if isRotated {
+                    GlassIconButton("Point the map north", systemImage: "location.north.line.fill") {
+                        camera.bearing = 0
+                    }
+                    .rotationEffect(.degrees(-camera.bearing))
+                    .accessibilityValue("Facing \(Int(camera.bearing.rounded())) degrees")
+                    .glassEffectID("compass", in: glass)
+                }
                 GlassIconButton("Show my location", systemImage: locationSymbol) {
                     showMyLocation()
                 }
@@ -61,6 +97,25 @@ struct GoView: View {
         // The screenshot harness waits for the map's tiles before it captures.
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(tilesRendered ? "map.settled" : "map.loading")
+    }
+
+    /// Whether the map is turned away from north, when the compass shows (as in Apple Maps).
+    private var isRotated: Bool {
+        let bearing = camera.bearing.truncatingRemainder(dividingBy: 360)
+        return abs(bearing) > 0.5 && abs(bearing) < 359.5
+    }
+
+    /// Whether the user is somewhere Express doesn't serve yet; false while their location is unknown.
+    private var isOutsideServiceArea: Bool {
+        guard location.authorization == .authorized, let fix = location.location else { return false }
+        return !ServiceArea.nyc.contains(fix)
+    }
+
+    /// Moves the map to the user's first fix in New York; outside it the map stays on the city, under the banner.
+    private func centerOnUserInNewYork(_ fix: Coordinate?) {
+        guard !hasCenteredOnUser, let fix, ServiceArea.nyc.contains(fix) else { return }
+        hasCenteredOnUser = true
+        camera = MapCamera(center: fix, zoom: 15)
     }
 
     private var locationSymbol: String {
