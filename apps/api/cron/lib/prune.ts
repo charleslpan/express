@@ -17,8 +17,12 @@ export interface Image {
 }
 
 export interface Production {
-  /** Deployment ids of production: each build tags its image with its deployment id. */
-  deploymentIds: string[];
+  /**
+   * Tags production's image may carry: each build tags its image with the
+   * first 12 characters of its commit SHA (`motis:bdcc5b5b7c92`), so these are
+   * production's commit SHAs, plus its deployment ids in case that changes.
+   */
+  tags: string[];
   /** When production's deployment was created, in ms; its image was pushed after that. */
   createdAt: number;
 }
@@ -31,16 +35,17 @@ export interface Plan {
 /**
  * Chooses which images to keep: production's own image (by tag), every image
  * pushed since production's deployment was created (production's image among
- * them even if its tag is not found), and the newest `keepNewest` tagged
- * images. Untagged images go only when they are older than everything kept.
+ * them even if its tag is not found), and the newest `keepNewest` images.
+ * Older untagged images (an earlier build of a commit whose tag moved to a
+ * rebuild, or an index's children) go only when they are more than an hour
+ * older than every tagged image kept.
  */
 export function planPrune(images: Image[], production: Production, keepNewest = KEEP_NEWEST): Plan {
   const time = (image: Image) => Date.parse(image.createdAt);
   const newestFirst = [...images].sort((a, b) => time(b) - time(a));
-  const tagged = newestFirst.filter((image) => image.tags.length > 0);
-  const kept = new Set<Image>(tagged.slice(0, keepNewest));
+  const kept = new Set<Image>(newestFirst.slice(0, keepNewest));
   for (const image of newestFirst) {
-    const isProduction = image.tags.some((tag) => production.deploymentIds.includes(tag));
+    const isProduction = image.tags.some((tag) => production.tags.includes(tag));
     // An unparseable date compares false; keep such images rather than guess.
     if (isProduction || !(time(image) < production.createdAt)) kept.add(image);
   }
@@ -59,8 +64,9 @@ export interface PruneDeps {
   token: string;
   teamId: string;
   projectId: string;
-  /** The deployment this function runs in: production, when Vercel Cron calls it. */
+  /** The deployment this function runs in (production, when Vercel Cron calls it) and its commit. */
   deploymentId: string | undefined;
+  commitSha: string | undefined;
   fetch: typeof fetch;
   log: Pick<Console, "log" | "warn">;
 }
@@ -85,16 +91,19 @@ async function api<T>(deps: PruneDeps, method: string, path: string, query: Reco
 }
 
 async function productionOf(deps: PruneDeps): Promise<Production> {
-  const project = await api<{ targets?: { production?: { id?: string; createdAt?: number } } }>(
+  const project = await api<{
+    targets?: { production?: { id?: string; createdAt?: number; meta?: { githubCommitSha?: string } } };
+  }>(
     deps,
     "GET",
     `/v9/projects/${encodeURIComponent(deps.projectId)}`,
   );
   const target = project?.targets?.production;
   if (!target?.id || typeof target.createdAt !== "number") throw new Error("project has no production deployment");
-  const deploymentIds = [target.id];
-  if (deps.deploymentId && deps.deploymentId !== target.id) deploymentIds.push(deps.deploymentId);
-  return { deploymentIds, createdAt: target.createdAt };
+  const ids = [target.id, deps.deploymentId];
+  const shas = [target.meta?.githubCommitSha, deps.commitSha];
+  const tags = [...ids, ...shas, ...shas.map((sha) => sha?.slice(0, 12))].filter((tag): tag is string => !!tag);
+  return { tags: [...new Set(tags)], createdAt: target.createdAt };
 }
 
 async function listImages(deps: PruneDeps): Promise<Image[]> {
@@ -137,7 +146,7 @@ export async function pruneImages(deps: PruneDeps): Promise<PruneResult> {
   deps.log.log(
     `prune: ${REPOSITORY} had ${images.length} images; kept ${keep.length}, deleted ${deleted}` +
       (failed ? `, ${failed} failed` : "") +
-      ` (production ${production.deploymentIds.join(", ")})`,
+      ` (production ${production.tags[0]})`,
   );
   return { kept: keep.length, deleted, failed };
 }

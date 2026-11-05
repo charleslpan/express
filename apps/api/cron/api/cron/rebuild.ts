@@ -18,6 +18,7 @@ const handle = createHandler({
       teamId: TEAM_ID,
       projectId: process.env.VERCEL_PROJECT_ID ?? "express",
       deploymentId: process.env.VERCEL_DEPLOYMENT_ID,
+      commitSha: process.env.VERCEL_GIT_COMMIT_SHA,
       fetch,
       log: console,
     });
