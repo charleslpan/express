@@ -38,11 +38,11 @@ on every call.
   query time).
 - `motis/smoke-build.sh`: runs `smoke.sh` inside the Docker build (`smoke`
   stage) against the freshly imported data; a failure fails the deployment.
-- `ignore-build.sh`: Vercel's Ignored Build Step (the `motis` service's
-  `ignoreCommand`; Vercel rejects a top-level one with `services`). Previews
-  build only when the API's paths changed (the same as CI's `server` filter);
-  production always builds. Add a path there if the API starts depending on
-  one outside them.
+- `ignore-build.sh`: Vercel's Ignored Build Step, set in the project's
+  settings (`bash ignore-build.sh`; Vercel ignores the `motis` service's
+  `ignoreCommand`). Previews build only when the API's paths (the same as CI's
+  `server` filter) changed since the branch left `main`; production always
+  builds. Add a path there if the API starts depending on one outside them.
 - `cron/`: the daily Vercel Cron target, the pnpm workspace `@express/cron`
   (listed in `pnpm-workspace.yaml`, shared tsconfig and ESLint config).
   `api/cron/rebuild.ts` is the entrypoint; `lib/rebuild.ts` checks
