@@ -72,8 +72,16 @@ xcodebuild -resolvePackageDependencies \
     -skipPackagePluginValidation
 echo "::endgroup::"
 if [[ ! -f $resolved ]]; then
-    echo "::error::Resolving packages didn't write $resolved. Found:"
-    find apps/ios build/DerivedData -name Package.resolved -print 2>/dev/null || true
+    echo "::group::Package.resolved debug"
+    find apps/ios/Express.xcodeproj -print
+    find apps/ios build "$HOME/Library/Developer/Xcode/DerivedData" -name 'Package.resolved' -print 2>/dev/null || true
+    xcodebuild -resolvePackageDependencies -workspace apps/ios/Express.xcodeproj/project.xcworkspace -scheme Express \
+        -skipPackagePluginValidation >/dev/null || true
+    find apps/ios "$HOME/Library/Developer/Xcode/DerivedData" -name 'Package.resolved' -print 2>/dev/null || true
+    echo "::endgroup::"
+fi
+if [[ ! -f $resolved ]]; then
+    echo "::error::Resolving packages didn't write $resolved."
     exit 1
 fi
 if [[ -n $(git status --porcelain -- "$resolved") ]]; then
