@@ -59,6 +59,27 @@ rm -rf build/tools/xcodegen && unzip -q -o "$zip" -d build/tools
 build/tools/xcodegen/bin/xcodegen generate --spec apps/ios/project.yml
 echo "::endgroup::"
 
+echo "::group::Swift packages"
+# Xcode Cloud won't resolve packages itself: it builds from the committed Package.resolved, so check that resolving
+# what project.yml and the local packages ask for leaves it unchanged. In CI a drift fails the job and prints the file
+# to commit; on a Mac, commit the file Xcode just wrote.
+resolved=apps/ios/Express.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+xcodebuild -resolvePackageDependencies \
+    -project apps/ios/Express.xcodeproj \
+    -scheme Express \
+    -derivedDataPath build/DerivedData \
+    -skipPackagePluginValidation
+echo "::endgroup::"
+if [[ -n $(git status --porcelain -- "$resolved") ]]; then
+    git --no-pager diff -- "$resolved" || true
+    echo "Resolved now:" && cat "$resolved"
+    message="$resolved is missing or out of date: commit the file printed above (Xcode Cloud builds from it)."
+    if [[ -n ${CI:-} ]]; then
+        echo "::error::$message" && exit 1
+    fi
+    echo "warning: $message"
+fi
+
 echo "::group::Simulator"
 # The newest standard iPhone Pro on the newest iOS runtime that runs one, at or above the app's deployment target, so
 # screenshots show the phone most people hold (wide devices such as the iPhone Duo put the status bar and tab bar down
