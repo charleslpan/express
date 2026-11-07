@@ -60,38 +60,21 @@ build/tools/xcodegen/bin/xcodegen generate --spec apps/ios/project.yml
 echo "::endgroup::"
 
 echo "::group::Swift packages"
-# Xcode Cloud won't resolve packages itself: it builds from the committed Package.resolved, so check that resolving
-# what project.yml and the local packages ask for leaves it unchanged. In CI a drift fails the job and prints the file
-# to commit; on a Mac, commit the file Xcode just wrote.
+# Xcode Cloud won't resolve packages itself: it builds from the committed Package.resolved, so check that its pins
+# match what resolving project.yml and the local packages gives. In CI a drift fails the job and prints the file to
+# commit; on a Mac the file is rewritten for you to commit. See package-resolved.py for why it reads DerivedData.
 resolved=apps/ios/Express.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
-mkdir -p "$(dirname "$resolved")" # Xcode only writes the file where its folder exists.
 xcodebuild -resolvePackageDependencies \
     -project apps/ios/Express.xcodeproj \
     -scheme Express \
     -derivedDataPath build/DerivedData \
     -skipPackagePluginValidation
 echo "::endgroup::"
-if [[ ! -f $resolved ]]; then
-    echo "::group::Package.resolved debug"
-    find apps/ios/Express.xcodeproj -print
-    find apps/ios build "$HOME/Library/Developer/Xcode/DerivedData" -name 'Package.resolved' -print 2>/dev/null || true
-    xcodebuild -resolvePackageDependencies -workspace apps/ios/Express.xcodeproj/project.xcworkspace -scheme Express \
-        -skipPackagePluginValidation >/dev/null || true
-    find apps/ios "$HOME/Library/Developer/Xcode/DerivedData" -name 'Package.resolved' -print 2>/dev/null || true
-    echo "::endgroup::"
-fi
-if [[ ! -f $resolved ]]; then
-    echo "::error::Resolving packages didn't write $resolved."
+check_args=(build/DerivedData/SourcePackages/workspace-state.json "$resolved")
+[[ -z ${CI:-} ]] && check_args+=(--write)
+if ! scripts/ci/package-resolved.py "${check_args[@]}"; then
+    echo "::error::$resolved is missing or out of date: commit the file printed above (Xcode Cloud builds from it)."
     exit 1
-fi
-if [[ -n $(git status --porcelain -- "$resolved") ]]; then
-    git --no-pager diff -- "$resolved" || true
-    echo "Resolved now:" && cat "$resolved"
-    message="$resolved is missing or out of date: commit the file printed above (Xcode Cloud builds from it)."
-    if [[ -n ${CI:-} ]]; then
-        echo "::error::$message" && exit 1
-    fi
-    echo "warning: $message"
 fi
 
 echo "::group::Simulator"

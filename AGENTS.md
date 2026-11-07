@@ -74,7 +74,7 @@ What each job runs:
 | `changes` | `ubuntu-latest` | none | Reads `ci-config.env` and evaluates `ci-filters.yml`. |
 | `swift` | `SWIFT_IMAGE` container | `ci-swift` | `scripts/ci/lint.sh` (pinned SwiftFormat `--lint` and SwiftLint `--strict`), then TransitKit's `swift test` (directly: the container has no Node). |
 | `server` | `ubuntu-latest` | `ci-server` | `scripts/ci/node.sh` (pinned pnpm via Corepack, `pnpm install --frozen-lockfile`, then `pnpm turbo run lint typecheck build test` over every non-Swift workspace), then the API checks (`scripts/ci/server.sh`, owned by the server tasks). |
-| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj`, fails if resolving packages changes the committed `Package.resolved` (see [TestFlight](#testflight)), runs the `Express` scheme's tests on the newest standard iPhone Pro simulator (see [Screenshot harness](#screenshot-harness)), writes `build/Express.xcresult`. |
+| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj`, fails if the committed `Package.resolved` doesn't match the resolved packages (see [TestFlight](#testflight)), runs the `Express` scheme's tests on the newest standard iPhone Pro simulator (see [Screenshot harness](#screenshot-harness)), writes `build/Express.xcresult`. |
 | `testflight` (own workflow) | `IOS_RUNNER` | `testflight` | Dormant: `scripts/ci/testflight.sh` skips with a notice without the App Store Connect secrets, which aren't set; Xcode Cloud ships TestFlight builds instead (see [TestFlight](#testflight)). Not part of `ci-ok`. |
 | `ci-ok` | `ubuntu-latest` | none | `re-actors/alls-green` over every job: failed or cancelled fails it, skipped is fine. |
 
@@ -104,9 +104,10 @@ API key, certificate, profile, or GitHub secret. GitHub CI builds for the simula
 - **Package.resolved:** Xcode Cloud won't resolve Swift packages itself, so
   `apps/ios/Express.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved` is committed (a `.gitignore`
   exception; the rest of the project stays ignored). The `ios` job resolves packages after generating the project and
-  fails if that changes the file, printing the file to commit. After changing a package in `project.yml` or a local
-  package's `Package.swift`, commit the file Xcode writes (`make generate`, then File → Packages → Resolve Package
-  Versions), or the one the failed `ios` job prints.
+  `scripts/ci/package-resolved.py` fails it if the committed pins differ from the resolved ones, printing the file to
+  commit (`xcodebuild` doesn't write it, so the script builds it from DerivedData's `workspace-state.json`). After
+  changing a package in `project.yml` or a local package's `Package.swift`, commit the file the failed `ios` job
+  prints, or the one `scripts/ci/ios.sh build` rewrites on a Mac.
 - **Versions:** Xcode Cloud sets the build number (`CFBundleVersion`) itself; the marketing version is
   `MARKETING_VERSION` in `apps/ios/project.yml`. Bump that for a new version.
 - `ITSAppUsesNonExemptEncryption = NO` is set in `project.yml`, so builds skip the export-compliance question.
