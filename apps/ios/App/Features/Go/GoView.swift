@@ -3,9 +3,10 @@ import SwiftUI
 import TransitKit
 import UIKit
 
-/// The Go tab, the map home: the map full screen under the tab bar, centred on the user where they're in New York
-/// and on New York otherwise, with glass controls floating over it (About, a compass while the map is rotated, and
-/// "Show my location"), and a banner while the user is outside the area Express serves.
+/// The map home, the app's one screen: the map full screen, centred on the user where they're in New York and on New
+/// York otherwise, with glass controls floating at the top (About, a compass while the map is rotated, and "Show my
+/// location"), a banner while the user is outside the area Express serves, and the ``HomeSheet`` over it all, which
+/// can't be dismissed and leaves the map usable up to half height.
 struct GoView: View {
     @Environment(AppRouter.self) private var router
     @Environment(LocationService.self) private var location
@@ -20,19 +21,19 @@ struct GoView: View {
     @Namespace private var glass
 
     var body: some View {
-        @Bindable var router = router
-        NavigationStack(path: $router.goPath) {
-            MapView(
-                camera: $camera,
-                showsUserLocation: location.isLive && location.authorization == .authorized,
-                onTilesRendered: { tilesRendered = true }
-            )
-            .ignoresSafeArea()
-            .overlay(alignment: .top) {
-                topControls
-                    .padding(Spacing.floatingInset)
-            }
-            .toolbarVisibility(.hidden, for: .navigationBar)
+        MapView(
+            camera: $camera,
+            showsUserLocation: location.isLive && location.authorization == .authorized,
+            onTilesRendered: { tilesRendered = true }
+        )
+        .ignoresSafeArea()
+        // The controls sit at the top, clear of the sheet at its peek.
+        .overlay(alignment: .top) {
+            topControls
+                .padding(Spacing.floatingInset)
+        }
+        .sheet(isPresented: .constant(true)) {
+            homeSheet
         }
         .onAppear {
             // Already allowed: start updates, which asks nothing. Otherwise wait for "Show my location".
@@ -51,13 +52,36 @@ struct GoView: View {
                 centerOnUserInNewYork(fix)
             }
         }
-        .alert("Location Is Off", isPresented: $showsLocationOff) {
-            if location.authorization == .denied, let settings = URL(string: UIApplication.openSettingsURLString) {
-                Link("Open Settings", destination: settings)
+    }
+
+    private var homeSheet: some View {
+        HomeSheet()
+            .presentationDetents(
+                Set(HomeSheetDetent.allCases.map(\.presentationDetent)),
+                selection: detent
+            )
+            .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+            .presentationDragIndicator(.visible)
+            .interactiveDismissDisabled()
+            // The map is covered by the sheet, so an alert from the map's buttons presents from the sheet.
+            .alert("Location Is Off", isPresented: $showsLocationOff) {
+                if location.authorization == .denied,
+                   let settings = URL(string: UIApplication.openSettingsURLString)
+                {
+                    Link("Open Settings", destination: settings)
+                }
+                Button("Not Now", role: .cancel) {}
+            } message: {
+                Text("Turn on Location Services for Express in Settings to see where you are on the map.")
             }
-            Button("Not Now", role: .cancel) {}
-        } message: {
-            Text("Turn on Location Services for Express in Settings to see where you are on the map.")
+    }
+
+    /// The sheet's detent, through ``AppRouter/homeDetent`` so features can raise and lower it.
+    private var detent: Binding<PresentationDetent> {
+        Binding {
+            router.homeDetent.presentationDetent
+        } set: { detent in
+            router.homeDetent = HomeSheetDetent(detent)
         }
     }
 

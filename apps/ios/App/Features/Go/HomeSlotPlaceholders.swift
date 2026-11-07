@@ -41,14 +41,27 @@ struct SavedPlacesPlaceholder: View {
     }
 }
 
-/// Stands in for the nearest departures (N1): a heading over rows in their loading state.
-struct NearestDeparturesPlaceholder: View {
+/// A section's heading in the home sheet, such as "Nearby".
+struct HomeSectionHeading: View {
+    let title: LocalizedStringKey
+
+    init(_ title: LocalizedStringKey) {
+        self.title = title
+    }
+
+    var body: some View {
+        Text(title)
+            .typography(.sectionTitle)
+            .foregroundStyle(.textPrimary)
+            .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// Stands in for the Nearby section (N1): its heading over departure rows in their loading state.
+struct NearbySectionPlaceholder: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
-            Text("Nearby Departures")
-                .typography(.sectionTitle)
-                .foregroundStyle(.textPrimary)
-                .accessibilityAddTraits(.isHeader)
+            HomeSectionHeading("Nearby")
             VStack(spacing: 0) {
                 ForEach(Self.rows, id: \.line.id) { row in
                     DepartureRow(line: row.line, headsign: row.headsign, departures: row.departures)
@@ -80,4 +93,17 @@ struct NearestDeparturesPlaceholder: View {
             departures: [DepartureTime(minutes: 6, status: .live), DepartureTime(minutes: 14, status: .scheduled)]
         ),
     ]
+}
+
+/// Stands in for the Saved section (P2): its heading and a note on what it will hold.
+struct SavedSectionPlaceholder: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            HomeSectionHeading("Saved")
+            Text("Places and lines you save will show here.")
+                .typography(.secondary)
+                .foregroundStyle(.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
 }
