@@ -64,12 +64,18 @@ echo "::group::Swift packages"
 # what project.yml and the local packages ask for leaves it unchanged. In CI a drift fails the job and prints the file
 # to commit; on a Mac, commit the file Xcode just wrote.
 resolved=apps/ios/Express.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+mkdir -p "$(dirname "$resolved")" # Xcode only writes the file where its folder exists.
 xcodebuild -resolvePackageDependencies \
     -project apps/ios/Express.xcodeproj \
     -scheme Express \
     -derivedDataPath build/DerivedData \
     -skipPackagePluginValidation
 echo "::endgroup::"
+if [[ ! -f $resolved ]]; then
+    echo "::error::Resolving packages didn't write $resolved. Found:"
+    find apps/ios build/DerivedData -name Package.resolved -print 2>/dev/null || true
+    exit 1
+fi
 if [[ -n $(git status --porcelain -- "$resolved") ]]; then
     git --no-pager diff -- "$resolved" || true
     echo "Resolved now:" && cat "$resolved"
