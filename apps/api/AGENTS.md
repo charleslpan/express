@@ -33,8 +33,9 @@ on every call.
   `matcher.py` matches MTA subway realtime trips to static trips (delete it
   if MOTIS ever does this itself); `adapter.py` serves `/subway/<feed>` and
   `/bus/<dataset>`; `upstream.py` fetches every feed in parallel at start for
-  MOTIS's first cycle (shortening the cold start's 503s); `build_index.py` runs at image build; `record.py` records
-  live feeds as test fixtures and prints match rates. `alerts.py` fills the
+  MOTIS's first cycle (shortening the cold start's 503s), and the adapter's
+  server keeps a listen backlog of 64, since MOTIS opens all its polls at
+  once; `build_index.py` runs at image build; `record.py` records live feeds as test fixtures and prints match rates. `alerts.py` fills the
   MTA alerts' standard effect, cause, and severity from `alert_types.json`
   for `/alerts/subway` and `/alerts/bus/<dataset>`. To add a feed, add it to
   `adapter.py` and a `rt` entry to `config.yml` (alert feeds first in a

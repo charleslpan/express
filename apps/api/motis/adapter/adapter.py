@@ -162,6 +162,13 @@ def _age(ts: int) -> str:
     return f"{time.time() - ts:.0f}s" if ts else "unknown"
 
 
+class Server(ThreadingHTTPServer):
+    # MOTIS opens all of its polls at once (19 today). With the default listen
+    # backlog of 5 the rest are dropped and retried a second later, which
+    # holds up every cycle, the cold start's first one included.
+    request_queue_size = 64
+
+
 def make_handler(subway: Subway, bus: Bus, alerts: Alerts):
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
@@ -204,7 +211,7 @@ def main():
     with open(os.path.join(here, "bus_routes.json")) as f:
         bus_routes = json.load(f)
     port = int(os.environ.get("ADAPTER_PORT", "8081"))
-    server = ThreadingHTTPServer(
+    server = Server(
         ("127.0.0.1", port),
         make_handler(Subway(tt, upstream), Bus(key, bus_routes, upstream),
                      Alerts(AlertTypes.load(os.path.join(here, "alert_types.json")), bus_routes, upstream)),
