@@ -17,8 +17,8 @@
   {
    "id": "fixture-walk",
    "duration": 1560,
-   "startTime": "2026-11-04T00:00:00Z",
-   "endTime": "2026-11-04T00:26:00Z",
+   "startTime": "2026-11-03T23:30:00Z",
+   "endTime": "2026-11-03T23:56:00Z",
    "transfers": 0,
    "legs": [
     {
@@ -28,20 +28,20 @@
       "lat": 40.7359,
       "lon": -73.9906,
       "vertexType": "NORMAL",
-      "departure": "2026-11-04T00:00:00Z"
+      "departure": "2026-11-03T23:30:00Z"
      },
      "to": {
       "name": "END",
       "lat": 40.7527,
       "lon": -73.9772,
       "vertexType": "NORMAL",
-      "arrival": "2026-11-04T00:26:00Z"
+      "arrival": "2026-11-03T23:56:00Z"
      },
      "duration": 1560,
-     "startTime": "2026-11-04T00:00:00Z",
-     "endTime": "2026-11-04T00:26:00Z",
-     "scheduledStartTime": "2026-11-04T00:00:00Z",
-     "scheduledEndTime": "2026-11-04T00:26:00Z",
+     "startTime": "2026-11-03T23:30:00Z",
+     "endTime": "2026-11-03T23:56:00Z",
+     "scheduledStartTime": "2026-11-03T23:30:00Z",
+     "scheduledEndTime": "2026-11-03T23:56:00Z",
      "realTime": false,
      "scheduled": false,
      "distance": 2050,
@@ -58,8 +58,8 @@
   {
    "id": "fixture-q-s",
    "duration": 1020,
-   "startTime": "2026-11-04T00:03:00Z",
-   "endTime": "2026-11-04T00:20:00Z",
+   "startTime": "2026-11-03T23:33:00Z",
+   "endTime": "2026-11-03T23:50:00Z",
    "transfers": 1,
    "legs": [
     {
@@ -69,7 +69,7 @@
       "lat": 40.7359,
       "lon": -73.9906,
       "vertexType": "NORMAL",
-      "departure": "2026-11-04T00:03:00Z"
+      "departure": "2026-11-03T23:33:00Z"
      },
      "to": {
       "name": "14 St-Union Sq",
@@ -77,14 +77,14 @@
       "lon": -73.9906,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_R20N",
-      "arrival": "2026-11-04T00:06:00Z",
-      "scheduledArrival": "2026-11-04T00:06:00Z"
+      "arrival": "2026-11-03T23:36:00Z",
+      "scheduledArrival": "2026-11-03T23:36:00Z"
      },
      "duration": 180,
-     "startTime": "2026-11-04T00:03:00Z",
-     "endTime": "2026-11-04T00:06:00Z",
-     "scheduledStartTime": "2026-11-04T00:03:00Z",
-     "scheduledEndTime": "2026-11-04T00:06:00Z",
+     "startTime": "2026-11-03T23:33:00Z",
+     "endTime": "2026-11-03T23:36:00Z",
+     "scheduledStartTime": "2026-11-03T23:33:00Z",
+     "scheduledEndTime": "2026-11-03T23:36:00Z",
      "realTime": false,
      "scheduled": false,
      "distance": 60,
@@ -102,8 +102,8 @@
       "lon": -73.9906,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_R20N",
-      "departure": "2026-11-04T00:06:00Z",
-      "scheduledDeparture": "2026-11-04T00:06:00Z",
+      "departure": "2026-11-03T23:36:00Z",
+      "scheduledDeparture": "2026-11-03T23:36:00Z",
       "departureTimestampReason": "PREDICTED"
      },
      "to": {
@@ -112,15 +112,15 @@
       "lon": -73.9864,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_R16N",
-      "arrival": "2026-11-04T00:13:00Z",
-      "scheduledArrival": "2026-11-04T00:13:00Z",
+      "arrival": "2026-11-03T23:43:00Z",
+      "scheduledArrival": "2026-11-03T23:43:00Z",
       "arrivalTimestampReason": "PREDICTED"
      },
      "duration": 420,
-     "startTime": "2026-11-04T00:06:00Z",
-     "endTime": "2026-11-04T00:13:00Z",
-     "scheduledStartTime": "2026-11-04T00:06:00Z",
-     "scheduledEndTime": "2026-11-04T00:13:00Z",
+     "startTime": "2026-11-03T23:36:00Z",
+     "endTime": "2026-11-03T23:43:00Z",
+     "scheduledStartTime": "2026-11-03T23:36:00Z",
+     "scheduledEndTime": "2026-11-03T23:43:00Z",
      "realTime": true,
      "scheduled": true,
      "headsign": "Astoria-Ditmars Blvd",
@@ -146,8 +146,8 @@
       "lon": -73.9864,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_R16N",
-      "departure": "2026-11-04T00:13:00Z",
-      "scheduledDeparture": "2026-11-04T00:13:00Z"
+      "departure": "2026-11-03T23:43:00Z",
+      "scheduledDeparture": "2026-11-03T23:43:00Z"
      },
      "to": {
       "name": "Times Sq-42 St",
@@ -155,14 +155,14 @@
       "lon": -73.9869,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_902N",
-      "arrival": "2026-11-04T00:15:00Z",
-      "scheduledArrival": "2026-11-04T00:15:00Z"
+      "arrival": "2026-11-03T23:45:00Z",
+      "scheduledArrival": "2026-11-03T23:45:00Z"
      },
      "duration": 120,
-     "startTime": "2026-11-04T00:13:00Z",
-     "endTime": "2026-11-04T00:15:00Z",
-     "scheduledStartTime": "2026-11-04T00:13:00Z",
-     "scheduledEndTime": "2026-11-04T00:15:00Z",
+     "startTime": "2026-11-03T23:43:00Z",
+     "endTime": "2026-11-03T23:45:00Z",
+     "scheduledStartTime": "2026-11-03T23:43:00Z",
+     "scheduledEndTime": "2026-11-03T23:45:00Z",
      "realTime": false,
      "scheduled": false,
      "distance": 90,
@@ -180,8 +180,8 @@
       "lon": -73.9869,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_902N",
-      "departure": "2026-11-04T00:16:00Z",
-      "scheduledDeparture": "2026-11-04T00:16:00Z",
+      "departure": "2026-11-03T23:46:00Z",
+      "scheduledDeparture": "2026-11-03T23:46:00Z",
       "departureTimestampReason": "NO_RT_DATA"
      },
      "to": {
@@ -190,15 +190,15 @@
       "lon": -73.9792,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_901N",
-      "arrival": "2026-11-04T00:18:00Z",
-      "scheduledArrival": "2026-11-04T00:18:00Z",
+      "arrival": "2026-11-03T23:48:00Z",
+      "scheduledArrival": "2026-11-03T23:48:00Z",
       "arrivalTimestampReason": "NO_RT_DATA"
      },
      "duration": 120,
-     "startTime": "2026-11-04T00:16:00Z",
-     "endTime": "2026-11-04T00:18:00Z",
-     "scheduledStartTime": "2026-11-04T00:16:00Z",
-     "scheduledEndTime": "2026-11-04T00:18:00Z",
+     "startTime": "2026-11-03T23:46:00Z",
+     "endTime": "2026-11-03T23:48:00Z",
+     "scheduledStartTime": "2026-11-03T23:46:00Z",
+     "scheduledEndTime": "2026-11-03T23:48:00Z",
      "realTime": false,
      "scheduled": true,
      "headsign": "Grand Central-42 St",
@@ -224,21 +224,21 @@
       "lon": -73.9792,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_901N",
-      "departure": "2026-11-04T00:18:00Z",
-      "scheduledDeparture": "2026-11-04T00:18:00Z"
+      "departure": "2026-11-03T23:48:00Z",
+      "scheduledDeparture": "2026-11-03T23:48:00Z"
      },
      "to": {
       "name": "END",
       "lat": 40.7527,
       "lon": -73.9772,
       "vertexType": "NORMAL",
-      "arrival": "2026-11-04T00:20:00Z"
+      "arrival": "2026-11-03T23:50:00Z"
      },
      "duration": 120,
-     "startTime": "2026-11-04T00:18:00Z",
-     "endTime": "2026-11-04T00:20:00Z",
-     "scheduledStartTime": "2026-11-04T00:18:00Z",
-     "scheduledEndTime": "2026-11-04T00:20:00Z",
+     "startTime": "2026-11-03T23:48:00Z",
+     "endTime": "2026-11-03T23:50:00Z",
+     "scheduledStartTime": "2026-11-03T23:48:00Z",
+     "scheduledEndTime": "2026-11-03T23:50:00Z",
      "realTime": false,
      "scheduled": false,
      "distance": 170,
@@ -253,8 +253,8 @@
   {
    "id": "fixture-6",
    "duration": 780,
-   "startTime": "2026-11-04T00:06:00Z",
-   "endTime": "2026-11-04T00:19:00Z",
+   "startTime": "2026-11-03T23:36:00Z",
+   "endTime": "2026-11-03T23:49:00Z",
    "transfers": 0,
    "legs": [
     {
@@ -264,7 +264,7 @@
       "lat": 40.7359,
       "lon": -73.9906,
       "vertexType": "NORMAL",
-      "departure": "2026-11-04T00:06:00Z"
+      "departure": "2026-11-03T23:36:00Z"
      },
      "to": {
       "name": "14 St-Union Sq",
@@ -272,14 +272,14 @@
       "lon": -73.9899,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_635N",
-      "arrival": "2026-11-04T00:08:00Z",
-      "scheduledArrival": "2026-11-04T00:08:00Z"
+      "arrival": "2026-11-03T23:38:00Z",
+      "scheduledArrival": "2026-11-03T23:38:00Z"
      },
      "duration": 120,
-     "startTime": "2026-11-04T00:06:00Z",
-     "endTime": "2026-11-04T00:08:00Z",
-     "scheduledStartTime": "2026-11-04T00:06:00Z",
-     "scheduledEndTime": "2026-11-04T00:08:00Z",
+     "startTime": "2026-11-03T23:36:00Z",
+     "endTime": "2026-11-03T23:38:00Z",
+     "scheduledStartTime": "2026-11-03T23:36:00Z",
+     "scheduledEndTime": "2026-11-03T23:38:00Z",
      "realTime": false,
      "scheduled": false,
      "distance": 140,
@@ -297,8 +297,8 @@
       "lon": -73.9899,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_635N",
-      "departure": "2026-11-04T00:08:00Z",
-      "scheduledDeparture": "2026-11-04T00:06:00Z",
+      "departure": "2026-11-03T23:38:00Z",
+      "scheduledDeparture": "2026-11-03T23:36:00Z",
       "departureTimestampReason": "PREDICTED"
      },
      "to": {
@@ -307,15 +307,15 @@
       "lon": -73.9768,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_631N",
-      "arrival": "2026-11-04T00:16:00Z",
-      "scheduledArrival": "2026-11-04T00:14:00Z",
+      "arrival": "2026-11-03T23:46:00Z",
+      "scheduledArrival": "2026-11-03T23:44:00Z",
       "arrivalTimestampReason": "PREDICTED"
      },
      "duration": 480,
-     "startTime": "2026-11-04T00:08:00Z",
-     "endTime": "2026-11-04T00:16:00Z",
-     "scheduledStartTime": "2026-11-04T00:06:00Z",
-     "scheduledEndTime": "2026-11-04T00:14:00Z",
+     "startTime": "2026-11-03T23:38:00Z",
+     "endTime": "2026-11-03T23:46:00Z",
+     "scheduledStartTime": "2026-11-03T23:36:00Z",
+     "scheduledEndTime": "2026-11-03T23:44:00Z",
      "realTime": true,
      "scheduled": true,
      "headsign": "Pelham Bay Park",
@@ -341,21 +341,21 @@
       "lon": -73.9768,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_631N",
-      "departure": "2026-11-04T00:16:00Z",
-      "scheduledDeparture": "2026-11-04T00:16:00Z"
+      "departure": "2026-11-03T23:46:00Z",
+      "scheduledDeparture": "2026-11-03T23:46:00Z"
      },
      "to": {
       "name": "END",
       "lat": 40.7527,
       "lon": -73.9772,
       "vertexType": "NORMAL",
-      "arrival": "2026-11-04T00:19:00Z"
+      "arrival": "2026-11-03T23:49:00Z"
      },
      "duration": 180,
-     "startTime": "2026-11-04T00:16:00Z",
-     "endTime": "2026-11-04T00:19:00Z",
-     "scheduledStartTime": "2026-11-04T00:16:00Z",
-     "scheduledEndTime": "2026-11-04T00:19:00Z",
+     "startTime": "2026-11-03T23:46:00Z",
+     "endTime": "2026-11-03T23:49:00Z",
+     "scheduledStartTime": "2026-11-03T23:46:00Z",
+     "scheduledEndTime": "2026-11-03T23:49:00Z",
      "realTime": false,
      "scheduled": false,
      "distance": 120,
@@ -370,8 +370,8 @@
   {
    "id": "fixture-m101",
    "duration": 1440,
-   "startTime": "2026-11-04T00:01:00Z",
-   "endTime": "2026-11-04T00:25:00Z",
+   "startTime": "2026-11-03T23:31:00Z",
+   "endTime": "2026-11-03T23:55:00Z",
    "transfers": 0,
    "legs": [
     {
@@ -381,7 +381,7 @@
       "lat": 40.7359,
       "lon": -73.9906,
       "vertexType": "NORMAL",
-      "departure": "2026-11-04T00:01:00Z"
+      "departure": "2026-11-03T23:31:00Z"
      },
      "to": {
       "name": "3 Av/E 14 St",
@@ -389,14 +389,14 @@
       "lon": -73.9871,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-BusManhattan_401907",
-      "arrival": "2026-11-04T00:05:00Z",
-      "scheduledArrival": "2026-11-04T00:05:00Z"
+      "arrival": "2026-11-03T23:35:00Z",
+      "scheduledArrival": "2026-11-03T23:35:00Z"
      },
      "duration": 240,
-     "startTime": "2026-11-04T00:01:00Z",
-     "endTime": "2026-11-04T00:05:00Z",
-     "scheduledStartTime": "2026-11-04T00:01:00Z",
-     "scheduledEndTime": "2026-11-04T00:05:00Z",
+     "startTime": "2026-11-03T23:31:00Z",
+     "endTime": "2026-11-03T23:35:00Z",
+     "scheduledStartTime": "2026-11-03T23:31:00Z",
+     "scheduledEndTime": "2026-11-03T23:35:00Z",
      "realTime": false,
      "scheduled": false,
      "distance": 330,
@@ -414,8 +414,8 @@
       "lon": -73.9871,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-BusManhattan_401907",
-      "departure": "2026-11-04T00:05:00Z",
-      "scheduledDeparture": "2026-11-04T00:05:00Z",
+      "departure": "2026-11-03T23:35:00Z",
+      "scheduledDeparture": "2026-11-03T23:35:00Z",
       "departureTimestampReason": "NO_RT_DATA"
      },
      "to": {
@@ -424,15 +424,15 @@
       "lon": -73.9746,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-BusManhattan_401920",
-      "arrival": "2026-11-04T00:20:00Z",
-      "scheduledArrival": "2026-11-04T00:20:00Z",
+      "arrival": "2026-11-03T23:50:00Z",
+      "scheduledArrival": "2026-11-03T23:50:00Z",
       "arrivalTimestampReason": "NO_RT_DATA"
      },
      "duration": 900,
-     "startTime": "2026-11-04T00:05:00Z",
-     "endTime": "2026-11-04T00:20:00Z",
-     "scheduledStartTime": "2026-11-04T00:05:00Z",
-     "scheduledEndTime": "2026-11-04T00:20:00Z",
+     "startTime": "2026-11-03T23:35:00Z",
+     "endTime": "2026-11-03T23:50:00Z",
+     "scheduledStartTime": "2026-11-03T23:35:00Z",
+     "scheduledEndTime": "2026-11-03T23:50:00Z",
      "realTime": false,
      "scheduled": true,
      "headsign": "Fort George",
@@ -458,21 +458,21 @@
       "lon": -73.9746,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-BusManhattan_401920",
-      "departure": "2026-11-04T00:20:00Z",
-      "scheduledDeparture": "2026-11-04T00:20:00Z"
+      "departure": "2026-11-03T23:50:00Z",
+      "scheduledDeparture": "2026-11-03T23:50:00Z"
      },
      "to": {
       "name": "END",
       "lat": 40.7527,
       "lon": -73.9772,
       "vertexType": "NORMAL",
-      "arrival": "2026-11-04T00:25:00Z"
+      "arrival": "2026-11-03T23:55:00Z"
      },
      "duration": 300,
-     "startTime": "2026-11-04T00:20:00Z",
-     "endTime": "2026-11-04T00:25:00Z",
-     "scheduledStartTime": "2026-11-04T00:20:00Z",
-     "scheduledEndTime": "2026-11-04T00:25:00Z",
+     "startTime": "2026-11-03T23:50:00Z",
+     "endTime": "2026-11-03T23:55:00Z",
+     "scheduledStartTime": "2026-11-03T23:50:00Z",
+     "scheduledEndTime": "2026-11-03T23:55:00Z",
      "realTime": false,
      "scheduled": false,
      "distance": 390,
@@ -487,8 +487,8 @@
   {
    "id": "fixture-4",
    "duration": 660,
-   "startTime": "2026-11-04T00:03:00Z",
-   "endTime": "2026-11-04T00:14:00Z",
+   "startTime": "2026-11-03T23:33:00Z",
+   "endTime": "2026-11-03T23:44:00Z",
    "transfers": 0,
    "legs": [
     {
@@ -498,7 +498,7 @@
       "lat": 40.7359,
       "lon": -73.9906,
       "vertexType": "NORMAL",
-      "departure": "2026-11-04T00:03:00Z"
+      "departure": "2026-11-03T23:33:00Z"
      },
      "to": {
       "name": "14 St-Union Sq",
@@ -506,14 +506,14 @@
       "lon": -73.9899,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_635N",
-      "arrival": "2026-11-04T00:05:00Z",
-      "scheduledArrival": "2026-11-04T00:05:00Z"
+      "arrival": "2026-11-03T23:35:00Z",
+      "scheduledArrival": "2026-11-03T23:35:00Z"
      },
      "duration": 120,
-     "startTime": "2026-11-04T00:03:00Z",
-     "endTime": "2026-11-04T00:05:00Z",
-     "scheduledStartTime": "2026-11-04T00:03:00Z",
-     "scheduledEndTime": "2026-11-04T00:05:00Z",
+     "startTime": "2026-11-03T23:33:00Z",
+     "endTime": "2026-11-03T23:35:00Z",
+     "scheduledStartTime": "2026-11-03T23:33:00Z",
+     "scheduledEndTime": "2026-11-03T23:35:00Z",
      "realTime": false,
      "scheduled": false,
      "distance": 140,
@@ -531,8 +531,8 @@
       "lon": -73.9899,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_635N",
-      "departure": "2026-11-04T00:05:00Z",
-      "scheduledDeparture": "2026-11-04T00:05:00Z",
+      "departure": "2026-11-03T23:35:00Z",
+      "scheduledDeparture": "2026-11-03T23:35:00Z",
       "departureTimestampReason": "PREDICTED"
      },
      "to": {
@@ -541,15 +541,15 @@
       "lon": -73.9768,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_631N",
-      "arrival": "2026-11-04T00:11:00Z",
-      "scheduledArrival": "2026-11-04T00:11:00Z",
+      "arrival": "2026-11-03T23:41:00Z",
+      "scheduledArrival": "2026-11-03T23:41:00Z",
       "arrivalTimestampReason": "PREDICTED"
      },
      "duration": 360,
-     "startTime": "2026-11-04T00:05:00Z",
-     "endTime": "2026-11-04T00:11:00Z",
-     "scheduledStartTime": "2026-11-04T00:05:00Z",
-     "scheduledEndTime": "2026-11-04T00:11:00Z",
+     "startTime": "2026-11-03T23:35:00Z",
+     "endTime": "2026-11-03T23:41:00Z",
+     "scheduledStartTime": "2026-11-03T23:35:00Z",
+     "scheduledEndTime": "2026-11-03T23:41:00Z",
      "realTime": true,
      "scheduled": true,
      "headsign": "Woodlawn",
@@ -575,21 +575,21 @@
       "lon": -73.9768,
       "vertexType": "TRANSIT",
       "stopId": "us-ny-MTA-NYCSubway_631N",
-      "departure": "2026-11-04T00:11:00Z",
-      "scheduledDeparture": "2026-11-04T00:11:00Z"
+      "departure": "2026-11-03T23:41:00Z",
+      "scheduledDeparture": "2026-11-03T23:41:00Z"
      },
      "to": {
       "name": "END",
       "lat": 40.7527,
       "lon": -73.9772,
       "vertexType": "NORMAL",
-      "arrival": "2026-11-04T00:14:00Z"
+      "arrival": "2026-11-03T23:44:00Z"
      },
      "duration": 180,
-     "startTime": "2026-11-04T00:11:00Z",
-     "endTime": "2026-11-04T00:14:00Z",
-     "scheduledStartTime": "2026-11-04T00:11:00Z",
-     "scheduledEndTime": "2026-11-04T00:14:00Z",
+     "startTime": "2026-11-03T23:41:00Z",
+     "endTime": "2026-11-03T23:44:00Z",
+     "scheduledStartTime": "2026-11-03T23:41:00Z",
+     "scheduledEndTime": "2026-11-03T23:44:00Z",
      "realTime": false,
      "scheduled": false,
      "distance": 120,

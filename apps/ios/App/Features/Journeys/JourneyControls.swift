@@ -19,22 +19,19 @@ struct JourneyControls: View {
     let onSwap: () -> Void
     let onChooseTime: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            HStack(spacing: Spacing.xs) {
-                VStack(spacing: 0) {
-                    endRow(.from)
-                    Divider()
-                        .padding(.leading, Spacing.md)
-                    endRow(.to)
+            // At accessibility sizes the ends take the full width, and the swap button goes under them.
+            if dynamicTypeSize.isAccessibilitySize {
+                ends
+                swapButton
+            } else {
+                HStack(spacing: Spacing.xs) {
+                    ends
+                    swapButton
                 }
-                .background(.fill.tertiary, in: Radius.shape(Radius.md))
-                Button("Swap start and end", systemImage: "arrow.up.arrow.down", action: onSwap)
-                    .labelStyle(.iconOnly)
-                    .buttonStyle(.bordered)
-                    .buttonBorderShape(.circle)
-                    .controlSize(.large)
-                    .accessibilityIdentifier("journeys.swap")
             }
             Button(action: onChooseTime) {
                 Label(timeTitle, systemImage: "clock")
@@ -45,6 +42,25 @@ struct JourneyControls: View {
             .accessibilityHint("Choose when to leave or when to arrive")
             .accessibilityIdentifier("journeys.time")
         }
+    }
+
+    private var ends: some View {
+        VStack(spacing: 0) {
+            endRow(.from)
+            Divider()
+                .padding(.leading, Spacing.md)
+            endRow(.to)
+        }
+        .background(.fill.tertiary, in: Radius.shape(Radius.md))
+    }
+
+    private var swapButton: some View {
+        Button("Swap start and end", systemImage: "arrow.up.arrow.down", action: onSwap)
+            .labelStyle(.iconOnly)
+            .buttonStyle(.bordered)
+            .buttonBorderShape(.circle)
+            .controlSize(.large)
+            .accessibilityIdentifier("journeys.swap")
     }
 
     private func endRow(_ end: End) -> some View {
@@ -59,13 +75,19 @@ struct JourneyControls: View {
             }
         } label: {
             HStack(spacing: Spacing.sm) {
-                Image(systemName: endpoint.isCurrentLocation ? "location.fill" : "mappin.circle.fill")
-                    .foregroundStyle(endpoint.isCurrentLocation ? Color.brand : Color.red)
-                    .accessibilityHidden(true)
+                // At accessibility sizes the icon sits by the label, leaving the name the row's whole width.
+                if !dynamicTypeSize.isAccessibilitySize {
+                    icon(for: endpoint)
+                }
                 VStack(alignment: .leading, spacing: Spacing.xxxs) {
-                    Text(title)
-                        .typography(.caption)
-                        .foregroundStyle(.textSecondary)
+                    HStack(spacing: Spacing.xxs) {
+                        if dynamicTypeSize.isAccessibilitySize {
+                            icon(for: endpoint)
+                        }
+                        Text(title)
+                    }
+                    .typography(.caption)
+                    .foregroundStyle(.textSecondary)
                     Text(name(of: endpoint))
                         .typography(.body)
                         .foregroundStyle(.textPrimary)
@@ -84,6 +106,12 @@ struct JourneyControls: View {
         .accessibilityHint(end == .from ? "Choose where to start" : "Choose where to go")
         .accessibilityAddTraits(.isButton)
         .accessibilityIdentifier(end == .from ? "journeys.from" : "journeys.to")
+    }
+
+    private func icon(for endpoint: JourneyEndpoint) -> some View {
+        Image(systemName: endpoint.isCurrentLocation ? "location.fill" : "mappin.circle.fill")
+            .foregroundStyle(endpoint.isCurrentLocation ? Color.brand : Color.red)
+            .accessibilityHidden(true)
     }
 
     private func name(of endpoint: JourneyEndpoint) -> String {

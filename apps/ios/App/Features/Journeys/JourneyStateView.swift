@@ -3,14 +3,17 @@ import SwiftUI
 import TransitKit
 import UIKit
 
-/// A state the journey options show in place of options, with a way on. Buttons are filled rather than glass, since
-/// they sit in the sheet's glass.
+/// A state the journey options show in place of options, with a way on: laid out tighter than
+/// `ContentUnavailableView`, so the way on shows under the controls with the sheet at half height. Buttons are filled
+/// rather than glass, since they sit in the sheet's glass.
 struct JourneyStateView<Actions: View>: View {
     private let title: LocalizedStringKey
     private let systemImage: String
     private let message: LocalizedStringKey
     private let identifier: String
     private let actions: Actions
+
+    @ScaledMetric(relativeTo: .title2) private var gap = Spacing.xs
 
     init(
         _ title: LocalizedStringKey,
@@ -27,15 +30,27 @@ struct JourneyStateView<Actions: View>: View {
     }
 
     var body: some View {
-        ContentUnavailableView {
-            Label(title, systemImage: systemImage)
-        } description: {
+        VStack(spacing: gap) {
+            Image(systemName: systemImage)
+                .font(.title)
+                .foregroundStyle(.textSecondary)
+                .accessibilityHidden(true)
+            Text(title)
+                .typography(.cardTitle)
+                .foregroundStyle(.textPrimary)
+                .accessibilityAddTraits(.isHeader)
             Text(message)
-        } actions: {
+                .typography(.secondary)
+                .foregroundStyle(.textSecondary)
             actions
                 .buttonBorderShape(.capsule)
                 .typography(.button)
+                .padding(.top, Spacing.xxs)
         }
+        .multilineTextAlignment(.center)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, Spacing.sm)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(identifier)
     }
