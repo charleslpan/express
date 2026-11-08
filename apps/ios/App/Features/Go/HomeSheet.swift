@@ -6,8 +6,16 @@ import UIKit
 /// stack (``AppRouter/homePath``), or place search in its place while ``AppRouter/isSearchingPlaces``. It brings no
 /// background of its own, so the system sheet draws its glass, and it presents the router's sheets (About) on top.
 /// ``GoView`` presents it with its detents.
+///
+/// It measures how tall its peek should be, from the search field down to what the content marks with
+/// ``View/homeSheetPeekBoundary(_:)``, into `peekHeight`; nil while nothing is marked.
 struct HomeSheet: View {
+    @Binding var peekHeight: CGFloat?
     @Environment(AppRouter.self) private var router
+
+    init(peekHeight: Binding<CGFloat?>) {
+        _peekHeight = peekHeight
+    }
 
     var body: some View {
         @Bindable var router = router
@@ -21,6 +29,15 @@ struct HomeSheet: View {
                     ScrollView {
                         HomeSheetContent {
                             router.showPlaceSearch()
+                        }
+                        .backgroundPreferenceValue(HomePeekBoundary.self) { boundary in
+                            GeometryReader { proxy in
+                                // Measured in the content's own space, so scrolling doesn't move it.
+                                let bottom = boundary.map { proxy[$0].maxY }
+                                Color.clear
+                                    .onAppear { updatePeek(bottom) }
+                                    .onChange(of: bottom) { _, bottom in updatePeek(bottom) }
+                            }
                         }
                         .padding(.top, Spacing.lg)
                     }
@@ -36,7 +53,22 @@ struct HomeSheet: View {
     }
 }
 
-/// The home sheet's peek: tall enough for the search field at the current text size (which stops growing at AX2),
+extension HomeSheet {
+    /// The tallest the peek grows, so it stays under the half-height detent at the largest text sizes.
+    static let maxPeekHeight: CGFloat = 400
+
+    /// Sets the peek to show the content down to `bottom` (in the content's space), with the same room around it
+    /// as ``HomePeekDetent`` gives the search field; whole points only, so layout rounding doesn't move the sheet.
+    private func updatePeek(_ bottom: CGFloat?) {
+        let height = bottom.map { min((Spacing.lg + $0 + Spacing.lg).rounded(.up), Self.maxPeekHeight) }
+        if height != peekHeight {
+            peekHeight = height
+        }
+    }
+}
+
+/// The home sheet's peek while no content marks a peek boundary: tall enough for the search field at the current text
+/// size (which stops growing at AX2),
 /// with room above it for the grabber and below it for the sheet's edge.
 struct HomePeekDetent: CustomPresentationDetent {
     static func height(in context: Context) -> CGFloat? {
@@ -48,10 +80,11 @@ struct HomePeekDetent: CustomPresentationDetent {
 }
 
 extension HomeSheetDetent {
-    /// The system detent for this one.
-    var presentationDetent: PresentationDetent {
+    /// The system detent for this one, with the peek `peekHeight` tall where the content measured one
+    /// (``HomeSheet``).
+    func presentationDetent(peekHeight: CGFloat?) -> PresentationDetent {
         switch self {
-        case .peek: .custom(HomePeekDetent.self)
+        case .peek: peekHeight.map { .height($0) } ?? .custom(HomePeekDetent.self)
         case .half: .medium
         case .full: .large
         }
@@ -94,10 +127,12 @@ private struct PlaceSearchPlaceholder: View {
 #Preview("Home sheet") {
     Color.gray
         .sheet(isPresented: .constant(true)) {
-            HomeSheet()
+            HomeSheet(peekHeight: .constant(nil))
                 .presentationDetents([.custom(HomePeekDetent.self), .medium, .large])
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                 .interactiveDismissDisabled()
         }
         .environment(AppRouter(homeDetent: .half))
+        .environment(LocationService(fixed: .notDetermined))
+        .environment(AppEnvironment())
 }
