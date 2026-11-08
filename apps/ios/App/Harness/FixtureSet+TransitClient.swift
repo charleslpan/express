@@ -11,7 +11,9 @@ extension FixtureSet {
     /// by the stop id after its feed's `_`; none for a stop without a file). Live buses get Midtown's buses from
     /// `/api/vehicles/bus` (`Fixtures/vehicles-bus-midtown.json`, its feed ``FixtureSet/busDataAge`` old) and their
     /// routes' labels and colours (`Fixtures/map-routes-midtown.json`: the feed's for the 14 St SBS routes,
-    /// illustrative for the rest). The bus-only sets run no trains.
+    /// illustrative for the rest). The bus-only sets run no trains. The trip view's
+    /// requests follow the set's network too: a trip by its id (`Fixtures/trip-<tripId>.json`, such as the uptown 6
+    /// Nearby lists, `fixture-6-0-4`).
     var transitClient: TransitClient {
         let fixtures = self
         return TransitClient(transport: StubTransport { request in
@@ -50,6 +52,8 @@ extension FixtureSet {
                 return data
             }
             return noDepartures
+        case "/api/v6/trip":
+            return try fixture("trip-\(request.query["tripId"] ?? "")")
         default:
             throw URLError(.resourceUnavailable)
         }

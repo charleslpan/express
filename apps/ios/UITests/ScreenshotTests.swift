@@ -157,6 +157,50 @@ final class ScreenshotTests: XCTestCase {
         capture("buses", fixtures: "nyc-evening-buses-stale", settledWhen: "buses.notice")
     }
 
+    // Stop detail and trip view (N2), pushed in the home sheet: Union Square's board at half and full height, then
+    // with times that may not be real time, offline, and with nothing more today; the uptown 6 followed from it
+    // mid-route at half and full height, a trip that has ended, and offline.
+
+    func testStopHalf() {
+        capture("stop-half", fixtures: "nyc-evening", settledWhen: "stop.loaded")
+    }
+
+    func testStopFull() {
+        capture("stop-full", fixtures: "nyc-evening", settledWhen: "stop.loaded")
+    }
+
+    func testStopStale() {
+        capture("stop-stale", fixtures: "nyc-evening-stale", settledWhen: "stop.not-real-time")
+    }
+
+    func testStopError() {
+        capture("stop-error", fixtures: "offline", settledWhen: "stop.failed")
+    }
+
+    func testStopEmpty() {
+        capture("stop-empty", fixtures: "nyc-no-service", settledWhen: "stop.empty")
+    }
+
+    func testTrip() {
+        capture("trip", fixtures: "nyc-evening", settledWhen: "trip.loaded")
+    }
+
+    func testTripFull() {
+        capture("trip-full", fixtures: "nyc-evening", settledWhen: "trip.loaded")
+    }
+
+    func testTripStale() {
+        capture("trip", fixtures: "nyc-evening-stale", settledWhen: "trip.not-real-time")
+    }
+
+    func testTripEnded() {
+        capture("trip-ended", fixtures: "nyc-evening", settledWhen: "trip.ended")
+    }
+
+    func testTripError() {
+        capture("trip-error", fixtures: "offline", settledWhen: "trip.failed")
+    }
+
     // GlassUI's gallery, one section per screen. The gallery shows no transit data; the fixtures only fix the clock.
 
     func testGalleryColors() {
