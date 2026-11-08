@@ -1,7 +1,6 @@
 extension AppRouter {
-    /// Starts a place search from the home sheet's search field: raises the sheet to full and shows search in it.
-    ///
-    /// Until place search (S3) lands, the sheet shows a placeholder there; S3 fills it in.
+    /// Starts a place search from the home sheet's search field: raises the sheet to full and shows search in it
+    /// (``PlaceSearchPanel``).
     func showPlaceSearch() {
         isSearchingPlaces = true
         homeDetent = .full

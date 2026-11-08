@@ -51,7 +51,7 @@ The controls that float over the map, all on native Liquid Glass (`glassEffect`)
 
 | Control | What it is |
 | --- | --- |
-| `GlassSearchField(_:text:onSubmit:accessory:)` | A floating capsule search field, as at the top of Apple Maps, with a clear button and an optional trailing accessory (plain, not glass). |
+| `GlassSearchField(_:text:surface:isFocused:onSubmit:accessory:)` | A floating capsule search field, as at the top of Apple Maps, with a clear button and an optional trailing accessory (plain, not glass). `surface: .inset` draws it as a fill for use inside a sheet, which already brings glass; `isFocused` focuses it from outside. |
 | `GlassCard { … }`, `GlassCard { action } content: { … }` | A glass panel in a `Radius.lg` shape; with an action, the whole card is one button. |
 | `GlassButton(_:systemImage:prominence:action:)` | A capsule button; `.prominent` tints it with `.brand` for the one primary action. |
 | `GlassIconButton(_:systemImage:prominence:action:)` | A round, icon-only button, 48 points across; its title is its VoiceOver label and large content viewer text. |
