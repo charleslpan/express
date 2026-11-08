@@ -58,6 +58,9 @@ struct HomeSheet: View {
             .navigationDestination(for: JourneyOptionsRoute.self) { route in
                 JourneyOptionsView(route: route)
             }
+            .navigationDestination(for: ChoosePlaceRoute.self) { route in
+                ChoosePlaceView(route: route)
+            }
             .navigationDestination(for: JourneyDetailRoute.self) { route in
                 JourneyDetailView(route: route)
             }
@@ -129,4 +132,5 @@ extension HomeSheetDetent {
         .environment(AppRouter(homeDetent: .half))
         .environment(LocationService(fixed: .notDetermined))
         .environment(AppEnvironment())
+        .environment(PlaceStore.inMemory())
 }

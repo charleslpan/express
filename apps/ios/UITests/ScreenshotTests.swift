@@ -317,7 +317,7 @@ final class ScreenshotTests: XCTestCase {
     /// `settledWhen` names elements the screen shows once it has finished loading what it shows, such as map tiles
     /// or departures; the capture waits for each a while, then goes ahead without it rather than fail. `then` runs
     /// before each capture, to put the screen in a state only a tap reaches, such as an open menu.
-    private func capture(
+    func capture(
         _ screen: String,
         fixtures: String,
         settledWhen settled: String...,
@@ -343,33 +343,37 @@ final class ScreenshotTests: XCTestCase {
     }
 }
 
-/// In an extension, as the class body has reached SwiftLint's length limit; `@objc` so XCTest finds each test.
+/// Home and Work chips and the Saved section (P2) in the home sheet, apart from the class body to keep it short.
 extension ScreenshotTests {
-    // Journey detail (J2), pushed over the options: the 6 running late, the L and the M101 with a transfer, the Q and
-    // the shuttle with a tight transfer, the 6 cancelled, times that may not be real time, and the stops between
-    // unfolded.
-
-    @objc func testJourneySubway() {
-        capture("journey-subway", fixtures: "nyc-evening", settledWhen: "journey.loaded")
+    func testHomePlaces() {
+        capture("home-places", fixtures: "nyc-evening", settledWhen: "home.chip.home")
     }
 
-    @objc func testJourneyBus() {
-        capture("journey-bus", fixtures: "nyc-evening", settledWhen: "journey.loaded")
+    func testHomePlacesUnset() {
+        capture("home-places-unset", fixtures: "nyc-evening", settledWhen: "home.chip.home")
     }
 
-    @objc func testJourneyTight() {
-        capture("journey-tight", fixtures: "nyc-evening", settledWhen: "journey.transfer-tight")
+    func testHomeSaved() {
+        capture("home-saved", fixtures: "nyc-evening", settledWhen: "home.saved", then: scrollToSaved)
     }
 
-    @objc func testJourneyCancelled() {
-        capture("journey-cancelled", fixtures: "nyc-evening-cancelled", settledWhen: "journey.problem")
+    func testHomeSavedLoading() {
+        capture("home-saved-loading", fixtures: "slow-network", settledWhen: "home.saved.loading", then: scrollToSaved)
     }
 
-    @objc func testJourneyStale() {
-        capture("journey-stale", fixtures: "nyc-evening-stale", settledWhen: "journey.may-not-be-real-time")
+    func testHomeSavedEmpty() {
+        capture("home-saved-empty", fixtures: "nyc-evening", settledWhen: "home.saved.empty", then: scrollToSaved)
     }
 
-    @objc func testJourneyStops() {
-        capture("journey-stops", fixtures: "nyc-evening", settledWhen: "journey.loaded")
+    /// Scrolls the home sheet until the Saved heading is in its top half, with small drags so it doesn't overshoot.
+    private func scrollToSaved(_ app: XCUIApplication) {
+        let heading = app.descendants(matching: .any)["home.saved.heading"]
+        let window = app.windows.firstMatch
+        for _ in 0 ..< 10 {
+            guard heading.exists, !(heading.isHittable && heading.frame.minY < window.frame.midY) else { return }
+            let start = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85))
+            let end = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
+            start.press(forDuration: 0.05, thenDragTo: end)
+        }
     }
 }
