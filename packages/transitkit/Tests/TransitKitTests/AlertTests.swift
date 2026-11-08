@@ -361,4 +361,14 @@ struct NearbyAlertTests {
         let six = try #require(rows.first { $0.routeId.hasSuffix("_6") })
         #expect(six.currentAlerts(now: Self.now).map(\.level) == [.severe])
     }
+
+    @Test func stopBoardListsEachCurrentAlertOnceMostSevereFirst() throws {
+        let board = try Self.board()
+        let departures = board.stops[0].lines.flatMap(\.departures)
+        let stopBoard = StopBoard(stopTimes: departures, fetchedAt: Self.now, dataAge: board.dataAge)
+        #expect(stopBoard.currentAlerts().map(\.header) == [
+            "No [6] trains between 3 Av-138 St and Pelham Bay Park",
+            "[L] trains are running with delays",
+        ])
+    }
 }

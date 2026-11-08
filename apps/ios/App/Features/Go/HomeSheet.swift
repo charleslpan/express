@@ -52,6 +52,7 @@ struct HomeSheet: View {
                 }
             }
             .toolbarVisibility(.hidden, for: .navigationBar)
+            .stopsNavigationDestinations()
             .navigationDestination(for: AlertsDestination.self) { destination in
                 AlertsDestinationView(destination: destination)
             }

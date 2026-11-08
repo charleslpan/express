@@ -49,6 +49,24 @@ enum ScreenshotScreen: String, CaseIterable {
     /// Live subway trains over Midtown and Union Square, and the same map zoomed out, where they hide (V1).
     case trains
     case trainsZoomedOut = "trains-zoomed-out"
+    /// Live buses over Midtown and Union Square (alone, or with trains, by the fixtures), and zoomed out, where they
+    /// hide (V2).
+    case buses
+    case busesZoomedOut = "buses-zoomed-out"
+    /// Union Square's full departures board pushed in the home sheet (N2), at half and full height, and in its other
+    /// states at half: times that may not be real time (`nyc-evening-stale`), offline (`offline`), and no more
+    /// departures today (`nyc-no-service`).
+    case stopHalf = "stop-half"
+    case stopFull = "stop-full"
+    case stopStale = "stop-stale"
+    case stopError = "stop-error"
+    case stopEmpty = "stop-empty"
+    /// The uptown 6 followed from Union Square's board (N2): mid-route at half and full height, a trip that has
+    /// ended, and offline (`offline`).
+    case trip
+    case tripFull = "trip-full"
+    case tripEnded = "trip-ended"
+    case tripError = "trip-error"
     /// Service alerts (A3), with `-fixtures nyc-alerts`: banners on Nearby's rows at full height, the alert chip at
     /// half height, and an alert's full text, which the UI test opens by tapping a banner.
     case alertsNearby = "alerts-nearby"
@@ -57,6 +75,9 @@ enum ScreenshotScreen: String, CaseIterable {
     /// Line status (A3), pushed onto the home sheet: mixed lines (`nyc-alerts`), all good service (`nyc-evening`),
     /// loading (`slow-network`), and offline (`offline`).
     case lineStatus = "line-status"
+    /// Union Square's board (N2) with `-fixtures nyc-alerts`: the stop's alerts under its name, and a banner on each
+    /// line and direction they apply to (A3).
+    case stopAlerts = "stop-alerts"
 
     #if DEBUG
         /// GlassUI's gallery, every section (debug builds only).
@@ -80,11 +101,14 @@ enum ScreenshotScreen: String, CaseIterable {
         case .homePeek, .homeHalf, .homeFull, .homeOutsideNYC, .about, .nearbyPeek, .nearbyHalf, .nearbyFull,
              .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError, .nearbyEmpty, .searchEmpty,
              .searchTyping, .searchResults, .searchNoResults, .searchError, .searchNoKey, .searchPlace, .searchRecents,
-             .placeSaved, .placeHomeWork, .alertsNearby, .alertsChip, .alertDetail, .lineStatus:
+             .placeSaved, .placeHomeWork, .stopHalf, .stopFull, .stopStale, .stopError, .stopEmpty, .trip, .tripFull,
+             .tripEnded, .tripError, .alertsNearby, .alertsChip, .alertDetail, .lineStatus, .stopAlerts:
             RootView()
         case .mapGlass: MapGlassScreen()
         case .trains: GoView(camera: MapCamera(center: Self.midtown, zoom: 14.5))
         case .trainsZoomedOut: GoView(camera: MapCamera(center: Self.midtown, zoom: 11.5))
+        case .buses: GoView(camera: MapCamera(center: Self.midtown, zoom: 15))
+        case .busesZoomedOut: GoView(camera: MapCamera(center: Self.midtown, zoom: 13))
         #if DEBUG
             case .gallery: GlassUIGallery()
             case .galleryColors: GlassUIGallery(sections: [.colors])
@@ -105,8 +129,9 @@ enum ScreenshotScreen: String, CaseIterable {
     var homeDetent: HomeSheetDetent {
         switch self {
         case .homeHalf, .nearbyHalf, .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError,
-             .nearbyEmpty, .alertsChip, .alertDetail: .half
-        case .homeFull, .nearbyFull, .alertsNearby, .lineStatus: .full
+             .nearbyEmpty, .stopHalf, .stopStale, .stopError, .stopEmpty, .trip, .tripEnded, .tripError, .alertsChip,
+             .alertDetail: .half
+        case .homeFull, .nearbyFull, .stopFull, .tripFull, .alertsNearby, .lineStatus, .stopAlerts: .full
         default: .peek
         }
     }
@@ -127,7 +152,7 @@ enum ScreenshotScreen: String, CaseIterable {
         }
     }
 
-    /// Puts the router where this screen starts: searching, or showing a picked place.
+    /// Puts the router where this screen starts: searching, showing a picked place, or with a stop or trip pushed.
     @MainActor
     func prepare(_ router: AppRouter) {
         if self == .lineStatus {
@@ -136,6 +161,18 @@ enum ScreenshotScreen: String, CaseIterable {
             router.showPlaceSearch()
         } else if [.searchPlace, .placeSaved, .placeHomeWork].contains(self) {
             router.showPlace(FixturePlaceSearchService.places[0])
+        }
+        let unionSquare = StopRoute(stopId: "us-ny-MTA-NYCSubway_635", name: "14 St-Union Sq", isSubway: true)
+        switch self {
+        case .stopHalf, .stopFull, .stopStale, .stopError, .stopEmpty, .stopAlerts:
+            router.homePath.append(unionSquare)
+        case .trip, .tripFull, .tripError:
+            router.homePath.append(unionSquare)
+            router.homePath.append(TripRoute(tripId: "fixture-6-0-4", stationId: unionSquare.stopId))
+        case .tripEnded:
+            router.homePath.append(TripRoute(tripId: "fixture-6-0-ended"))
+        default:
+            break
         }
     }
 
@@ -182,7 +219,8 @@ enum ScreenshotScreen: String, CaseIterable {
         }
     }
 
-    /// Where the trains screens look: between Union Square and Herald Square, where the `nyc-evening` trips run.
+    /// Where the trains and buses screens look: between Union Square and Herald Square, where the `nyc-evening` trips
+    /// and buses run.
     private static let midtown = Coordinate(latitude: 40.7445, longitude: -73.9895)
 
     /// The accessibility identifier the harness puts on the screen, which the UI test waits for before capturing.

@@ -52,6 +52,8 @@ struct BackendFixtureTests {
         let directory = try #require(Bundle.module.url(forResource: "Fixtures", withExtension: nil))
         let urls = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
             .filter { $0.pathExtension == "json" }
+            // Our own endpoints' answers (`vehicles-…` from `/api/vehicles/bus`) carry no MOTIS stops.
+            .filter { !$0.lastPathComponent.hasPrefix("vehicles-") }
         #expect(urls.count >= 5)
         for url in urls {
             let name = url.deletingPathExtension().lastPathComponent

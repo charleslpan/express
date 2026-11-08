@@ -231,6 +231,14 @@ public extension LineDepartures {
     }
 }
 
+public extension StopBoard {
+    /// The alerts that apply to the departures on the board, across every line and direction, each once, the most
+    /// severe first: what the stop screen shows under the stop's name.
+    func currentAlerts() -> [ServiceAlert] {
+        lines.flatMap { $0.currentAlerts(now: fetchedAt) }.uniqued().sortedBySeverity()
+    }
+}
+
 /// A line near the rider with alerts that apply to it now, for the home sheet's summary ("2 lines with alerts").
 public struct LineAlertSummary: Sendable, Hashable, Identifiable {
     /// The line as line status names it, express variants under their line (`6` for the 6X).

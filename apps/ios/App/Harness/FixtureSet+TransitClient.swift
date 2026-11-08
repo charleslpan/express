@@ -8,16 +8,24 @@ extension FixtureSet {
     /// from our server and shifted to the reference date) and `/metrics` with the subway feed
     /// ``FixtureSet/realtimeDataAge`` old, in every set. Nearby's requests follow the set's network: the stops around
     /// Union Square (`Fixtures/nearby-stops.json`) and each stop's departures (`Fixtures/nearby-stoptimes-<stop>.json`,
-    /// by the stop id after its feed's `_`; none for a stop without a file). Line status (`/api/alerts`) answers every
-    /// requested line with no alerts, but in `nyc-alerts`, which answers from `Fixtures/line-status-nyc-alerts.json`
-    /// (the MTA's alerts recorded that evening, with the set's own) and adds `Fixtures/nearby-alerts.json` to the
-    /// departures.
+    /// by the stop id after its feed's `_`; none for a stop without a file). Live buses get Midtown's buses from
+    /// `/api/vehicles/bus` (`Fixtures/vehicles-bus-midtown.json`, its feed ``FixtureSet/busDataAge`` old) and their
+    /// routes' labels and colours (`Fixtures/map-routes-midtown.json`: the feed's for the 14 St SBS routes,
+    /// illustrative for the rest). The bus-only sets run no trains. The trip view's
+    /// requests follow the set's network too: a trip by its id (`Fixtures/trip-<tripId>.json`, such as the uptown 6
+    /// Nearby lists, `fixture-6-0-4`). Line status (`/api/alerts`) answers every requested line with no alerts, but in
+    /// `nyc-alerts`, which answers from `Fixtures/line-status-nyc-alerts.json` (the MTA's alerts recorded that evening,
+    /// with the set's own) and adds `Fixtures/nearby-alerts.json` to the departures.
     var transitClient: TransitClient {
         let fixtures = self
         return TransitClient(transport: StubTransport { request in
             switch request.path {
             case "/api/v6/map/trips":
-                return try Self.fixture("map-trips-midtown")
+                return fixtures.hasTrains ? try Self.fixture("map-trips-midtown") : Data("[]".utf8)
+            case "/api/vehicles/bus":
+                return try Self.busPositions(fixtures)
+            case "/api/experimental/map/routes":
+                return try Self.fixture("map-routes-midtown")
             case "/metrics":
                 return Self.metrics(fixtures)
             default:
@@ -29,7 +37,8 @@ extension FixtureSet {
             case .slowNetwork:
                 try await Task.sleep(for: .seconds(24 * 60 * 60))
                 throw CancellationError()
-            case .nycEvening, .nycEveningStale, .nycNoService, .noKey, .nycAlerts:
+            case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .noKey,
+                 .nycAlerts:
                 return try Self.response(to: request, fixtures: fixtures)
             }
         })
@@ -49,6 +58,8 @@ extension FixtureSet {
                 return data
             }
             return noDepartures
+        case "/api/v6/trip":
+            return try fixture("trip-\(request.query["tripId"] ?? "")")
         case "/api/alerts":
             return try lineStatus(lines: request.query["lines"] ?? "", fixtures: fixtures)
         default:
@@ -100,6 +111,14 @@ extension FixtureSet {
             "lines": Dictionary(lines, uniquingKeysWith: { first, _ in first }),
         ]
         return try JSONSerialization.data(withJSONObject: answer)
+    }
+
+    /// `/api/vehicles/bus`'s answer, with Bus Time's feed as old as the set's bus data is.
+    private static func busPositions(_ fixtures: FixtureSet) throws -> Data {
+        let data = try fixture("vehicles-bus-midtown")
+        guard var response = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return data }
+        response["updatedAt"] = Int(fixtures.referenceDate.timeIntervalSince1970 - fixtures.busDataAge)
+        return try JSONSerialization.data(withJSONObject: response)
     }
 
     /// A `stoptimes` answer with nothing due.
