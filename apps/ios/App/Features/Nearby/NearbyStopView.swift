@@ -3,7 +3,8 @@ import SwiftUI
 import TransitKit
 
 /// A nearby stop and its next departures: a header with the stop's mode, name, and walk, then a row per line and
-/// direction, soonest first. Tapping a row opens that line's departures (``AppRouter/showDepartures(_:at:)``).
+/// direction, soonest first. Tapping a row opens that line's departures (``AppRouter/showDepartures(_:at:)``), and
+/// tapping the header the stop's full board (``AppRouter/showStop(_:)``).
 struct NearbyStopView: View {
     let stop: NearbyStop
     /// The lines to show, soonest first.
@@ -14,6 +15,7 @@ struct NearbyStopView: View {
     let marksPeek: Bool
     let onSelect: (LineDepartures) -> Void
 
+    @Environment(AppRouter.self) private var router
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .headline) private var gap = Spacing.xs
 
@@ -66,6 +68,16 @@ struct NearbyStopView: View {
     }
 
     private var header: some View {
+        Button {
+            router.showStop(stop)
+        } label: {
+            headerLabel
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Shows every departure from this stop.")
+    }
+
+    private var headerLabel: some View {
         HStack(spacing: gap) {
             ModeIcon(stop.isSubway ? .subway : .bus, style: .tile)
                 .accessibilityHidden(true)
@@ -77,7 +89,13 @@ struct NearbyStopView: View {
                     .typography(.secondary)
                     .foregroundStyle(.textSecondary)
             }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.forward")
+                .typography(.secondary)
+                .foregroundStyle(.textTertiary)
         }
+        .frame(minHeight: 44)
+        .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
             "\(stop.displayName), \(stop.isSubway ? "subway station" : "bus stop"), \(stop.walkingMinutes) minute walk"

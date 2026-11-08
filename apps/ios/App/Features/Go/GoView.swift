@@ -34,6 +34,7 @@ struct GoView: View {
         MapView(
             camera: $camera,
             showsUserLocation: location.isLive && location.authorization == .authorized,
+            polylines: router.mapTrip.map { [$0.line] } ?? [],
             pin: placePin,
             route: router.selectedJourney.map(MapRoute.init(journey:)),
             vehicles: trains.vehicles + buses.vehicles,
@@ -80,6 +81,13 @@ struct GoView: View {
         .onChange(of: router.selectedPlace) { _, place in
             if let place {
                 center(on: place)
+            }
+        }
+        // A trip opened in the sheet: look at its vehicle, above the sheet, as its line appears.
+        .onChange(of: router.mapTrip?.line.id) { _, id in
+            if id != nil, let focus = router.mapTrip?.focus {
+                hasCenteredOnUser = true
+                camera = .following(focus)
             }
         }
         .onChange(of: location.location) { _, fix in

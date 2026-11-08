@@ -44,6 +44,8 @@ final class AppRouter {
     var selectedJourney: Itinerary?
     /// The sheet shown over the home sheet, if any.
     var sheet: AppSheet?
+    /// The trip drawn on the map while its trip view shows (``showOnMap(_:)``).
+    var mapTrip: MapTrip?
 
     init(homeDetent: HomeSheetDetent = .peek, sheet: AppSheet? = nil) {
         self.homeDetent = homeDetent

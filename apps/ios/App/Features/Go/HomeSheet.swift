@@ -53,6 +53,7 @@ struct HomeSheet: View {
                 }
             }
             .toolbarVisibility(.hidden, for: .navigationBar)
+            .stopsNavigationDestinations()
             .navigationDestination(for: JourneyOptionsRoute.self) { route in
                 JourneyOptionsView(route: route)
             }
