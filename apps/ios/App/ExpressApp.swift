@@ -11,17 +11,21 @@ struct ExpressApp: App {
     @State private var location: LocationService
     /// The app's one ``TransitClient``: on the fixture set's recorded data for the screenshot harness, else live.
     private let transitClient: TransitClient
+    private let placeSearchService: (any PlaceSearchService)?
 
     init() {
         _environment = State(initialValue: AppEnvironment(fixtures: launch.fixtures))
         transitClient = launch.fixtures?.transitClient ?? TransitClient(baseURL: ExpressApp.transitServer.baseURL)
         let screen = launch.screen
-        _router = State(initialValue: AppRouter(homeDetent: screen?.homeDetent ?? .peek, sheet: screen?.sheet))
+        let router = AppRouter(homeDetent: screen?.homeDetent ?? .peek, sheet: screen?.sheet)
+        screen?.prepare(router)
+        _router = State(initialValue: router)
         // The screenshot harness never asks for the location; it fixes the permission each screen shows.
         let location = screen
             .map { LocationService(fixed: $0.locationAuthorization, location: $0.location) } ?? LocationService()
         _location = State(initialValue: location)
         GoogleMapsServices.configure()
+        placeSearchService = PlaceSearchServices.make(fixtures: launch.fixtures)
         if launch.isScreenshot {
             UIView.setAnimationsEnabled(false)
         }
@@ -42,6 +46,8 @@ struct ExpressApp: App {
             .environment(router)
             .environment(location)
             .environment(\.transitClient, transitClient)
+            .environment(\.placeSearchService, placeSearchService)
+            .environment(\.placeSearchSeed, launch.screen?.searchQuery)
             .preferredColorScheme(launch.colorScheme)
         }
         .onChange(of: scenePhase) { _, phase in

@@ -62,6 +62,8 @@ struct MapView: View {
     var showsUserLocation = false
     var polylines: [MapPolyline] = []
     var markers: [MapMarker] = []
+    /// The one place the user picked, such as a search result: drawn above every other marker.
+    var pin: MapMarker?
     /// Vehicles to show. A vehicle that moves glides to its new place over ``vehicleMoveDuration``.
     var vehicles: [MapVehicle] = []
     /// How long a vehicle takes to glide to a new position, such as the time until the next one; 0 jumps.
@@ -82,6 +84,7 @@ struct MapView: View {
                 showsUserLocation: showsUserLocation,
                 polylines: polylines,
                 markers: markers,
+                pin: pin,
                 vehicles: vehicles,
                 vehicleMoveDuration: vehicleMoveDuration,
                 onTilesRendered: onTilesRendered,
@@ -108,6 +111,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
     var showsUserLocation: Bool
     var polylines: [MapPolyline]
     var markers: [MapMarker]
+    var pin: MapMarker?
     var vehicles: [MapVehicle]
     var vehicleMoveDuration: TimeInterval
     var onTilesRendered: (() -> Void)?
@@ -161,6 +165,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         }
         coordinator.show(polylines: polylines, on: mapView)
         coordinator.show(markers: markers, on: mapView)
+        coordinator.show(pin: pin, on: mapView)
         let moveDuration = context.transaction.disablesAnimations || !UIView.areAnimationsEnabled
             ? 0 : vehicleMoveDuration
         coordinator.show(vehicles: vehicles, colorScheme: colorScheme, moveDuration: moveDuration, on: mapView)
@@ -184,6 +189,8 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         private var vehicleColorScheme: ColorScheme?
         /// Each vehicle's bullet, and the flat arrow under it that turns with its bearing, by the vehicle's id.
         private var vehicleMarkers: [String: (bullet: GMSMarker, arrow: GMSMarker)] = [:]
+        private var pin: MapMarker?
+        private var pinMarker: GMSMarker?
 
         init(camera: Binding<MapCamera>) {
             self.camera = camera
@@ -290,6 +297,21 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
             bullet.userData = vehicle.id
             bullet.map = mapView
             return (bullet, arrow)
+        }
+
+        func show(pin: MapMarker?, on mapView: GMSMapView) {
+            guard pin != self.pin else { return }
+            self.pin = pin
+            pinMarker?.map = nil
+            pinMarker = pin.map { pin in
+                let marker = GMSMarker(position: CLLocationCoordinate2D(pin.coordinate))
+                marker.title = pin.title
+                marker.icon = GMSMarker.markerImage(with: UIColor(pin.color))
+                // Above vehicles' arrows (1) and bullets (2).
+                marker.zIndex = 3
+                marker.map = mapView
+                return marker
+            }
         }
     }
 }

@@ -26,6 +26,36 @@ final class ScreenshotTests: XCTestCase {
         capture("home-outside-nyc", fixtures: "nyc-evening", settledWhen: "map.settled")
     }
 
+    // Place search (S3) in the home sheet, in each state, and a picked place's pin and card.
+
+    func testSearchEmpty() {
+        capture("search-empty", fixtures: "nyc-evening", settledWhen: "search.hint")
+    }
+
+    func testSearchTyping() {
+        capture("search-typing", fixtures: "slow-network", settledWhen: "search.loading")
+    }
+
+    func testSearchResults() {
+        capture("search-results", fixtures: "nyc-evening", settledWhen: "search.results")
+    }
+
+    func testSearchNoResults() {
+        capture("search-no-results", fixtures: "nyc-evening", settledWhen: "search.no-results")
+    }
+
+    func testSearchError() {
+        capture("search-error", fixtures: "offline", settledWhen: "search.error")
+    }
+
+    func testSearchNoKey() {
+        capture("search-no-key", fixtures: "no-key", settledWhen: "search.unavailable")
+    }
+
+    func testSearchPlace() {
+        capture("search-place", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
     // The About sheet (S1), over the home sheet.
 
     func testAbout() {
