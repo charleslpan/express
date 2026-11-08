@@ -1,0 +1,238 @@
+{
+  "routes": [
+    {
+      "mode": "BUS",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-BusManhattan_M14A+",
+          "shortName": "M14A-SBS",
+          "longName": "14 St Crosstown via Avenue A",
+          "color": "6cbe45",
+          "textColor": "ffffff"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 0,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    },
+    {
+      "mode": "BUS",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-BusManhattan_M14D+",
+          "shortName": "M14D-SBS",
+          "longName": "14 St Crosstown via Avenue D",
+          "color": "6cbe45",
+          "textColor": "ffffff"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 1,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    },
+    {
+      "mode": "BUS",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-BusManhattan_M23+",
+          "shortName": "M23-SBS",
+          "longName": "23 St Crosstown",
+          "color": "ee352e",
+          "textColor": "ffffff"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 2,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    },
+    {
+      "mode": "BUS",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-BusManhattan_M34+",
+          "shortName": "M34-SBS",
+          "longName": "34 St Crosstown",
+          "color": "0039a6",
+          "textColor": "ffffff"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 3,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    },
+    {
+      "mode": "BUS",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-BusManhattan_M1",
+          "shortName": "M1",
+          "longName": "Harlem - East Village",
+          "color": "b933ad",
+          "textColor": "ffffff"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 4,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    },
+    {
+      "mode": "BUS",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-BusManhattan_M2",
+          "shortName": "M2",
+          "longName": "Washington Heights - East Village",
+          "color": "ff6319",
+          "textColor": "ffffff"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 5,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    },
+    {
+      "mode": "BUS",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-BusManhattan_M7",
+          "shortName": "M7",
+          "longName": "Harlem - Chelsea",
+          "color": "00933c",
+          "textColor": "ffffff"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 6,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    },
+    {
+      "mode": "BUS",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-BusManhattan_M20",
+          "shortName": "M20",
+          "longName": "Lincoln Center - South Ferry",
+          "color": "a7a9ac",
+          "textColor": "ffffff"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 7,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    },
+    {
+      "mode": "BUS",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-BusManhattan_M15",
+          "shortName": "M15",
+          "longName": "East Harlem - South Ferry",
+          "color": "0039a6",
+          "textColor": "ffffff"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 8,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    },
+    {
+      "mode": "BUS",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-BusManhattan_M55",
+          "shortName": "M55",
+          "longName": "Midtown - South Ferry",
+          "color": "fccc0a",
+          "textColor": "000000"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 9,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    },
+    {
+      "mode": "BUS",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-BusCompany_BxM1",
+          "shortName": "BxM1",
+          "longName": "Riverdale - Midtown",
+          "color": "006983",
+          "textColor": "ffffff"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 10,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    },
+    {
+      "mode": "BUS",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-BusCompany_QM2",
+          "shortName": "QM2",
+          "longName": "Bay Terrace - Midtown",
+          "color": "00933c",
+          "textColor": "ffffff"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 11,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    },
+    {
+      "mode": "SUBWAY",
+      "transitRoutes": [
+        {
+          "id": "us-ny-MTA-NYCSubway_M",
+          "shortName": "M",
+          "longName": "Queens Blvd Local/6 Av Local",
+          "color": "ff6319",
+          "textColor": "ffffff"
+        }
+      ],
+      "numStops": 0,
+      "routeIdx": 12,
+      "pathSource": "TIMETABLE",
+      "segments": []
+    }
+  ],
+  "polylines": [],
+  "stops": [
+    {
+      "name": "E 23 ST/PARK AV S",
+      "stopId": "us-ny-MTA-BusManhattan_401732",
+      "lat": 40.74001,
+      "lon": -73.98642,
+      "level": 0,
+      "vertexType": "TRANSIT",
+      "modes": [
+        "BUS"
+      ]
+    },
+    {
+      "name": "E 34 ST/MADISON AV",
+      "stopId": "us-ny-MTA-BusManhattan_404190",
+      "lat": 40.74811,
+      "lon": -73.9838,
+      "level": 0,
+      "vertexType": "TRANSIT",
+      "modes": [
+        "BUS"
+      ]
+    }
+  ],
+  "zoomFiltered": false
+}

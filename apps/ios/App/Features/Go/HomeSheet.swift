@@ -32,7 +32,7 @@ struct HomeSheet: View {
                     }
                 } else {
                     ScrollView {
-                        HomeSheetContent(nearby: nearby) {
+                        HomeSheetContent(nearby: nearby, isPeeking: router.homeDetent == .peek) {
                             router.showPlaceSearch()
                         }
                         .backgroundPreferenceValue(HomePeekBoundary.self) { boundary in
@@ -63,8 +63,9 @@ struct HomeSheet: View {
 }
 
 extension HomeSheet {
-    /// The tallest the peek grows, so it stays under the half-height detent at the largest text sizes.
-    static let maxPeekHeight: CGFloat = 400
+    /// The tallest the peek grows: room at the largest text sizes for the search field and the nearest station's
+    /// first row, which stop growing at AX2.
+    static let maxPeekHeight: CGFloat = 520
 
     /// Sets the peek to show the content down to `bottom` (in the content's space), with the same room around it
     /// as ``HomePeekDetent`` gives the search field; whole points only, so layout rounding doesn't move the sheet.

@@ -139,6 +139,24 @@ final class ScreenshotTests: XCTestCase {
         capture("trains", fixtures: "nyc-evening-stale", settledWhen: "trains.notice")
     }
 
+    // Live buses (V2): alone, with trains, hidden when zoomed out, and with the notice when Bus Time's feed is stale.
+
+    func testBuses() {
+        capture("buses", fixtures: "nyc-evening-buses", settledWhen: "map.settled")
+    }
+
+    func testBusesWithTrains() {
+        capture("buses", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testBusesZoomedOut() {
+        capture("buses-zoomed-out", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testBusesStale() {
+        capture("buses", fixtures: "nyc-evening-buses-stale", settledWhen: "buses.notice")
+    }
+
     // Stop detail and trip view (N2), pushed in the home sheet: Union Square's board at half and full height, then
     // with times that may not be real time, offline, and with nothing more today; the uptown 6 followed from it
     // mid-route at half and full height, a trip that has ended, and offline.

@@ -1,0 +1,170 @@
+{
+  "updatedAt": 1793748580,
+  "vehicles": [
+    {
+      "id": "MTA NYCT_5911",
+      "route": "M14A+",
+      "directionId": 0,
+      "tripId": "MQ_D6-Weekday-SDon-108100_M14AD_801",
+      "headsign": null,
+      "lat": 40.73505,
+      "lon": -73.98602,
+      "bearing": 118.9,
+      "timestamp": 1793748572
+    },
+    {
+      "id": "MTA NYCT_5934",
+      "route": "M14D+",
+      "directionId": 1,
+      "tripId": "MQ_D6-Weekday-SDon-107800_M14AD_812",
+      "headsign": null,
+      "lat": 40.73522,
+      "lon": -73.99198,
+      "bearing": 298.6,
+      "timestamp": 1793748568
+    },
+    {
+      "id": "MTA NYCT_6418",
+      "route": "M23+",
+      "directionId": 0,
+      "tripId": "MQ_D6-Weekday-SDon-108300_M23_101",
+      "headsign": null,
+      "lat": 40.74098,
+      "lon": -73.98903,
+      "bearing": 119.2,
+      "timestamp": 1793748575
+    },
+    {
+      "id": "MTA NYCT_6402",
+      "route": "M23+",
+      "directionId": 1,
+      "tripId": "MQ_D6-Weekday-SDon-107900_M23_104",
+      "headsign": null,
+      "lat": 40.73981,
+      "lon": -73.98452,
+      "bearing": 299.1,
+      "timestamp": 1793748563
+    },
+    {
+      "id": "MTA NYCT_6655",
+      "route": "M34+",
+      "directionId": 1,
+      "tripId": "MQ_D6-Weekday-SDon-108200_M34_221",
+      "headsign": null,
+      "lat": 40.74902,
+      "lon": -73.98797,
+      "bearing": 299.0,
+      "timestamp": 1793748571
+    },
+    {
+      "id": "MTA NYCT_6671",
+      "route": "M34+",
+      "directionId": 0,
+      "tripId": "MQ_D6-Weekday-SDon-108000_M34_214",
+      "headsign": null,
+      "lat": 40.74781,
+      "lon": -73.98401,
+      "bearing": 118.7,
+      "timestamp": 1793748558
+    },
+    {
+      "id": "MTA NYCT_3866",
+      "route": "M1",
+      "directionId": 0,
+      "tripId": "OH_D6-Weekday-SDon-107700_M1_131",
+      "headsign": null,
+      "lat": 40.74452,
+      "lon": -73.98579,
+      "bearing": 28.9,
+      "timestamp": 1793748574
+    },
+    {
+      "id": "MTA NYCT_3881",
+      "route": "M2",
+      "directionId": 1,
+      "tripId": "OH_D6-Weekday-SDon-108400_M2_117",
+      "headsign": null,
+      "lat": 40.75102,
+      "lon": -73.98221,
+      "bearing": 208.8,
+      "timestamp": 1793748566
+    },
+    {
+      "id": "MTA NYCT_4412",
+      "route": "M7",
+      "directionId": 0,
+      "tripId": "MV_D6-Weekday-SDon-107600_M7_301",
+      "headsign": null,
+      "lat": 40.74401,
+      "lon": -73.99248,
+      "bearing": 29.3,
+      "timestamp": 1793748577
+    },
+    {
+      "id": "MTA NYCT_4437",
+      "route": "M20",
+      "directionId": 1,
+      "tripId": "MV_D6-Weekday-SDon-108100_M20_306",
+      "headsign": null,
+      "lat": 40.74951,
+      "lon": -73.99372,
+      "bearing": 209.1,
+      "timestamp": 1793748569
+    },
+    {
+      "id": "MTA NYCT_7582",
+      "route": "M15",
+      "directionId": 1,
+      "tripId": "OH_D6-Weekday-SDon-108500_M15_402",
+      "headsign": null,
+      "lat": 40.73851,
+      "lon": -73.98108,
+      "bearing": 209.0,
+      "timestamp": 1793748573
+    },
+    {
+      "id": "MTA NYCT_4459",
+      "route": "M55",
+      "directionId": 0,
+      "tripId": "MV_D6-Weekday-SDon-107500_M55_311",
+      "headsign": null,
+      "lat": 40.74603,
+      "lon": -73.99051,
+      "bearing": null,
+      "timestamp": 1793748561
+    },
+    {
+      "id": "MTABC_2245",
+      "route": "BxM1",
+      "directionId": 0,
+      "tripId": "47352199-EPPD6-EP_D6-Weekday-02",
+      "headsign": null,
+      "lat": 40.75151,
+      "lon": -73.98102,
+      "bearing": 29.0,
+      "timestamp": 1793748570
+    },
+    {
+      "id": "MTABC_3820",
+      "route": "QM2",
+      "directionId": 1,
+      "tripId": "47353812-CPPD6-CP_D6-Weekday-04",
+      "headsign": null,
+      "lat": 40.74901,
+      "lon": -73.98832,
+      "bearing": 209.4,
+      "timestamp": 1793748567
+    },
+    {
+      "id": "MTA NYCT_8170",
+      "route": "B57",
+      "directionId": 0,
+      "tripId": "JG_D6-Weekday-SDon-107900_B57_501",
+      "headsign": null,
+      "lat": 40.69012,
+      "lon": -73.99003,
+      "bearing": 201.5,
+      "timestamp": 1793748565
+    }
+  ]
+}
