@@ -30,6 +30,6 @@ enum FixtureSet: String, CaseIterable, Sendable {
 
     /// How old the server's realtime data is at ``referenceDate``.
     var realtimeDataAge: TimeInterval {
-        self == .nycEveningStale ? 180 : 15
+        self == .nycEveningStale ? 180 : 20
     }
 }
