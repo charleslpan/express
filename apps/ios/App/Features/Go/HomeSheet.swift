@@ -12,6 +12,8 @@ import UIKit
 struct HomeSheet: View {
     @Binding var peekHeight: CGFloat?
     @Environment(AppRouter.self) private var router
+    /// The Nearby board, kept here so it survives place search replacing the sheet's content.
+    @State private var nearby = NearbyModel()
 
     init(peekHeight: Binding<CGFloat?>) {
         _peekHeight = peekHeight
@@ -27,7 +29,7 @@ struct HomeSheet: View {
                     }
                 } else {
                     ScrollView {
-                        HomeSheetContent {
+                        HomeSheetContent(nearby: nearby) {
                             router.showPlaceSearch()
                         }
                         .backgroundPreferenceValue(HomePeekBoundary.self) { boundary in

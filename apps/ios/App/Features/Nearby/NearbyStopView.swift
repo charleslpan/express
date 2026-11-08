@@ -5,9 +5,9 @@ import TransitKit
 /// A nearby stop and its next departures: a header with the stop's mode, name, and walk, then a row per line and
 /// direction, soonest first. Tapping a row opens that line's departures (``AppRouter/showDepartures(_:at:)``).
 struct NearbyStopView: View {
-    let departures: NearbyDepartures
-    /// How many lines to show; nil for all of them.
-    let lineLimit: Int?
+    let stop: NearbyStop
+    /// The lines to show, soonest first.
+    let lines: [LineDepartures]
     let now: Date
     let realtimeIsStale: Bool
     /// Whether the home sheet's peek ends at this stop's first rows: the nearest station's next trains.
@@ -18,15 +18,15 @@ struct NearbyStopView: View {
     @ScaledMetric(relativeTo: .headline) private var gap = Spacing.xs
 
     init(
-        departures: NearbyDepartures,
-        lineLimit: Int?,
+        stop: NearbyStop,
+        lines: [LineDepartures],
         now: Date,
         realtimeIsStale: Bool,
         marksPeek: Bool,
         onSelect: @escaping (LineDepartures) -> Void
     ) {
-        self.departures = departures
-        self.lineLimit = lineLimit
+        self.stop = stop
+        self.lines = lines
         self.now = now
         self.realtimeIsStale = realtimeIsStale
         self.marksPeek = marksPeek
@@ -60,18 +60,13 @@ struct NearbyStopView: View {
         }
     }
 
-    private var lines: [LineDepartures] {
-        lineLimit.map { Array(departures.lines.prefix($0)) } ?? departures.lines
-    }
-
     /// The last row the peek shows: the second, or only the first at accessibility sizes, where rows grow tall.
     private var peekRow: Int {
         dynamicTypeSize.isAccessibilitySize ? 0 : min(1, lines.count - 1)
     }
 
     private var header: some View {
-        let stop = departures.stop
-        return HStack(spacing: gap) {
+        HStack(spacing: gap) {
             ModeIcon(stop.isSubway ? .subway : .bus, style: .tile)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: Spacing.xxxs) {

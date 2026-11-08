@@ -4,35 +4,64 @@ import TransitKit
 import UIKit
 
 /// The home sheet's Nearby section: the stops nearest the rider, subway stations and bus stops, each with its next
-/// departures by line and direction, the nearest subway station first. Its first two rows are what the sheet shows at
-/// its peek (``View/homeSheetPeekBoundary(_:)``): the next trains at the nearest station.
+/// departures by line and direction, the nearest subway station first. It comes in two parts around Home and Work:
+/// ``Part/next``, the nearest station's next trains under the search field, which the sheet shows at its peek
+/// (``View/homeSheetPeekBoundary(_:)``), and ``Part/more``, the station's other lines and the other stops, further
+/// down. Both read one ``NearbyModel``.
 ///
-/// It refreshes about every 30 seconds while it's on screen and the app is active, and pauses otherwise. It asks for
-/// the location only when the rider taps "Use My Location", and says so plainly when it can't show departures: the
-/// location is off, the rider is outside New York, the server can't be reached, or nothing is due.
+/// The `next` part refreshes the model about every 30 seconds while it's on screen and the app is active, and pauses
+/// otherwise. It asks for the location only when the rider taps "Use My Location", and says so plainly when it can't
+/// show departures: the location is off, the rider is outside New York, the server can't be reached, or nothing is
+/// due.
 struct NearbySection: View {
+    /// Which part of the section a view shows.
+    enum Part {
+        /// The nearest station's next departures, or what stands in their place; it also drives refreshing.
+        case next
+        /// The nearest station's other lines and the other stops near by, once departures have loaded.
+        case more
+    }
+
+    /// How many of the nearest station's lines the `next` part shows.
+    static let nextLineCount = 2
+
+    let model: NearbyModel
+    let part: Part
     @Environment(AppRouter.self) private var router
     @Environment(LocationService.self) private var location
     @Environment(AppEnvironment.self) private var environment
     @Environment(\.transitClient) private var transitClient
     @Environment(\.scenePhase) private var scenePhase
-    @State private var model = NearbyModel()
     /// Bumped by "Try Again", which restarts refreshing.
     @State private var attempt = 0
 
+    init(model: NearbyModel, part: Part) {
+        self.model = model
+        self.part = part
+    }
+
     var body: some View {
-        content
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .contain)
-            .accessibilityIdentifier("nearby.\(state.identifier)")
-            .task(id: refresh) {
-                guard refresh.isActive else { return }
-                await model.run(client: transitClient, location: { location.location }, now: { environment.now })
+        switch part {
+        case .next:
+            next
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("nearby.\(state.identifier)")
+                .task(id: refresh) {
+                    guard refresh.isActive else { return }
+                    await model.run(client: transitClient, location: { location.location }, now: { environment.now })
+                }
+        case .more:
+            if case let .loaded(board, realtimeIsStale) = state {
+                more(board, realtimeIsStale: realtimeIsStale)
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("nearby.more")
             }
+        }
     }
 
     @ViewBuilder
-    private var content: some View {
+    private var next: some View {
         switch state {
         case .needsPermission:
             NearbyMessage(
@@ -92,18 +121,49 @@ struct NearbySection: View {
                 if realtimeIsStale {
                     NotRealTimeNotice()
                 }
-                ForEach(Array(board.stops.enumerated()), id: \.element.id) { index, stop in
+                if let nearest = board.stops.first {
                     NearbyStopView(
-                        departures: stop,
-                        lineLimit: index == 0 ? nil : 4,
+                        stop: nearest.stop,
+                        lines: Array(nearest.lines.prefix(Self.nextLineCount)),
                         now: model.now,
                         realtimeIsStale: realtimeIsStale,
-                        marksPeek: index == 0
+                        marksPeek: true
                     ) { line in
-                        router.showDepartures(line, at: stop.stop)
+                        router.showDepartures(line, at: nearest.stop)
                     }
                 }
             }
+        }
+    }
+
+    /// The rest of the board under a heading: the nearest station's other lines, then up to four lines at each
+    /// other stop.
+    @ViewBuilder
+    private func more(_ board: NearbyBoard, realtimeIsStale: Bool) -> some View {
+        let sections = board.stops.enumerated().map { index, stop in
+            (
+                stop: stop.stop,
+                lines: index == 0 ? Array(stop.lines.dropFirst(Self.nextLineCount)) : Array(stop.lines.prefix(4))
+            )
+        }.filter { !$0.lines.isEmpty }
+        if !sections.isEmpty {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                HomeSectionHeading("More Nearby")
+                VStack(alignment: .leading, spacing: Spacing.lg) {
+                    ForEach(sections, id: \.stop.id) { section in
+                        NearbyStopView(
+                            stop: section.stop,
+                            lines: section.lines,
+                            now: model.now,
+                            realtimeIsStale: realtimeIsStale,
+                            marksPeek: false
+                        ) { line in
+                            router.showDepartures(line, at: section.stop)
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -186,7 +246,7 @@ private struct NotRealTimeNotice: View {
 
 #Preview("Nearby, permission") {
     ScrollView {
-        NearbySection()
+        NearbySection(model: NearbyModel(), part: .next)
             .padding()
     }
     .environment(AppRouter())
@@ -195,9 +255,13 @@ private struct NotRealTimeNotice: View {
 }
 
 #Preview("Nearby, Union Square") {
+    @Previewable @State var model = NearbyModel()
     ScrollView {
-        NearbySection()
-            .padding()
+        VStack(spacing: Spacing.lg) {
+            NearbySection(model: model, part: .next)
+            NearbySection(model: model, part: .more)
+        }
+        .padding()
     }
     .environment(AppRouter())
     .environment(LocationService(fixed: .authorized, location: FixtureSet.unionSquare))
