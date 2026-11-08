@@ -73,18 +73,23 @@ public struct ServiceAlertBanner: View {
     }
 
     public var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: gap) {
-            Image(systemName: level.systemImage)
-                .foregroundStyle(level.color)
-            Text(header)
-                .foregroundStyle(.textPrimary)
-                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : lineLimit)
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            if showsChevron {
-                Image(systemName: "chevron.right")
-                    .typography(.captionEmphasized)
-                    .foregroundStyle(.textTertiary)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                // The icon and chevron go above the header, so it has the whole width to wrap in.
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                    HStack {
+                        icon
+                        Spacer(minLength: 0)
+                        chevron
+                    }
+                    text
+                }
+            } else {
+                HStack(alignment: .firstTextBaseline, spacing: gap) {
+                    icon
+                    text
+                    chevron
+                }
             }
         }
         .typography(.secondary)
@@ -95,6 +100,28 @@ public struct ServiceAlertBanner: View {
         .contentShape(Radius.shape(Radius.sm))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(level.accessibilityName): \(header)")
+    }
+
+    private var icon: some View {
+        Image(systemName: level.systemImage)
+            .foregroundStyle(level.color)
+    }
+
+    private var text: some View {
+        Text(header)
+            .foregroundStyle(.textPrimary)
+            .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : lineLimit)
+            .multilineTextAlignment(.leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    @ViewBuilder
+    private var chevron: some View {
+        if showsChevron {
+            Image(systemName: "chevron.right")
+                .typography(.captionEmphasized)
+                .foregroundStyle(.textTertiary)
+        }
     }
 
     /// A light wash of the level's colour, a little stronger where Reduce Transparency asks for more contrast.
