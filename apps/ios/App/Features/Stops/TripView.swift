@@ -88,7 +88,8 @@ struct TripView: View {
                 realtimeIsStale: realtimeIsStale
             )
             .onAppear {
-                guard !hasScrolledToVehicle else { return }
+                // An ended trip stays at the top, where the message says so.
+                guard !hasScrolledToVehicle, progress.phase != .ended else { return }
                 hasScrolledToVehicle = true
                 proxy.scrollTo(TripStopList.focusID(progress), anchor: .center)
             }

@@ -97,40 +97,25 @@ private struct TripStopRow: View {
     let line: TransitLine?
     let color: Color
     let realtimeIsStale: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         let status = stop.status(realtimeIsStale: realtimeIsStale)
-        HStack(alignment: .center, spacing: Spacing.sm) {
-            VStack(alignment: .leading, spacing: Spacing.xxxs) {
-                Text(stop.name)
-                    .typography(isMarked || hasVehicle ? .bodyEmphasized : .body)
-                    .foregroundStyle(isPassed ? Color.textTertiary : Color.textPrimary)
-                    .strikethrough(stop.isCancelled)
-                    .fixedSize(horizontal: false, vertical: true)
-                if hasVehicle {
-                    Text(line?.mode == .bus ? LocalizedStringKey("The bus is here") : "The train is here")
-                        .typography(.captionEmphasized)
-                        .foregroundStyle(.textSecondary)
-                } else if isMarked {
-                    Text("Where you're looking from")
-                        .typography(.caption)
-                        .foregroundStyle(.textSecondary)
+        Group {
+            // At accessibility sizes the time moves under the name, so names never break mid-word.
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                    names
+                    times(status: status, alignment: .leading)
                 }
-            }
-            Spacer(minLength: Spacing.xs)
-            if let time = stop.time {
-                VStack(alignment: .trailing, spacing: Spacing.xxxs) {
-                    Text(time, format: .stationClock)
-                        .typography(.secondary)
-                        .monospacedDigit()
-                        .foregroundStyle(isPassed ? Color.textTertiary : Color.textPrimary)
-                    if !isPassed {
-                        Text(status.shortText)
-                            .typography(.caption)
-                            .foregroundStyle(status.color)
-                    }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                HStack(alignment: .center, spacing: Spacing.sm) {
+                    names
+                    Spacer(minLength: Spacing.xs)
+                    times(status: status, alignment: .trailing)
+                        .fixedSize()
                 }
-                .fixedSize()
             }
         }
         .padding(.vertical, Spacing.xs)
@@ -141,6 +126,42 @@ private struct TripStopRow: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel(status: status))
+    }
+
+    private var names: some View {
+        VStack(alignment: .leading, spacing: Spacing.xxxs) {
+            Text(stop.name)
+                .typography(isMarked || hasVehicle ? .bodyEmphasized : .body)
+                .foregroundStyle(isPassed ? Color.textTertiary : Color.textPrimary)
+                .strikethrough(stop.isCancelled)
+                .fixedSize(horizontal: false, vertical: true)
+            if hasVehicle {
+                Text(line?.mode == .bus ? LocalizedStringKey("The bus is here") : "The train is here")
+                    .typography(.captionEmphasized)
+                    .foregroundStyle(.textSecondary)
+            } else if isMarked {
+                Text("Where you're looking from")
+                    .typography(.caption)
+                    .foregroundStyle(.textSecondary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func times(status: DepartureStatus, alignment: HorizontalAlignment) -> some View {
+        if let time = stop.time {
+            VStack(alignment: alignment, spacing: Spacing.xxxs) {
+                Text(time, format: .stationClock)
+                    .typography(.secondary)
+                    .monospacedDigit()
+                    .foregroundStyle(isPassed ? Color.textTertiary : Color.textPrimary)
+                if !isPassed {
+                    Text(status.shortText)
+                        .typography(.caption)
+                        .foregroundStyle(status.color)
+                }
+            }
+        }
     }
 
     /// The line through the stop, passed above or below it as the vehicle has got, and the stop's dot, or the line's
