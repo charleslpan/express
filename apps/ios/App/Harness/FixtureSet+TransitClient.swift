@@ -39,7 +39,7 @@ extension FixtureSet {
         case "/api/v6/map/stops":
             return try fixture("nearby-stops")
         case "/api/v6/plan":
-            return fixtures == .noJourneys ? noJourneys : try fixture("plan-nyc-evening")
+            return fixtures == .noJourneys ? emptyPlan : try fixture("plan-nyc-evening")
         case "/api/v6/stoptimes":
             let stopId = request.query["stopId"] ?? ""
             let feedStopId = stopId.split(separator: "_").last.map(String.init) ?? stopId
@@ -59,7 +59,7 @@ extension FixtureSet {
     }
 
     /// A `plan` answer with no itineraries, which ``TransitClient/plan(_:)`` reports as no route.
-    private static let noJourneys = Data("""
+    private static let emptyPlan = Data("""
     {
       "requestParameters": {}, "debugOutput": {},
       "from": {"name": "START", "lat": 40.7359, "lon": -73.9906},
