@@ -42,6 +42,14 @@ enum ScreenshotScreen: String, CaseIterable {
     case placeSaved = "place-saved"
     /// The place card's Home or Work menu, open, for the place that's Work (P1); the UI test opens it.
     case placeHomeWork = "place-home-work"
+    /// The home sheet at half height with the Home and Work chips, set and not set (P2).
+    case homePlaces = "home-places"
+    case homePlacesUnset = "home-places-unset"
+    /// The home sheet's Saved section (P2), scrolled into view by the UI test: several places, one row still loading
+    /// (on `slow-network`), and empty.
+    case homeSaved = "home-saved"
+    case homeSavedLoading = "home-saved-loading"
+    case homeSavedEmpty = "home-saved-empty"
     /// Journey options to a picked place (J1): the options list at each detent, the second option selected on the map,
     /// the arrive-by picker, and every state: loading, none found, outside New York, location off, offline, and times
     /// that may not be real time. Which state shows depends on the fixtures and location each test launches with.
@@ -104,8 +112,9 @@ enum ScreenshotScreen: String, CaseIterable {
         case .homePeek, .homeHalf, .homeFull, .homeOutsideNYC, .about, .nearbyPeek, .nearbyHalf, .nearbyFull,
              .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError, .nearbyEmpty, .searchEmpty,
              .searchTyping, .searchResults, .searchNoResults, .searchError, .searchNoKey, .searchPlace, .searchRecents,
-             .placeSaved, .placeHomeWork, .stopHalf, .stopFull, .stopStale, .stopError, .stopEmpty, .trip, .tripFull,
-             .tripEnded, .tripError, .journeysPeek, .journeysHalf, .journeysFull, .journeysRoute, .journeysArriveBy,
+             .placeSaved, .placeHomeWork, .homePlaces, .homePlacesUnset, .homeSaved, .homeSavedLoading,
+             .homeSavedEmpty, .stopHalf, .stopFull, .stopStale, .stopError, .stopEmpty, .trip, .tripFull, .tripEnded,
+             .tripError, .journeysPeek, .journeysHalf, .journeysFull, .journeysRoute, .journeysArriveBy,
              .journeysLoading, .journeysNoResults, .journeysOutsideNYC, .journeysLocationOff, .journeysError,
              .journeysStale:
             RootView()
@@ -133,9 +142,11 @@ enum ScreenshotScreen: String, CaseIterable {
     /// How far the home sheet is pulled up for this screen.
     var homeDetent: HomeSheetDetent {
         switch self {
-        case .homeHalf, .nearbyHalf, .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError,
-             .nearbyEmpty, .stopHalf, .stopStale, .stopError, .stopEmpty, .trip, .tripEnded, .tripError: .half
-        case .homeFull, .nearbyFull, .stopFull, .tripFull, .journeysFull, .journeysArriveBy: .full
+        case .homeHalf, .homePlaces, .homePlacesUnset, .nearbyHalf, .nearbyStale, .nearbyDenied, .nearbyOutsideNYC,
+             .nearbyLoading, .nearbyError, .nearbyEmpty, .stopHalf, .stopStale, .stopError, .stopEmpty, .trip,
+             .tripEnded, .tripError: .half
+        case .homeFull, .homeSaved, .homeSavedLoading, .homeSavedEmpty, .nearbyFull, .stopFull, .tripFull,
+             .journeysFull, .journeysArriveBy: .full
         case .journeysPeek: .peek
         case _ where isJourneys: .half
         default: .peek
@@ -207,7 +218,8 @@ enum ScreenshotScreen: String, CaseIterable {
     }
 
     /// Fills the in-memory place store with what this screen shows: recents picked over the past day, or the
-    /// card's place saved, or Work with another place as Home.
+    /// card's place saved, or Work with another place as Home, or Home and Work set, or several saved places whose
+    /// details are fetched again as at launch (one of them never arriving on `slow-network`).
     @MainActor
     func prepare(_ places: PlaceStore) {
         let fixtures = FixturePlaceSearchService.places
@@ -219,9 +231,19 @@ enum ScreenshotScreen: String, CaseIterable {
             }
         case .placeSaved:
             places.save(fixtures[0])
-        case .placeHomeWork:
+        case .placeHomeWork, .homePlaces:
             places.set(.home, to: fixtures[2])
             places.set(.work, to: fixtures[0])
+        case .homeSaved:
+            for place in [fixtures[0], fixtures[2], fixtures[4], fixtures[3]] {
+                places.save(place)
+                places.details.forget(place.placeID)
+            }
+        case .homeSavedLoading:
+            for place in [fixtures[0], fixtures[2], fixtures[4]] {
+                places.save(place)
+            }
+            places.details.forget(fixtures[2].placeID)
         default:
             break
         }

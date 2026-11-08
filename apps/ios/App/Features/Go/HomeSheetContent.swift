@@ -63,9 +63,9 @@ struct HomeSheetContent<Departures: View, Alert: View, Places: View, Nearby: Vie
 }
 
 extension HomeSheetContent where Departures == NearbySection, Alert == AlertChipPlaceholder,
-    Places == SavedPlacesPlaceholder, Nearby == NearbySection, Saved == SavedSectionPlaceholder
+    Places == HomeWorkChips, Nearby == NearbySection, Saved == SavedPlacesSection
 {
-    /// The sheet with each slot showing its feature, or its placeholder until A3 and P2 land. `nearby` is the board
+    /// The sheet with each slot showing its feature, or its placeholder until A3 lands. `nearby` is the board
     /// both Nearby slots show, which outlives the content (``HomeSheet`` keeps it).
     init(nearby model: NearbyModel, isPeeking: Bool = false, onSearch: @escaping () -> Void) {
         self.init(isPeeking: isPeeking, onSearch: onSearch) {
@@ -73,11 +73,11 @@ extension HomeSheetContent where Departures == NearbySection, Alert == AlertChip
         } alert: {
             AlertChipPlaceholder()
         } places: {
-            SavedPlacesPlaceholder()
+            HomeWorkChips()
         } nearby: {
             NearbySection(model: model, part: .more)
         } saved: {
-            SavedSectionPlaceholder()
+            SavedPlacesSection()
         }
     }
 }
@@ -147,6 +147,7 @@ struct HomeSearchField: View {
     .environment(AppRouter())
     .environment(LocationService(fixed: .notDetermined))
     .environment(AppEnvironment())
+    .environment(PlaceStore.inMemory())
 }
 
 #Preview("Home sheet content, AX5") {
@@ -158,4 +159,5 @@ struct HomeSearchField: View {
     .environment(AppRouter())
     .environment(LocationService(fixed: .notDetermined))
     .environment(AppEnvironment())
+    .environment(PlaceStore.inMemory())
 }

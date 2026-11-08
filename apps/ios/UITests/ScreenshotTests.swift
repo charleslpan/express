@@ -342,3 +342,38 @@ final class ScreenshotTests: XCTestCase {
         }
     }
 }
+
+/// Home and Work chips and the Saved section (P2) in the home sheet, apart from the class body to keep it short.
+extension ScreenshotTests {
+    func testHomePlaces() {
+        capture("home-places", fixtures: "nyc-evening", settledWhen: "home.chip.home")
+    }
+
+    func testHomePlacesUnset() {
+        capture("home-places-unset", fixtures: "nyc-evening", settledWhen: "home.chip.home")
+    }
+
+    func testHomeSaved() {
+        capture("home-saved", fixtures: "nyc-evening", settledWhen: "home.saved", then: scrollToSaved)
+    }
+
+    func testHomeSavedLoading() {
+        capture("home-saved-loading", fixtures: "slow-network", settledWhen: "home.saved.loading", then: scrollToSaved)
+    }
+
+    func testHomeSavedEmpty() {
+        capture("home-saved-empty", fixtures: "nyc-evening", settledWhen: "home.saved.empty", then: scrollToSaved)
+    }
+
+    /// Scrolls the home sheet until the Saved heading is in its top half, with small drags so it doesn't overshoot.
+    private func scrollToSaved(_ app: XCUIApplication) {
+        let heading = app.descendants(matching: .any)["home.saved.heading"]
+        let window = app.windows.firstMatch
+        for _ in 0 ..< 10 {
+            guard heading.exists, !(heading.isHittable && heading.frame.minY < window.frame.midY) else { return }
+            let start = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85))
+            let end = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
+            start.press(forDuration: 0.05, thenDragTo: end)
+        }
+    }
+}
