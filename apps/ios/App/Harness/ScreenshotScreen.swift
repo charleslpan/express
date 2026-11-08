@@ -49,6 +49,14 @@ enum ScreenshotScreen: String, CaseIterable {
     /// Live subway trains over Midtown and Union Square, and the same map zoomed out, where they hide (V1).
     case trains
     case trainsZoomedOut = "trains-zoomed-out"
+    /// Service alerts (A3), with `-fixtures nyc-alerts`: banners on Nearby's rows at full height, the alert chip at
+    /// half height, and an alert's full text, which the UI test opens by tapping a banner.
+    case alertsNearby = "alerts-nearby"
+    case alertsChip = "alerts-chip"
+    case alertDetail = "alert-detail"
+    /// Line status (A3), pushed onto the home sheet: mixed lines (`nyc-alerts`), all good service (`nyc-evening`),
+    /// loading (`slow-network`), and offline (`offline`).
+    case lineStatus = "line-status"
 
     #if DEBUG
         /// GlassUI's gallery, every section (debug builds only).
@@ -72,7 +80,7 @@ enum ScreenshotScreen: String, CaseIterable {
         case .homePeek, .homeHalf, .homeFull, .homeOutsideNYC, .about, .nearbyPeek, .nearbyHalf, .nearbyFull,
              .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError, .nearbyEmpty, .searchEmpty,
              .searchTyping, .searchResults, .searchNoResults, .searchError, .searchNoKey, .searchPlace, .searchRecents,
-             .placeSaved, .placeHomeWork:
+             .placeSaved, .placeHomeWork, .alertsNearby, .alertsChip, .alertDetail, .lineStatus:
             RootView()
         case .mapGlass: MapGlassScreen()
         case .trains: GoView(camera: MapCamera(center: Self.midtown, zoom: 14.5))
@@ -97,8 +105,8 @@ enum ScreenshotScreen: String, CaseIterable {
     var homeDetent: HomeSheetDetent {
         switch self {
         case .homeHalf, .nearbyHalf, .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError,
-             .nearbyEmpty: .half
-        case .homeFull, .nearbyFull: .full
+             .nearbyEmpty, .alertsChip, .alertDetail: .half
+        case .homeFull, .nearbyFull, .alertsNearby, .lineStatus: .full
         default: .peek
         }
     }
@@ -122,7 +130,9 @@ enum ScreenshotScreen: String, CaseIterable {
     /// Puts the router where this screen starts: searching, or showing a picked place.
     @MainActor
     func prepare(_ router: AppRouter) {
-        if searchQuery != nil {
+        if self == .lineStatus {
+            router.showLineStatus(nearbyBuses: FixtureSet.unionSquareBuses)
+        } else if searchQuery != nil {
             router.showPlaceSearch()
         } else if [.searchPlace, .placeSaved, .placeHomeWork].contains(self) {
             router.showPlace(FixturePlaceSearchService.places[0])
@@ -154,7 +164,7 @@ enum ScreenshotScreen: String, CaseIterable {
     var locationAuthorization: LocationService.Authorization {
         switch self {
         case .homeOutsideNYC, .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyOutsideNYC, .nearbyLoading,
-             .nearbyError, .nearbyEmpty: .authorized
+             .nearbyError, .nearbyEmpty, .alertsNearby, .alertsChip, .alertDetail: .authorized
         case .nearbyDenied: .denied
         default: .notDetermined
         }
@@ -165,7 +175,8 @@ enum ScreenshotScreen: String, CaseIterable {
     var location: Coordinate? {
         switch self {
         case .homeOutsideNYC, .nearbyOutsideNYC: Coordinate(latitude: 39.9526, longitude: -75.1652)
-        case .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyLoading, .nearbyError, .nearbyEmpty:
+        case .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyLoading, .nearbyError, .nearbyEmpty,
+             .alertsNearby, .alertsChip, .alertDetail:
             FixtureSet.unionSquare
         default: nil
         }

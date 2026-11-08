@@ -8,7 +8,10 @@ extension FixtureSet {
     /// from our server and shifted to the reference date) and `/metrics` with the subway feed
     /// ``FixtureSet/realtimeDataAge`` old, in every set. Nearby's requests follow the set's network: the stops around
     /// Union Square (`Fixtures/nearby-stops.json`) and each stop's departures (`Fixtures/nearby-stoptimes-<stop>.json`,
-    /// by the stop id after its feed's `_`; none for a stop without a file).
+    /// by the stop id after its feed's `_`; none for a stop without a file). Line status (`/api/alerts`) answers every
+    /// requested line with no alerts, but in `nyc-alerts`, which answers from `Fixtures/line-status-nyc-alerts.json`
+    /// (the MTA's alerts recorded that evening, with the set's own) and adds `Fixtures/nearby-alerts.json` to the
+    /// departures.
     var transitClient: TransitClient {
         let fixtures = self
         return TransitClient(transport: StubTransport { request in
@@ -26,7 +29,7 @@ extension FixtureSet {
             case .slowNetwork:
                 try await Task.sleep(for: .seconds(24 * 60 * 60))
                 throw CancellationError()
-            case .nycEvening, .nycEveningStale, .nycNoService, .noKey:
+            case .nycEvening, .nycEveningStale, .nycNoService, .noKey, .nycAlerts:
                 return try Self.response(to: request, fixtures: fixtures)
             }
         })
@@ -40,9 +43,14 @@ extension FixtureSet {
             let stopId = request.query["stopId"] ?? ""
             let feedStopId = stopId.split(separator: "_").last.map(String.init) ?? stopId
             if fixtures != .nycNoService, let data = try? fixture("nearby-stoptimes-\(feedStopId)") {
+                if fixtures == .nycAlerts {
+                    return try withAlerts(data)
+                }
                 return data
             }
             return noDepartures
+        case "/api/alerts":
+            return try lineStatus(lines: request.query["lines"] ?? "", fixtures: fixtures)
         default:
             throw URLError(.resourceUnavailable)
         }
@@ -52,6 +60,46 @@ extension FixtureSet {
     private static func metrics(_ fixtures: FixtureSet) -> Data {
         let timestamp = Int(fixtures.referenceDate.timeIntervalSince1970 - fixtures.realtimeDataAge)
         return Data("nigiri_gtfsrt_feed_timestamp_seconds{tag=\"us-ny-MTA-NYCSubway\"} \(timestamp)\n".utf8)
+    }
+
+    /// A `stoptimes` answer with each departure given the alerts `Fixtures/nearby-alerts.json` lists for its route, or
+    /// for its route and direction (`<routeId>|<directionId>`), as MOTIS attaches them (`place.alerts`).
+    private static func withAlerts(_ data: Data) throws -> Data {
+        let alerts = try JSONSerialization.jsonObject(with: fixture("nearby-alerts")) as? [String: [Any]] ?? [:]
+        guard var answer = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let stopTimes = answer["stopTimes"] as? [[String: Any]]
+        else { return data }
+        answer["stopTimes"] = stopTimes.map { stopTime in
+            let route = stopTime["routeId"] as? String ?? ""
+            let direction = stopTime["directionId"] as? String ?? ""
+            let attached = (alerts[route] ?? []) + (alerts["\(route)|\(direction)"] ?? [])
+            guard !attached.isEmpty, var place = stopTime["place"] as? [String: Any] else { return stopTime }
+            place["alerts"] = attached
+            var stopTime = stopTime
+            stopTime["place"] = place
+            return stopTime
+        }
+        return try JSONSerialization.data(withJSONObject: answer)
+    }
+
+    /// The line status endpoint's answer for a comma-separated `lines`: each line's alerts in `nyc-alerts`, none in
+    /// every other set.
+    private static func lineStatus(lines: String, fixtures: FixtureSet) throws -> Data {
+        var recorded: [String: Any] = [:]
+        var updatedAt: Any = ["subway": NSNull(), "bus": NSNull()]
+        if fixtures == .nycAlerts,
+           let answer = try JSONSerialization.jsonObject(with: fixture("line-status-nyc-alerts")) as? [String: Any]
+        {
+            recorded = answer["lines"] as? [String: Any] ?? [:]
+            updatedAt = answer["updatedAt"] ?? updatedAt
+        }
+        let requested = lines.split(separator: ",").map(String.init)
+        let lines = requested.map { ($0, recorded[$0] ?? [Any]()) }
+        let answer: [String: Any] = [
+            "updatedAt": updatedAt,
+            "lines": Dictionary(lines, uniquingKeysWith: { first, _ in first }),
+        ]
+        return try JSONSerialization.data(withJSONObject: answer)
     }
 
     /// A `stoptimes` answer with nothing due.

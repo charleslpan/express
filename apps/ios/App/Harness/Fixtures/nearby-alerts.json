@@ -1,0 +1,130 @@
+{
+ "us-ny-MTA-NYCSubway_L": [
+  {
+   "communicationPeriod": [
+    {
+     "start": "2026-11-03T23:00:00Z",
+     "end": "2026-12-03T23:30:00Z"
+    }
+   ],
+   "impactPeriod": [
+    {
+     "start": "2026-11-03T23:00:00Z",
+     "end": "2026-12-03T23:30:00Z"
+    }
+   ],
+   "cause": "UNKNOWN_CAUSE",
+   "effect": "NO_SERVICE",
+   "headerText": "No [L] trains between Broadway Junction and Canarsie-Rockaway Pkwy while we address a signal problem at Atlantic Av.",
+   "descriptionText": "[L] trains are running between 8 Av and Broadway Junction.\nFor service to and from Canarsie, take the B42 or B60 bus."
+  }
+ ],
+ "us-ny-MTA-NYCSubway_4|0": [
+  {
+   "communicationPeriod": [
+    {
+     "start": "2026-11-03T23:10:00Z",
+     "end": "2026-12-03T23:30:00Z"
+    }
+   ],
+   "impactPeriod": [
+    {
+     "start": "2026-11-03T23:10:00Z",
+     "end": "2026-12-03T23:30:00Z"
+    }
+   ],
+   "cause": "UNKNOWN_CAUSE",
+   "effect": "SIGNIFICANT_DELAYS",
+   "headerText": "Woodlawn-bound [4] trains are running with delays while we request NYPD for a person being disruptive on a train at 125 St.",
+   "descriptionText": ""
+  }
+ ],
+ "us-ny-MTA-NYCSubway_6": [
+  {
+   "communicationPeriod": [
+    {
+     "start": "2026-11-18T04:45:00Z",
+     "end": "2026-11-18T10:00:00Z"
+    },
+    {
+     "start": "2026-11-19T04:45:00Z",
+     "end": "2026-11-19T10:00:00Z"
+    },
+    {
+     "start": "2026-11-20T04:45:00Z",
+     "end": "2026-11-20T10:00:00Z"
+    },
+    {
+     "start": "2026-11-21T04:45:00Z",
+     "end": "2026-11-21T10:00:00Z"
+    }
+   ],
+   "impactPeriod": [
+    {
+     "start": "2026-11-18T04:45:00Z",
+     "end": "2026-11-18T10:00:00Z"
+    },
+    {
+     "start": "2026-11-19T04:45:00Z",
+     "end": "2026-11-19T10:00:00Z"
+    },
+    {
+     "start": "2026-11-20T04:45:00Z",
+     "end": "2026-11-20T10:00:00Z"
+    },
+    {
+     "start": "2026-11-21T04:45:00Z",
+     "end": "2026-11-21T10:00:00Z"
+    }
+   ],
+   "cause": "MAINTENANCE",
+   "effect": "NO_SERVICE",
+   "headerText": "No [6] trains between 3 Av-138 St and Pelham Bay Park",
+   "descriptionText": "Take the [4] or [5], or free shuttle buses.\nWhat's happening? We're making track repairs."
+  }
+ ],
+ "us-ny-MTA-NYCSubway_6X": [
+  {
+   "communicationPeriod": [
+    {
+     "start": "2026-11-18T04:45:00Z",
+     "end": "2026-11-18T10:00:00Z"
+    },
+    {
+     "start": "2026-11-19T04:45:00Z",
+     "end": "2026-11-19T10:00:00Z"
+    },
+    {
+     "start": "2026-11-20T04:45:00Z",
+     "end": "2026-11-20T10:00:00Z"
+    },
+    {
+     "start": "2026-11-21T04:45:00Z",
+     "end": "2026-11-21T10:00:00Z"
+    }
+   ],
+   "impactPeriod": [
+    {
+     "start": "2026-11-18T04:45:00Z",
+     "end": "2026-11-18T10:00:00Z"
+    },
+    {
+     "start": "2026-11-19T04:45:00Z",
+     "end": "2026-11-19T10:00:00Z"
+    },
+    {
+     "start": "2026-11-20T04:45:00Z",
+     "end": "2026-11-20T10:00:00Z"
+    },
+    {
+     "start": "2026-11-21T04:45:00Z",
+     "end": "2026-11-21T10:00:00Z"
+    }
+   ],
+   "cause": "MAINTENANCE",
+   "effect": "NO_SERVICE",
+   "headerText": "No [6] trains between 3 Av-138 St and Pelham Bay Park",
+   "descriptionText": "Take the [4] or [5], or free shuttle buses.\nWhat's happening? We're making track repairs."
+  }
+ ]
+}

@@ -52,6 +52,9 @@ struct HomeSheet: View {
                 }
             }
             .toolbarVisibility(.hidden, for: .navigationBar)
+            .navigationDestination(for: AlertsDestination.self) { destination in
+                AlertsDestinationView(destination: destination)
+            }
         }
         .sheet(item: $router.sheet) { sheet in
             switch sheet {
