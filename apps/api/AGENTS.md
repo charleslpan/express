@@ -1,6 +1,6 @@
 # apps/api/
 
-The Express backend: one Vercel project (`express-server`) whose services are
+The Express backend: one Vercel project (`express`) whose services are
 declared in `vercel.json`, and the pnpm workspace `@express/api` (see the root
 [`AGENTS.md`](../../AGENTS.md)). Today that is MOTIS in `motis/`. See `README.md`
 for what is deployed and the measured numbers.
@@ -16,7 +16,11 @@ on every call.
 
 - `vercel.json`: services and rewrites. Add new routes **before** the
   `/api/(.*)` catch-all, which sends everything else to MOTIS. `/metrics` also
-  goes to MOTIS (realtime age and match rate).
+  goes to MOTIS (realtime age and match rate). It also pins the region
+  (`iad1`; Hobby allows one), caps each service's `maxDuration` through its
+  own `functions` glob (top-level `functions` is invalid with `services`), and
+  sets `Vercel-CDN-Cache-Control` on MOTIS's cacheable routes (stoptimes, trip,
+  map), since MOTIS sends no `Cache-Control` itself. Keep `plan` uncached.
 - `motis/Dockerfile`: downloads MOTIS v2.11.4, the GTFS feeds, and the OSM
   extract, runs `motis import` at build time, builds the adapter's index from
   the same files, and ships the binary, `data/`, and the adapter.
@@ -28,8 +32,10 @@ on every call.
 - `motis/adapter/`: the realtime adapter MOTIS polls on `127.0.0.1:8081`.
   `matcher.py` matches MTA subway realtime trips to static trips (delete it
   if MOTIS ever does this itself); `adapter.py` serves `/subway/<feed>` and
-  `/bus/<dataset>`; `build_index.py` runs at image build; `record.py` records
-  live feeds as test fixtures and prints match rates. `alerts.py` fills the
+  `/bus/<dataset>`; `upstream.py` fetches every feed in parallel at start for
+  MOTIS's first cycle (shortening the cold start's 503s), and the adapter's
+  server keeps a listen backlog of 64, since MOTIS opens all its polls at
+  once; `build_index.py` runs at image build; `record.py` records live feeds as test fixtures and prints match rates. `alerts.py` fills the
   MTA alerts' standard effect, cause, and severity from `alert_types.json`
   for `/alerts/subway` and `/alerts/bus/<dataset>`. To add a feed, add it to
   `adapter.py` and a `rt` entry to `config.yml` (alert feeds first in a

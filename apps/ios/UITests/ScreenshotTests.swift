@@ -97,6 +97,24 @@ final class ScreenshotTests: XCTestCase {
         capture("search-place", fixtures: "nyc-evening", settledWhen: "map.settled")
     }
 
+    // Recents and saved places (P1): recents in search before you type, and the place card's Save and Home or Work.
+
+    func testSearchRecents() {
+        capture("search-recents", fixtures: "nyc-evening", settledWhen: "search.recents")
+    }
+
+    func testPlaceSaved() {
+        capture("place-saved", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testPlaceHomeWork() {
+        capture("place-home-work", fixtures: "nyc-evening", settledWhen: "map.settled") { app in
+            app.buttons["place.slots"].tap()
+            let menuOpened = app.buttons["Set as Home"].waitForExistence(timeout: 10)
+            XCTAssertTrue(menuOpened, "The Home or Work menu never opened")
+        }
+    }
+
     // The About sheet (S1), over the home sheet.
 
     func testAbout() {
@@ -174,8 +192,14 @@ final class ScreenshotTests: XCTestCase {
     /// `<screen>-<fixtures>-<variant>` (such as `go-nyc-evening-dark`).
     ///
     /// `settledWhen` names elements the screen shows once it has finished loading what it shows, such as map tiles
-    /// or departures; the capture waits for each a while, then goes ahead without it rather than fail.
-    private func capture(_ screen: String, fixtures: String, settledWhen settled: String...) {
+    /// or departures; the capture waits for each a while, then goes ahead without it rather than fail. `then` runs
+    /// before each capture, to put the screen in a state only a tap reaches, such as an open menu.
+    private func capture(
+        _ screen: String,
+        fixtures: String,
+        settledWhen settled: String...,
+        then prepare: ((XCUIApplication) -> Void)? = nil
+    ) {
         for variant in Variant.allCases {
             let app = XCUIApplication()
             app.launchArguments = ["-screenshot", screen, "-fixtures", fixtures] + variant.arguments
@@ -185,6 +209,7 @@ final class ScreenshotTests: XCTestCase {
             for settled in settled where !app.descendants(matching: .any)[settled].waitForExistence(timeout: 30) {
                 XCTContext.runActivity(named: "\(screen) never showed \(settled); capturing anyway") { _ in }
             }
+            prepare?(app)
 
             let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
             attachment.name = "\(screen)-\(fixtures)-\(variant.rawValue)"

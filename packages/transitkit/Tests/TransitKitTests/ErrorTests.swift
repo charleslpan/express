@@ -33,8 +33,9 @@ struct ErrorTests {
     }
 
     @Test func serverError() async {
-        let error = await plan(with: FixtureTransport(status: .serviceUnavailable))
-        #expect(error == .server(statusCode: 503, message: nil))
+        // 503 is retried first (RetryTests); any other undocumented status fails at once.
+        let error = await plan(with: FixtureTransport(status: .badGateway))
+        #expect(error == .server(statusCode: 502, message: nil))
     }
 
     @Test func decodingError() async {

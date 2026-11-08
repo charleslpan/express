@@ -139,3 +139,37 @@ export function filterFleet(fleet: Fleet, { bbox, routes }: Query): Fleet {
     ),
   };
 }
+
+/** A bus as the Runtime Cache stores it: `Bus`'s fields in order, without the always-null headsign. */
+export type CompactBus = [
+  id: string,
+  route: string | null,
+  directionId: number | null,
+  tripId: string | null,
+  lat: number,
+  lon: number,
+  bearing: number | null,
+  timestamp: number | null,
+];
+
+/** The fleet as the Runtime Cache stores it, about half the bytes of `Fleet`'s JSON (it is billed per 8 KB). */
+export interface CompactFleet {
+  updatedAt: number | null;
+  vehicles: CompactBus[];
+}
+
+export function compactFleet({ updatedAt, vehicles }: Fleet): CompactFleet {
+  return {
+    updatedAt,
+    vehicles: vehicles.map((b) => [b.id, b.route, b.directionId, b.tripId, b.lat, b.lon, b.bearing, b.timestamp]),
+  };
+}
+
+export function expandFleet({ updatedAt, vehicles }: CompactFleet): Fleet {
+  return {
+    updatedAt,
+    vehicles: vehicles.map(([id, route, directionId, tripId, lat, lon, bearing, timestamp]) => ({
+      id, route, directionId, tripId, headsign: null, lat, lon, bearing, timestamp,
+    })),
+  };
+}

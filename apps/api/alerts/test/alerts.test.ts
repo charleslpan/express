@@ -3,7 +3,7 @@ import { gunzipSync } from "node:zlib";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { table } from "../lib/alert-types.js";
 import { indexAlerts, mapAlertType, parseLines, selectLines, MAX_LINES } from "../lib/alerts.js";
-import { CACHE_KEY, FEED_URLS, TTL_SECONDS, createHandler, type AlertCache } from "../lib/handler.js";
+import { CACHE_KEY, FEED_URLS, STALE_SECONDS, TTL_SECONDS, createHandler, type AlertCache } from "../lib/handler.js";
 
 // The MTA's subway and bus alert feeds (GTFS-RT JSON), recorded on Nov 3, 2026 at about 21:30 UTC.
 const recorded = (name: string): unknown =>
@@ -129,7 +129,9 @@ describe("handler", () => {
     const h = handler();
     const res = await get(h, "?lines=L,BM1");
     expect(res.status).toBe(200);
-    expect(res.headers.get("cache-control")).toBe(`public, max-age=0, s-maxage=${TTL_SECONDS}`);
+    expect(res.headers.get("cache-control")).toBe(
+      `public, max-age=0, s-maxage=${TTL_SECONDS}, stale-while-revalidate=${STALE_SECONDS}`,
+    );
     const body = (await res.json()) as ReturnType<typeof selectLines>;
     expect(Object.keys(body.lines)).toEqual(["L", "BM1"]);
     expect(body.lines["BM1"]?.some((a) => a.id === "lmm:alert:274725:31")).toBe(true);
@@ -138,6 +140,29 @@ describe("handler", () => {
 
     await get(handler(), "?lines=A");
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("reads the Runtime Cache at most once per instance per minute", async () => {
+    vi.useFakeTimers({ now: Date.UTC(2026, 10, 3, 21, 30) });
+    try {
+      const a = handler();
+      const b = handler();
+      await get(a, "?lines=A"); // a misses, fetches, and keeps its copy
+      await get(b, "?lines=A"); // b reads a's copy from the Runtime Cache
+      expect(cache.get).toHaveBeenCalledTimes(2);
+      expect(store.get(CACHE_KEY)).toMatchObject({ fetchedAt: Date.now() });
+      vi.advanceTimersByTime(30_000);
+      for (const h of [a, b, a, b]) await get(h, "?lines=C");
+      expect(cache.get).toHaveBeenCalledTimes(2);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+
+      vi.advanceTimersByTime(31_000); // both copies are 61 s old
+      await get(b, "?lines=A");
+      expect(cache.get).toHaveBeenCalledTimes(3);
+      expect(fetchMock).toHaveBeenCalledTimes(4);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("shares one fetch between concurrent misses", async () => {
