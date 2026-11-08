@@ -1,17 +1,17 @@
 import Observation
 import SwiftUI
 
-/// The app's tabs, in the order the tab bar shows them.
-enum AppTab: String, CaseIterable, Hashable {
-    /// The map home.
-    case go
-    case nearby
-    case saved
-    /// The search tab, which the tab bar draws apart from the others.
-    case search
+/// How far the home sheet is pulled up over the map.
+enum HomeSheetDetent: String, CaseIterable, Hashable {
+    /// Just the search field, with the map filling the screen.
+    case peek
+    /// About half the screen: search, Home and Work, and the start of Nearby, with the map still usable above.
+    case half
+    /// Nearly the whole screen: every section, scrolling.
+    case full
 }
 
-/// A sheet the shell presents over every tab.
+/// A sheet the shell presents over the home sheet.
 enum AppSheet: String, Identifiable {
     case about
 
@@ -20,50 +20,33 @@ enum AppSheet: String, Identifiable {
     }
 }
 
-/// Where the app is: the selected tab, each tab's navigation stack, and the sheet on top.
+/// Where the app is: how far the home sheet is pulled up, the navigation stack inside it, and the sheet on top.
 ///
-/// Views never wire navigation themselves: they read the router from the environment (`@Environment(AppRouter.self)`)
-/// and call a method that says where to go. Features add their own methods in an extension in their folder, such as
-/// `showJourneys(to:)` pushing a value onto ``goPath`` and selecting ``AppTab/go``, and register a
-/// `navigationDestination(for:)` for that value in the tab's stack.
+/// The app is one screen, Apple Maps style: the map, with the home sheet over it that never goes away. Views never
+/// wire navigation themselves: they read the router from the environment (`@Environment(AppRouter.self)`) and call a
+/// method that says where to go. Features add their own methods in an extension in their folder, such as
+/// `showDepartures(from:)` pushing a value onto ``homePath`` and raising the sheet, and register a
+/// `navigationDestination(for:)` for that value in the sheet's stack.
 @MainActor
 @Observable
 final class AppRouter {
-    var selectedTab: AppTab
-    /// The Go tab's stack, over the map home.
-    var goPath = NavigationPath()
-    var nearbyPath = NavigationPath()
-    var savedPath = NavigationPath()
-    var searchPath = NavigationPath()
-    /// The sheet shown over the tabs, if any.
+    /// How far the home sheet is pulled up.
+    var homeDetent: HomeSheetDetent
+    /// The navigation stack inside the home sheet.
+    var homePath = NavigationPath()
+    /// Whether the home sheet is showing place search in place of its sections (``showPlaceSearch()``).
+    var isSearchingPlaces = false
+    /// The sheet shown over the home sheet, if any.
     var sheet: AppSheet?
 
-    init(selectedTab: AppTab = .go, sheet: AppSheet? = nil) {
-        self.selectedTab = selectedTab
+    init(homeDetent: HomeSheetDetent = .peek, sheet: AppSheet? = nil) {
+        self.homeDetent = homeDetent
         self.sheet = sheet
     }
 
-    /// Shows `tab`. Selecting the tab that is already showing pops it to its root, as the system's tab bars do.
-    func select(_ tab: AppTab) {
-        if tab == selectedTab {
-            popToRoot(tab)
-        }
-        selectedTab = tab
-    }
-
-    /// Empties `tab`'s navigation stack.
-    func popToRoot(_ tab: AppTab) {
-        switch tab {
-        case .go: goPath = NavigationPath()
-        case .nearby: nearbyPath = NavigationPath()
-        case .saved: savedPath = NavigationPath()
-        case .search: searchPath = NavigationPath()
-        }
-    }
-
-    /// Opens the search tab, for "where to?" from anywhere in the app.
-    func showSearch() {
-        selectedTab = .search
+    /// Empties the home sheet's navigation stack.
+    func popToRoot() {
+        homePath = NavigationPath()
     }
 
     func showAbout() {

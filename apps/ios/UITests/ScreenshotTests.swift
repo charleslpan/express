@@ -8,27 +8,25 @@ final class ScreenshotTests: XCTestCase {
         continueAfterFailure = false
     }
 
-    // The app shell (S1): each tab, the friendly location-off state, and the About sheet.
+    // The map home (S2): the home sheet at each detent, and the banner outside New York.
 
-    func testGo() {
-        capture("go", fixtures: "nyc-evening", settledWhen: "map.settled")
+    func testHomePeek() {
+        capture("home-peek", fixtures: "nyc-evening", settledWhen: "map.settled")
     }
 
-    func testNearby() {
-        capture("nearby", fixtures: "nyc-evening")
+    func testHomeHalf() {
+        capture("home-half", fixtures: "nyc-evening", settledWhen: "home.search")
     }
 
-    func testNearbyLocationOff() {
-        capture("nearby-location-off", fixtures: "nyc-evening")
+    func testHomeFull() {
+        capture("home-full", fixtures: "nyc-evening", settledWhen: "home.search")
     }
 
-    func testSaved() {
-        capture("saved", fixtures: "nyc-evening")
+    func testHomeOutsideNYC() {
+        capture("home-outside-nyc", fixtures: "nyc-evening", settledWhen: "map.settled")
     }
 
-    func testSearch() {
-        capture("search", fixtures: "nyc-evening")
-    }
+    // The About sheet (S1), over the home sheet.
 
     func testAbout() {
         capture("about", fixtures: "nyc-evening", settledWhen: "about.sheet")
