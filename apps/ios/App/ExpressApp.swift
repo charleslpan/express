@@ -10,12 +10,14 @@ struct ExpressApp: App {
     @State private var router: AppRouter
     @State private var location: LocationService
     @State private var places: PlaceStore
-    private let transitClient = TransitClient(baseURL: ExpressApp.transitServer.baseURL)
+    /// The app's one ``TransitClient``: on the fixture set's recorded data for the screenshot harness, else live.
+    private let transitClient: TransitClient
     private let placeSearchService: (any PlaceSearchService)?
 
     init() {
         let environment = AppEnvironment(fixtures: launch.fixtures)
         _environment = State(initialValue: environment)
+        transitClient = launch.fixtures?.transitClient ?? TransitClient(baseURL: ExpressApp.transitServer.baseURL)
         let screen = launch.screen
         let router = AppRouter(homeDetent: screen?.homeDetent ?? .peek, sheet: screen?.sheet)
         screen?.prepare(router)

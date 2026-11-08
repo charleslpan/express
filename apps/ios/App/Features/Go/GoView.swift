@@ -5,13 +5,15 @@ import UIKit
 
 /// The map home, the app's one screen: the map full screen, centred on the user where they're in New York and on New
 /// York otherwise, with glass controls floating at the top (About, a compass while the map is rotated, and "Show my
-/// location"), a banner while the user is outside the area Express serves, and the ``HomeSheet`` over it all, which
-/// can't be dismissed and leaves the map usable up to half height.
+/// location"), a banner while the user is outside the area Express serves, live subway trains (``LiveTrains``) with a
+/// notice while their positions may not be real time, and the ``HomeSheet`` over it all, which can't be dismissed and
+/// leaves the map usable up to half height.
 struct GoView: View {
     @Environment(AppRouter.self) private var router
     @Environment(LocationService.self) private var location
 
-    @State private var camera = MapCamera.newYork
+    @State private var camera: MapCamera
+    @State private var trains = LiveTrains()
     @State private var tilesRendered = false
     /// Whether the map should move to the next location fix, after "Show my location" asked for one.
     @State private var centersOnNextFix = false
@@ -20,14 +22,25 @@ struct GoView: View {
     @State private var hasCenteredOnUser = false
     @Namespace private var glass
 
+    /// - Parameter camera: Where the map first looks; New York unless the screenshot harness asks for somewhere else.
+    init(camera: MapCamera = .newYork) {
+        _camera = State(initialValue: camera)
+    }
+
     var body: some View {
         MapView(
             camera: $camera,
             showsUserLocation: location.isLive && location.authorization == .authorized,
             pin: placePin,
-            onTilesRendered: { tilesRendered = true }
+            vehicles: trains.vehicles,
+            vehicleMoveDuration: LiveTrains.tick / .seconds(1),
+            onTilesRendered: { tilesRendered = true },
+            onCameraIdle: { trains.cameraDidIdle($0) },
+            onCameraMove: { trains.cameraDidMove() },
+            onVehicleTap: { router.showTrip(id: $0) }
         )
         .ignoresSafeArea()
+        .liveTrains(trains)
         // The controls sit at the top, clear of the sheet at its peek.
         .overlay(alignment: .top) {
             topControls
@@ -101,6 +114,9 @@ struct GoView: View {
         VStack(alignment: .trailing, spacing: Spacing.floatingInset) {
             if isOutsideServiceArea {
                 OutsideServiceAreaBanner()
+            }
+            if trains.mayNotBeRealTime {
+                LiveTrainsNotice()
             }
             controls
         }
@@ -190,6 +206,7 @@ struct GoView: View {
 
 #Preview {
     GoView()
+        .environment(AppEnvironment())
         .environment(AppRouter())
         .environment(LocationService(fixed: .notDetermined))
 }

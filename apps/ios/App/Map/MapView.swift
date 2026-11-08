@@ -31,6 +31,24 @@ struct MapMarker: Identifiable, Equatable {
     var color: Color = .accentColor
 }
 
+/// A vehicle moving on the map, such as a subway train at its estimated position: a line bullet, with an arrow
+/// pointing the way it's heading.
+struct MapVehicle: Identifiable, Equatable {
+    var id: String
+    var coordinate: Coordinate
+    /// The direction of travel, in degrees clockwise from north.
+    var bearing: Double
+    var bullet: LineBullet
+    /// What VoiceOver reads, such as "Q train to 14 St-Union Sq".
+    var accessibilityLabel: String
+}
+
+/// What the map shows once it settles: the area on screen and the zoom level.
+struct MapViewport: Equatable {
+    var bounds: CoordinateBounds
+    var zoom: Double
+}
+
 /// Express's Google map, the one map view every map screen builds on.
 ///
 /// Google offers no SwiftUI map, so this wraps `GMSMapView`. It styles itself with ``MapStyle`` for the current
@@ -46,8 +64,18 @@ struct MapView: View {
     var markers: [MapMarker] = []
     /// The one place the user picked, such as a search result: drawn above every other marker.
     var pin: MapMarker?
+    /// Vehicles to show. A vehicle that moves glides to its new place over ``vehicleMoveDuration``.
+    var vehicles: [MapVehicle] = []
+    /// How long a vehicle takes to glide to a new position, such as the time until the next one; 0 jumps.
+    var vehicleMoveDuration: TimeInterval = 0
     /// Called once the visible tiles have finished rendering, such as for the screenshot harness to wait on.
     var onTilesRendered: (() -> Void)?
+    /// Called whenever the map comes to rest after loading or moving, with the area it shows.
+    var onCameraIdle: (@MainActor (MapViewport) -> Void)?
+    /// Called as the map starts to move, by a gesture or an animation.
+    var onCameraMove: (@MainActor () -> Void)?
+    /// Called with a vehicle's id when it's tapped.
+    var onVehicleTap: (@MainActor (String) -> Void)?
 
     var body: some View {
         if GoogleMapsServices.isConfigured {
@@ -57,7 +85,12 @@ struct MapView: View {
                 polylines: polylines,
                 markers: markers,
                 pin: pin,
-                onTilesRendered: onTilesRendered
+                vehicles: vehicles,
+                vehicleMoveDuration: vehicleMoveDuration,
+                onTilesRendered: onTilesRendered,
+                onCameraIdle: onCameraIdle,
+                onCameraMove: onCameraMove,
+                onVehicleTap: onVehicleTap
             )
             .accessibilityLabel("Map")
         } else {
@@ -79,7 +112,12 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
     var polylines: [MapPolyline]
     var markers: [MapMarker]
     var pin: MapMarker?
+    var vehicles: [MapVehicle]
+    var vehicleMoveDuration: TimeInterval
     var onTilesRendered: (() -> Void)?
+    var onCameraIdle: (@MainActor (MapViewport) -> Void)?
+    var onCameraMove: (@MainActor () -> Void)?
+    var onVehicleTap: (@MainActor (String) -> Void)?
 
     func makeCoordinator() -> Coordinator {
         Coordinator(camera: $camera)
@@ -104,6 +142,9 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         let coordinator = context.coordinator
         coordinator.camera = $camera
         coordinator.onTilesRendered = onTilesRendered
+        coordinator.onCameraIdle = onCameraIdle
+        coordinator.onCameraMove = onCameraMove
+        coordinator.onVehicleTap = onVehicleTap
 
         let colorScheme = context.environment.colorScheme
         if coordinator.colorScheme != colorScheme {
@@ -125,6 +166,9 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         coordinator.show(polylines: polylines, on: mapView)
         coordinator.show(markers: markers, on: mapView)
         coordinator.show(pin: pin, on: mapView)
+        let moveDuration = context.transaction.disablesAnimations || !UIView.areAnimationsEnabled
+            ? 0 : vehicleMoveDuration
+        coordinator.show(vehicles: vehicles, colorScheme: colorScheme, moveDuration: moveDuration, on: mapView)
     }
 
     @MainActor
@@ -134,10 +178,17 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         var shownCamera: MapCamera?
         var colorScheme: ColorScheme?
         var onTilesRendered: (() -> Void)?
+        var onCameraIdle: (@MainActor (MapViewport) -> Void)?
+        var onCameraMove: (@MainActor () -> Void)?
+        var onVehicleTap: (@MainActor (String) -> Void)?
         private var polylines: [MapPolyline] = []
         private var markers: [MapMarker] = []
         private var overlays: [GMSOverlay] = []
         private var pins: [GMSMarker] = []
+        private var vehicles: [MapVehicle] = []
+        private var vehicleColorScheme: ColorScheme?
+        /// Each vehicle's bullet, and the flat arrow under it that turns with its bearing, by the vehicle's id.
+        private var vehicleMarkers: [String: (bullet: GMSMarker, arrow: GMSMarker)] = [:]
         private var pin: MapMarker?
         private var pinMarker: GMSMarker?
 
@@ -173,6 +224,81 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
             }
         }
 
+        /// Adds, moves, and removes vehicle markers to match `vehicles`, gliding moved ones over `moveDuration` with
+        /// the SDK's own marker animation (Core Animation on the marker's position and rotation).
+        func show(
+            vehicles: [MapVehicle],
+            colorScheme: ColorScheme,
+            moveDuration: TimeInterval,
+            on mapView: GMSMapView
+        ) {
+            let schemeChanged = vehicleColorScheme != colorScheme
+            guard vehicles != self.vehicles || schemeChanged else { return }
+            let previous = Dictionary(self.vehicles.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            self.vehicles = vehicles
+            vehicleColorScheme = colorScheme
+            // The map's own traits (text size among them), in the appearance SwiftUI asks for.
+            let traits = mapView.traitCollection.modifyingTraits {
+                $0.userInterfaceStyle = colorScheme == .dark ? .dark : .light
+            }
+
+            let current = Set(vehicles.map(\.id))
+            for (id, markers) in vehicleMarkers where !current.contains(id) {
+                markers.bullet.map = nil
+                markers.arrow.map = nil
+                vehicleMarkers[id] = nil
+            }
+
+            CATransaction.begin()
+            CATransaction.setAnimationDuration(moveDuration)
+            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .linear))
+            CATransaction.setDisableActions(moveDuration == 0)
+            for vehicle in vehicles {
+                let position = CLLocationCoordinate2D(vehicle.coordinate)
+                guard let markers = vehicleMarkers[vehicle.id] else {
+                    vehicleMarkers[vehicle.id] = addMarkers(for: vehicle, traits: traits, on: mapView)
+                    continue
+                }
+                if schemeChanged || previous[vehicle.id]?.bullet != vehicle.bullet {
+                    markers.bullet.icon = VehicleMarkerImage.bullet(vehicle.bullet, traits: traits)
+                    markers.arrow.icon = VehicleMarkerImage.arrow(vehicle.bullet, traits: traits)
+                }
+                markers.bullet.title = vehicle.accessibilityLabel
+                markers.bullet.position = position
+                markers.arrow.position = position
+                // Turn the shorter way round, so 350° to 10° is a nudge rather than a spin.
+                let turn = (vehicle.bearing - markers.arrow.rotation + 540).truncatingRemainder(dividingBy: 360) - 180
+                markers.arrow.rotation += turn
+            }
+            CATransaction.commit()
+        }
+
+        private func addMarkers(
+            for vehicle: MapVehicle,
+            traits: UITraitCollection,
+            on mapView: GMSMapView
+        ) -> (bullet: GMSMarker, arrow: GMSMarker) {
+            let position = CLLocationCoordinate2D(vehicle.coordinate)
+            let arrow = GMSMarker(position: position)
+            arrow.icon = VehicleMarkerImage.arrow(vehicle.bullet, traits: traits)
+            arrow.groundAnchor = CGPoint(x: 0.5, y: 0.5)
+            // Flat, so its rotation is a compass bearing that turns with the map.
+            arrow.isFlat = true
+            arrow.rotation = vehicle.bearing
+            arrow.zIndex = 1
+            arrow.userData = vehicle.id
+            arrow.map = mapView
+
+            let bullet = GMSMarker(position: position)
+            bullet.icon = VehicleMarkerImage.bullet(vehicle.bullet, traits: traits)
+            bullet.groundAnchor = CGPoint(x: 0.5, y: 0.5)
+            bullet.title = vehicle.accessibilityLabel
+            bullet.zIndex = 2
+            bullet.userData = vehicle.id
+            bullet.map = mapView
+            return (bullet, arrow)
+        }
+
         func show(pin: MapMarker?, on mapView: GMSMapView) {
             guard pin != self.pin else { return }
             self.pin = pin
@@ -181,7 +307,8 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
                 let marker = GMSMarker(position: CLLocationCoordinate2D(pin.coordinate))
                 marker.title = pin.title
                 marker.icon = GMSMarker.markerImage(with: UIColor(pin.color))
-                marker.zIndex = 1
+                // Above vehicles' arrows (1) and bullets (2).
+                marker.zIndex = 3
                 marker.map = mapView
                 return marker
             }
@@ -190,7 +317,15 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
 }
 
 extension GoogleMapRepresentable.Coordinator: @preconcurrency GMSMapViewDelegate {
-    func mapView(_: GMSMapView, idleAt position: GMSCameraPosition) {
+    func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
+        if let onCameraIdle {
+            let region = GMSCoordinateBounds(region: mapView.projection.visibleRegion())
+            let bounds = CoordinateBounds(
+                southWest: Coordinate(latitude: region.southWest.latitude, longitude: region.southWest.longitude),
+                northEast: Coordinate(latitude: region.northEast.latitude, longitude: region.northEast.longitude)
+            )
+            onCameraIdle(MapViewport(bounds: bounds, zoom: Double(position.zoom)))
+        }
         let settled = MapCamera(
             center: Coordinate(latitude: position.target.latitude, longitude: position.target.longitude),
             zoom: position.zoom,
@@ -199,6 +334,17 @@ extension GoogleMapRepresentable.Coordinator: @preconcurrency GMSMapViewDelegate
         guard settled != shownCamera else { return }
         shownCamera = settled
         camera.wrappedValue = settled
+    }
+
+    func mapView(_: GMSMapView, willMove _: Bool) {
+        onCameraMove?()
+    }
+
+    func mapView(_: GMSMapView, didTap marker: GMSMarker) -> Bool {
+        // A vehicle's tap goes to the caller, with no info window; a pin's shows its title as before.
+        guard let id = marker.userData as? String, vehicleMarkers[id] != nil else { return false }
+        onVehicleTap?(id)
+        return true
     }
 
     func mapViewDidFinishTileRendering(_: GMSMapView) {

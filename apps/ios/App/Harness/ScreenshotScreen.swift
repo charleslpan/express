@@ -32,6 +32,9 @@ enum ScreenshotScreen: String, CaseIterable {
     case about
     /// Liquid Glass controls and a glass sheet over the Google map, for judging the look (F5).
     case mapGlass = "map-glass"
+    /// Live subway trains over Midtown and Union Square, and the same map zoomed out, where they hide (V1).
+    case trains
+    case trainsZoomedOut = "trains-zoomed-out"
 
     #if DEBUG
         /// GlassUI's gallery, every section (debug builds only).
@@ -56,6 +59,8 @@ enum ScreenshotScreen: String, CaseIterable {
              .searchNoResults, .searchError, .searchNoKey, .searchPlace, .searchRecents, .placeSaved, .placeHomeWork:
             RootView()
         case .mapGlass: MapGlassScreen()
+        case .trains: GoView(camera: MapCamera(center: Self.midtown, zoom: 14.5))
+        case .trainsZoomedOut: GoView(camera: MapCamera(center: Self.midtown, zoom: 11.5))
         #if DEBUG
             case .gallery: GlassUIGallery()
             case .galleryColors: GlassUIGallery(sections: [.colors])
@@ -137,6 +142,9 @@ enum ScreenshotScreen: String, CaseIterable {
     var location: Coordinate? {
         self == .homeOutsideNYC ? Coordinate(latitude: 39.9526, longitude: -75.1652) : nil
     }
+
+    /// Where the trains screens look: between Union Square and Herald Square, where the `nyc-evening` trips run.
+    private static let midtown = Coordinate(latitude: 40.7445, longitude: -73.9895)
 
     /// The accessibility identifier the harness puts on the screen, which the UI test waits for before capturing.
     var accessibilityIdentifier: String {
