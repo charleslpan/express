@@ -9,11 +9,13 @@ struct ExpressApp: App {
     @State private var environment: AppEnvironment
     @State private var router: AppRouter
     @State private var location: LocationService
+    @State private var places: PlaceStore
     private let transitClient = TransitClient(baseURL: ExpressApp.transitServer.baseURL)
     private let placeSearchService: (any PlaceSearchService)?
 
     init() {
-        _environment = State(initialValue: AppEnvironment(fixtures: launch.fixtures))
+        let environment = AppEnvironment(fixtures: launch.fixtures)
+        _environment = State(initialValue: environment)
         let screen = launch.screen
         let router = AppRouter(homeDetent: screen?.homeDetent ?? .peek, sheet: screen?.sheet)
         screen?.prepare(router)
@@ -23,7 +25,16 @@ struct ExpressApp: App {
             .map { LocationService(fixed: $0.locationAuthorization, location: $0.location) } ?? LocationService()
         _location = State(initialValue: location)
         GoogleMapsServices.configure()
-        placeSearchService = PlaceSearchServices.make(fixtures: launch.fixtures)
+        let placeSearchService = PlaceSearchServices.make(fixtures: launch.fixtures)
+        self.placeSearchService = placeSearchService
+        // Recents and saved places, on disk; launches on fixtures (the screenshot harness) keep theirs in memory, on
+        // the fixtures' clock, so they never touch the real store.
+        let lookup = PlaceLookupServices.make(fixtures: launch.fixtures, search: placeSearchService)
+        let places = launch.fixtures == nil && !launch.isScreenshot
+            ? PlaceStore.persistent(lookup: lookup)
+            : PlaceStore.inMemory(lookup: lookup, now: { environment.now })
+        screen?.prepare(places)
+        _places = State(initialValue: places)
         if launch.isScreenshot {
             UIView.setAnimationsEnabled(false)
         }
@@ -43,6 +54,7 @@ struct ExpressApp: App {
             .environment(environment)
             .environment(router)
             .environment(location)
+            .environment(places)
             .environment(\.transitClient, transitClient)
             .environment(\.placeSearchService, placeSearchService)
             .environment(\.placeSearchSeed, launch.screen?.searchQuery)
