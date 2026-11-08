@@ -26,6 +26,7 @@ struct GoView: View {
         MapView(
             camera: $camera,
             showsUserLocation: location.isLive && location.authorization == .authorized,
+            pin: placePin,
             onTilesRendered: { tilesRendered = true }
         )
         .ignoresSafeArea()
@@ -42,7 +43,16 @@ struct GoView: View {
             if location.authorization == .authorized {
                 location.requestLocation()
             }
-            centerOnUserInNewYork(location.location)
+            if let place = router.selectedPlace {
+                center(on: place)
+            } else {
+                centerOnUserInNewYork(location.location)
+            }
+        }
+        .onChange(of: router.selectedPlace) { _, place in
+            if let place {
+                center(on: place)
+            }
         }
         .onChange(of: location.location) { _, fix in
             guard let fix else { return }
@@ -135,6 +145,17 @@ struct GoView: View {
     private var isOutsideServiceArea: Bool {
         guard location.authorization == .authorized, let fix = location.location else { return false }
         return !ServiceArea.nyc.contains(fix)
+    }
+
+    /// The picked place's pin, while there is one.
+    private var placePin: MapMarker? {
+        router.selectedPlace.map { MapMarker(id: $0.placeID, coordinate: $0.coordinate, title: $0.name, color: .red) }
+    }
+
+    /// Centres the map on a picked place, close enough to see the streets around it.
+    private func center(on place: PlaceDetails) {
+        hasCenteredOnUser = true
+        camera = MapCamera(center: place.coordinate, zoom: 16)
     }
 
     /// Moves the map to the user's first fix in New York; outside it the map stays on the city, under the banner.

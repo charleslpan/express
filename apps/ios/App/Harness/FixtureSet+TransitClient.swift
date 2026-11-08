@@ -13,10 +13,10 @@ extension FixtureSet {
             switch fixtures {
             case .offline:
                 throw URLError(.notConnectedToInternet)
-            case .loading:
+            case .slowNetwork:
                 try await Task.sleep(for: .seconds(24 * 60 * 60))
                 throw CancellationError()
-            case .nycEvening, .nycEveningStale, .nycNoService:
+            case .nycEvening, .nycEveningStale, .nycNoService, .noKey:
                 try Self.response(to: request, fixtures: fixtures)
             }
         })

@@ -17,7 +17,7 @@ enum ScreenshotScreen: String, CaseIterable {
     case nearbyHalf = "nearby-half"
     case nearbyFull = "nearby-full"
     /// Nearby's states other than departures (N1), each at half height: the "may not be real time" notice (with
-    /// `-fixtures nyc-evening-stale`), the location turned off, outside New York, loading (`loading`), offline
+    /// `-fixtures nyc-evening-stale`), the location turned off, outside New York, loading (`slow-network`), offline
     /// (`offline`), and nothing due (`nyc-no-service`).
     case nearbyStale = "nearby-stale"
     case nearbyDenied = "nearby-denied"
@@ -25,6 +25,17 @@ enum ScreenshotScreen: String, CaseIterable {
     case nearbyLoading = "nearby-loading"
     case nearbyError = "nearby-error"
     case nearbyEmpty = "nearby-empty"
+    /// Place search in the home sheet (S3): the hint for an empty query, a query typed while suggestions load, the
+    /// suggestions, none found, a failure with Try Again, and "Search Unavailable" without a key. Which of the last
+    /// states shows depends on the fixtures each test launches with.
+    case searchEmpty = "search-empty"
+    case searchTyping = "search-typing"
+    case searchResults = "search-results"
+    case searchNoResults = "search-no-results"
+    case searchError = "search-error"
+    case searchNoKey = "search-no-key"
+    /// A place picked from search: its pin on the map and its card in the home sheet (S3).
+    case searchPlace = "search-place"
     /// The About sheet over the home sheet (S1).
     case about
     /// Liquid Glass controls and a glass sheet over the Google map, for judging the look (F5).
@@ -50,7 +61,9 @@ enum ScreenshotScreen: String, CaseIterable {
     var view: some View {
         switch self {
         case .homePeek, .homeHalf, .homeFull, .homeOutsideNYC, .about, .nearbyPeek, .nearbyHalf, .nearbyFull,
-             .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError, .nearbyEmpty: RootView()
+             .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError, .nearbyEmpty, .searchEmpty,
+             .searchTyping, .searchResults, .searchNoResults, .searchError, .searchNoKey, .searchPlace:
+            RootView()
         case .mapGlass: MapGlassScreen()
         #if DEBUG
             case .gallery: GlassUIGallery()
@@ -81,6 +94,27 @@ enum ScreenshotScreen: String, CaseIterable {
     /// The sheet the shell opens with for this screen.
     var sheet: AppSheet? {
         self == .about ? .about : nil
+    }
+
+    /// The query a search screen opens with, as if typed; nil leaves the field empty.
+    var searchQuery: String? {
+        switch self {
+        case .searchEmpty, .searchNoKey: ""
+        case .searchTyping: "Grand Cen"
+        case .searchResults, .searchError: "Grand"
+        case .searchNoResults: "Qwxyz"
+        default: nil
+        }
+    }
+
+    /// Puts the router where this screen starts: searching, or showing a picked place.
+    @MainActor
+    func prepare(_ router: AppRouter) {
+        if searchQuery != nil {
+            router.showPlaceSearch()
+        } else if self == .searchPlace {
+            router.showPlace(FixturePlaceSearchService.places[0])
+        }
     }
 
     /// The location permission the screen shows; the harness never asks for it.
