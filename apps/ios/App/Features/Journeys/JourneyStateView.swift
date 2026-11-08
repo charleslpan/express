@@ -42,6 +42,7 @@ struct JourneyStateView<Actions: View>: View {
 }
 
 /// The journey options' states: none found, outside New York City, location off, and failed.
+@MainActor
 enum JourneyStates {
     static func noJourneys(onChangeTime: @escaping () -> Void) -> some View {
         JourneyStateView(
