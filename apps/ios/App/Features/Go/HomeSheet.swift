@@ -52,6 +52,7 @@ struct HomeSheet: View {
                 }
             }
             .toolbarVisibility(.hidden, for: .navigationBar)
+            .stopsNavigationDestinations()
         }
         .sheet(item: $router.sheet) { sheet in
             switch sheet {

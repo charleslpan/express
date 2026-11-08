@@ -8,7 +8,8 @@ extension FixtureSet {
     /// from our server and shifted to the reference date) and `/metrics` with the subway feed
     /// ``FixtureSet/realtimeDataAge`` old, in every set. Nearby's requests follow the set's network: the stops around
     /// Union Square (`Fixtures/nearby-stops.json`) and each stop's departures (`Fixtures/nearby-stoptimes-<stop>.json`,
-    /// by the stop id after its feed's `_`; none for a stop without a file).
+    /// by the stop id after its feed's `_`; none for a stop without a file). So do the trip view's: a trip by its id
+    /// (`Fixtures/trip-<tripId>.json`, such as the uptown 6 Nearby lists, `fixture-6-0-4`).
     var transitClient: TransitClient {
         let fixtures = self
         return TransitClient(transport: StubTransport { request in
@@ -43,6 +44,8 @@ extension FixtureSet {
                 return data
             }
             return noDepartures
+        case "/api/v6/trip":
+            return try fixture("trip-\(request.query["tripId"] ?? "")")
         default:
             throw URLError(.resourceUnavailable)
         }

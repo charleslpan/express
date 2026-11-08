@@ -40,21 +40,12 @@ public extension Departure {
     /// How the departure stands against the timetable; ``DepartureStatus/uncertain`` for a live time when the
     /// realtime data is stale.
     func status(realtimeIsStale: Bool = false) -> DepartureStatus {
-        if isCancelled {
-            return .cancelled
-        }
-        guard isRealtime else { return .scheduled }
-        if realtimeIsStale {
-            return .uncertain
-        }
-        let delay = delayMinutes ?? 0
-        if delay >= DepartureStatus.delayThreshold {
-            return .late(minutes: delay)
-        }
-        if delay <= -DepartureStatus.delayThreshold {
-            return .early(minutes: -delay)
-        }
-        return .onTime
+        DepartureStatus(
+            delayMinutes: delayMinutes,
+            isRealtime: isRealtime,
+            isCancelled: isCancelled,
+            realtimeIsStale: realtimeIsStale
+        )
     }
 }
 

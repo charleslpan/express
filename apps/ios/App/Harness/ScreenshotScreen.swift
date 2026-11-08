@@ -49,6 +49,20 @@ enum ScreenshotScreen: String, CaseIterable {
     /// Live subway trains over Midtown and Union Square, and the same map zoomed out, where they hide (V1).
     case trains
     case trainsZoomedOut = "trains-zoomed-out"
+    /// Union Square's full departures board pushed in the home sheet (N2), at half and full height, and in its other
+    /// states at half: times that may not be real time (`nyc-evening-stale`), offline (`offline`), and no more
+    /// departures today (`nyc-no-service`).
+    case stopHalf = "stop-half"
+    case stopFull = "stop-full"
+    case stopStale = "stop-stale"
+    case stopError = "stop-error"
+    case stopEmpty = "stop-empty"
+    /// The uptown 6 followed from Union Square's board (N2): mid-route at half and full height, a trip that has
+    /// ended, and offline (`offline`).
+    case trip
+    case tripFull = "trip-full"
+    case tripEnded = "trip-ended"
+    case tripError = "trip-error"
 
     #if DEBUG
         /// GlassUI's gallery, every section (debug builds only).
@@ -72,7 +86,8 @@ enum ScreenshotScreen: String, CaseIterable {
         case .homePeek, .homeHalf, .homeFull, .homeOutsideNYC, .about, .nearbyPeek, .nearbyHalf, .nearbyFull,
              .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError, .nearbyEmpty, .searchEmpty,
              .searchTyping, .searchResults, .searchNoResults, .searchError, .searchNoKey, .searchPlace, .searchRecents,
-             .placeSaved, .placeHomeWork:
+             .placeSaved, .placeHomeWork, .stopHalf, .stopFull, .stopStale, .stopError, .stopEmpty, .trip, .tripFull,
+             .tripEnded, .tripError:
             RootView()
         case .mapGlass: MapGlassScreen()
         case .trains: GoView(camera: MapCamera(center: Self.midtown, zoom: 14.5))
@@ -97,8 +112,8 @@ enum ScreenshotScreen: String, CaseIterable {
     var homeDetent: HomeSheetDetent {
         switch self {
         case .homeHalf, .nearbyHalf, .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError,
-             .nearbyEmpty: .half
-        case .homeFull, .nearbyFull: .full
+             .nearbyEmpty, .stopHalf, .stopStale, .stopError, .stopEmpty, .trip, .tripEnded, .tripError: .half
+        case .homeFull, .nearbyFull, .stopFull, .tripFull: .full
         default: .peek
         }
     }
@@ -119,13 +134,25 @@ enum ScreenshotScreen: String, CaseIterable {
         }
     }
 
-    /// Puts the router where this screen starts: searching, or showing a picked place.
+    /// Puts the router where this screen starts: searching, showing a picked place, or with a stop or trip pushed.
     @MainActor
     func prepare(_ router: AppRouter) {
         if searchQuery != nil {
             router.showPlaceSearch()
         } else if [.searchPlace, .placeSaved, .placeHomeWork].contains(self) {
             router.showPlace(FixturePlaceSearchService.places[0])
+        }
+        let unionSquare = StopRoute(stopId: "us-ny-MTA-NYCSubway_635", name: "14 St-Union Sq", isSubway: true)
+        switch self {
+        case .stopHalf, .stopFull, .stopStale, .stopError, .stopEmpty:
+            router.homePath.append(unionSquare)
+        case .trip, .tripFull, .tripError:
+            router.homePath.append(unionSquare)
+            router.homePath.append(TripRoute(tripId: "fixture-6-0-4", stationId: unionSquare.stopId))
+        case .tripEnded:
+            router.homePath.append(TripRoute(tripId: "fixture-6-0-ended"))
+        default:
+            break
         }
     }
 
