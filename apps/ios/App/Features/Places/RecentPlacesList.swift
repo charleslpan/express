@@ -37,8 +37,9 @@ struct RecentPlacesList: View {
             }
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(store.recents) { recent in
-                    RecentPlaceRow(
-                        entry: store.details.entries[recent.placeID],
+                    RememberedPlaceRow(
+                        systemImage: "clock.fill",
+                        text: RememberedPlaceText(entry: store.details.entries[recent.placeID]),
                         isOpening: opening == recent.placeID,
                         action: { open(recent) }
                     )
@@ -78,71 +79,6 @@ struct RecentPlacesList: View {
             } else {
                 router.showPlace(place)
             }
-        }
-    }
-}
-
-/// One recent: a clock, the place's name and address once they've arrived (a placeholder until then), as one button.
-private struct RecentPlaceRow: View {
-    let entry: PlaceDetailsCache.Entry?
-    let isOpening: Bool
-    let action: () -> Void
-
-    @ScaledMetric(relativeTo: .body) private var gap = Spacing.sm
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: gap) {
-                Image(systemName: "clock.fill")
-                    .font(.title2)
-                    .foregroundStyle(.textSecondary)
-                    .accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: Spacing.xxxs) {
-                    Text(title)
-                        .typography(.body)
-                        .foregroundStyle(.textPrimary)
-                    if let subtitle {
-                        Text(subtitle)
-                            .typography(.secondary)
-                            .foregroundStyle(.textSecondary)
-                    }
-                }
-                .redacted(reason: isLoading ? .placeholder : [])
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
-                Spacer(minLength: 0)
-                if isOpening {
-                    ProgressView()
-                }
-            }
-            .padding(.vertical, Spacing.sm)
-            .frame(minHeight: 44)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text([title, subtitle].compactMap(\.self).joined(separator: ", ")))
-        .accessibilityValue(isOpening ? Text("Loading") : Text(""))
-        .accessibilityAddTraits(.isButton)
-    }
-
-    private var isLoading: Bool {
-        entry == nil || entry == .loading
-    }
-
-    private var title: String {
-        switch entry {
-        case let .loaded(place): place.name
-        case .failed: String(localized: "Place unavailable")
-        case .loading, nil: String(localized: "Loading place")
-        }
-    }
-
-    private var subtitle: String? {
-        switch entry {
-        case let .loaded(place): place.address
-        case .failed: String(localized: "Tap to try again")
-        case .loading, nil: String(localized: "Loading address")
         }
     }
 }

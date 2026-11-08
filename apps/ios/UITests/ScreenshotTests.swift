@@ -317,7 +317,7 @@ final class ScreenshotTests: XCTestCase {
     /// `settledWhen` names elements the screen shows once it has finished loading what it shows, such as map tiles
     /// or departures; the capture waits for each a while, then goes ahead without it rather than fail. `then` runs
     /// before each capture, to put the screen in a state only a tap reaches, such as an open menu.
-    private func capture(
+    func capture(
         _ screen: String,
         fixtures: String,
         settledWhen settled: String...,
@@ -343,45 +343,37 @@ final class ScreenshotTests: XCTestCase {
     }
 }
 
+/// Home and Work chips and the Saved section (P2) in the home sheet, apart from the class body to keep it short.
 extension ScreenshotTests {
-    // Service alerts (A3): banners on Nearby's rows (a red L and an amber uptown 4, and no banner for the 6's work two
-    // weeks away), the alert chip, an alert's full text, line status with mixed lines, all good service, loading, and
-    // offline, and a stop's alerts. They sit in an extension so the class stays within SwiftLint's length; `@objc`
-    // keeps them visible to XCTest, which finds tests through the Objective-C runtime.
-
-    @objc func testAlertsNearby() {
-        capture("alerts-nearby", fixtures: "nyc-alerts", settledWhen: "nearby.loaded", "nearby.alert")
+    func testHomePlaces() {
+        capture("home-places", fixtures: "nyc-evening", settledWhen: "home.chip.home")
     }
 
-    @objc func testAlertsChip() {
-        capture("alerts-chip", fixtures: "nyc-alerts", settledWhen: "nearby.loaded", "alerts.chip")
+    func testHomePlacesUnset() {
+        capture("home-places-unset", fixtures: "nyc-evening", settledWhen: "home.chip.home")
     }
 
-    @objc func testAlertDetail() {
-        capture("alert-detail", fixtures: "nyc-alerts", settledWhen: "nearby.alert") { app in
-            app.descendants(matching: .any).matching(identifier: "nearby.alert").firstMatch.tap()
-            let opened = app.descendants(matching: .any)["alerts.detail"].waitForExistence(timeout: 10)
-            XCTAssertTrue(opened, "The alert's full text never opened")
+    func testHomeSaved() {
+        capture("home-saved", fixtures: "nyc-evening", settledWhen: "home.saved", then: scrollToSaved)
+    }
+
+    func testHomeSavedLoading() {
+        capture("home-saved-loading", fixtures: "slow-network", settledWhen: "home.saved.loading", then: scrollToSaved)
+    }
+
+    func testHomeSavedEmpty() {
+        capture("home-saved-empty", fixtures: "nyc-evening", settledWhen: "home.saved.empty", then: scrollToSaved)
+    }
+
+    /// Scrolls the home sheet until the Saved heading is in its top half, with small drags so it doesn't overshoot.
+    private func scrollToSaved(_ app: XCUIApplication) {
+        let heading = app.descendants(matching: .any)["home.saved.heading"]
+        let window = app.windows.firstMatch
+        for _ in 0 ..< 10 {
+            guard heading.exists, !(heading.isHittable && heading.frame.minY < window.frame.midY) else { return }
+            let start = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85))
+            let end = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
+            start.press(forDuration: 0.05, thenDragTo: end)
         }
-    }
-
-    @objc func testLineStatus() {
-        capture("line-status", fixtures: "nyc-alerts", settledWhen: "line-status.loaded")
-    }
-
-    @objc func testLineStatusGoodService() {
-        capture("line-status", fixtures: "nyc-evening", settledWhen: "line-status.all-good")
-    }
-
-    @objc func testLineStatusLoading() {
-        capture("line-status", fixtures: "slow-network", settledWhen: "line-status.loading")
-    }
-
-    @objc func testLineStatusError() {
-        capture("line-status", fixtures: "offline", settledWhen: "line-status.failed")
-    }
-
-    @objc func testStopAlerts() {
-        capture("stop-alerts", fixtures: "nyc-alerts", settledWhen: "stop.loaded", "stop.alerts")
     }
 }
