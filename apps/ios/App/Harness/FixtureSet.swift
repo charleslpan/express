@@ -16,13 +16,18 @@ enum FixtureSet: String, CaseIterable, Sendable {
     case offline
     /// The evening rush in a build with no Google Maps key, so place search is unavailable.
     case noKey = "no-key"
+    /// The same evening's buses with no trains running, so the map shows buses alone.
+    case nycEveningBuses = "nyc-evening-buses"
+    /// Buses alone, with Bus Time's feed three minutes old, so the map says bus positions may not be real time.
+    case nycEveningBusesStale = "nyc-evening-buses-stale"
     /// The evening rush, with no journey to be found anywhere.
     case noJourneys = "no-journeys"
 
     /// The moment the fixtures describe, which stands in for "now" so times on screen don't drift between runs.
     var referenceDate: Date {
         switch self {
-        case .nycEvening, .nycEveningStale, .nycNoService, .slowNetwork, .offline, .noKey, .noJourneys:
+        case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .slowNetwork,
+             .offline, .noKey, .noJourneys:
             Date(timeIntervalSince1970: 1_793_748_600) // 2026-11-03 18:30 America/New_York
         }
     }
@@ -33,5 +38,15 @@ enum FixtureSet: String, CaseIterable, Sendable {
     /// How old the server's realtime data is at ``referenceDate``.
     var realtimeDataAge: TimeInterval {
         self == .nycEveningStale ? 180 : 20
+    }
+
+    /// Whether trains run in this set; the bus-only sets have none, so buses show alone.
+    var hasTrains: Bool {
+        ![.nycEveningBuses, .nycEveningBusesStale].contains(self)
+    }
+
+    /// How old Bus Time's feed is at ``referenceDate``.
+    var busDataAge: TimeInterval {
+        self == .nycEveningBusesStale ? 180 : 20
     }
 }

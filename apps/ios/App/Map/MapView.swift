@@ -31,13 +31,13 @@ struct MapMarker: Identifiable, Equatable {
     var color: Color = .accentColor
 }
 
-/// A vehicle moving on the map, such as a subway train at its estimated position: a line bullet, with an arrow
-/// pointing the way it's heading.
+/// A vehicle moving on the map, such as a subway train at its estimated position or a bus at its GPS position: a line
+/// bullet, with an arrow pointing the way it's heading.
 struct MapVehicle: Identifiable, Equatable {
     var id: String
     var coordinate: Coordinate
-    /// The direction of travel, in degrees clockwise from north.
-    var bearing: Double
+    /// The direction of travel, in degrees clockwise from north; `nil` where it's unknown, which shows no arrow.
+    var bearing: Double?
     var bullet: LineBullet
     /// What VoiceOver reads, such as "Q train to 14 St-Union Sq".
     var accessibilityLabel: String
@@ -277,9 +277,12 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
                 markers.bullet.title = vehicle.accessibilityLabel
                 markers.bullet.position = position
                 markers.arrow.position = position
-                // Turn the shorter way round, so 350° to 10° is a nudge rather than a spin.
-                let turn = (vehicle.bearing - markers.arrow.rotation + 540).truncatingRemainder(dividingBy: 360) - 180
-                markers.arrow.rotation += turn
+                markers.arrow.map = vehicle.bearing == nil ? nil : mapView
+                if let bearing = vehicle.bearing {
+                    // Turn the shorter way round, so 350° to 10° is a nudge rather than a spin.
+                    let turn = (bearing - markers.arrow.rotation + 540).truncatingRemainder(dividingBy: 360) - 180
+                    markers.arrow.rotation += turn
+                }
             }
             CATransaction.commit()
         }
@@ -295,10 +298,10 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
             arrow.groundAnchor = CGPoint(x: 0.5, y: 0.5)
             // Flat, so its rotation is a compass bearing that turns with the map.
             arrow.isFlat = true
-            arrow.rotation = vehicle.bearing
+            arrow.rotation = vehicle.bearing ?? 0
             arrow.zIndex = 1
             arrow.userData = vehicle.id
-            arrow.map = mapView
+            arrow.map = vehicle.bearing == nil ? nil : mapView
 
             let bullet = GMSMarker(position: position)
             bullet.icon = VehicleMarkerImage.bullet(vehicle.bullet, traits: traits)

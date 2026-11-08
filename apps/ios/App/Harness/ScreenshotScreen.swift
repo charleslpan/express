@@ -63,6 +63,10 @@ enum ScreenshotScreen: String, CaseIterable {
     /// Live subway trains over Midtown and Union Square, and the same map zoomed out, where they hide (V1).
     case trains
     case trainsZoomedOut = "trains-zoomed-out"
+    /// Live buses over Midtown and Union Square (alone, or with trains, by the fixtures), and zoomed out, where they
+    /// hide (V2).
+    case buses
+    case busesZoomedOut = "buses-zoomed-out"
 
     #if DEBUG
         /// GlassUI's gallery, every section (debug builds only).
@@ -93,6 +97,8 @@ enum ScreenshotScreen: String, CaseIterable {
         case .mapGlass: MapGlassScreen()
         case .trains: GoView(camera: MapCamera(center: Self.midtown, zoom: 14.5))
         case .trainsZoomedOut: GoView(camera: MapCamera(center: Self.midtown, zoom: 11.5))
+        case .buses: GoView(camera: MapCamera(center: Self.midtown, zoom: 15))
+        case .busesZoomedOut: GoView(camera: MapCamera(center: Self.midtown, zoom: 13))
         #if DEBUG
             case .gallery: GlassUIGallery()
             case .galleryColors: GlassUIGallery(sections: [.colors])
@@ -217,7 +223,8 @@ enum ScreenshotScreen: String, CaseIterable {
         }
     }
 
-    /// Where the trains screens look: between Union Square and Herald Square, where the `nyc-evening` trips run.
+    /// Where the trains and buses screens look: between Union Square and Herald Square, where the `nyc-evening` trips
+    /// and buses run.
     private static let midtown = Coordinate(latitude: 40.7445, longitude: -73.9895)
 
     /// The accessibility identifier the harness puts on the screen, which the UI test waits for before capturing.

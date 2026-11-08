@@ -5,15 +5,16 @@ import UIKit
 
 /// The map home, the app's one screen: the map full screen, centred on the user where they're in New York and on New
 /// York otherwise, with glass controls floating at the top (About, a compass while the map is rotated, and "Show my
-/// location"), a banner while the user is outside the area Express serves, live subway trains (``LiveTrains``) with a
-/// notice while their positions may not be real time, and the ``HomeSheet`` over it all, which can't be dismissed and
-/// leaves the map usable up to half height.
+/// location"), a banner while the user is outside the area Express serves, live subway trains (``LiveTrains``) and
+/// buses (``LiveBuses``) with a notice while their positions may not be real time, and the ``HomeSheet`` over it all,
+/// which can't be dismissed and leaves the map usable up to half height.
 struct GoView: View {
     @Environment(AppRouter.self) private var router
     @Environment(LocationService.self) private var location
 
     @State private var camera: MapCamera
     @State private var trains = LiveTrains()
+    @State private var buses = LiveBuses()
     @State private var tilesRendered = false
     /// Whether the map should move to the next location fix, after "Show my location" asked for one.
     @State private var centersOnNextFix = false
@@ -35,15 +36,28 @@ struct GoView: View {
             showsUserLocation: location.isLive && location.authorization == .authorized,
             pin: placePin,
             route: router.selectedJourney.map(MapRoute.init(journey:)),
-            vehicles: trains.vehicles,
+            vehicles: trains.vehicles + buses.vehicles,
             vehicleMoveDuration: LiveTrains.tick / .seconds(1),
             onTilesRendered: { tilesRendered = true },
-            onCameraIdle: { trains.cameraDidIdle($0) },
-            onCameraMove: { trains.cameraDidMove() },
-            onVehicleTap: { router.showTrip(id: $0) }
+            onCameraIdle: { viewport in
+                trains.cameraDidIdle(viewport)
+                buses.cameraDidIdle(viewport)
+            },
+            onCameraMove: {
+                trains.cameraDidMove()
+                buses.cameraDidMove()
+            },
+            onVehicleTap: { id in
+                if let bus = buses.bus(forVehicle: id) {
+                    router.showBus(bus)
+                } else {
+                    router.showTrip(id: id)
+                }
+            }
         )
         .ignoresSafeArea()
         .liveTrains(trains)
+        .liveBuses(buses)
         // The controls sit at the top, clear of the sheet at its peek.
         .overlay(alignment: .top) {
             topControls
@@ -118,7 +132,10 @@ struct GoView: View {
             if isOutsideServiceArea {
                 OutsideServiceAreaBanner()
             }
-            if trains.mayNotBeRealTime {
+            // One note at a time: the bus note covers trains too where both may not be real time.
+            if buses.mayNotBeRealTime {
+                LiveBusesNotice(includesTrains: trains.mayNotBeRealTime)
+            } else if trains.mayNotBeRealTime {
                 LiveTrainsNotice()
             }
             controls
