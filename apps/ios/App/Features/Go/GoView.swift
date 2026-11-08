@@ -21,6 +21,8 @@ struct GoView: View {
     @State private var showsLocationOff = false
     /// Whether the map has moved to the user's first location fix in New York, which it does once.
     @State private var hasCenteredOnUser = false
+    /// How tall the sheet's peek is, as the sheet measured it; nil for the search field alone.
+    @State private var peekHeight: CGFloat?
     @Namespace private var glass
 
     /// - Parameter camera: Where the map first looks; New York unless the screenshot harness asks for somewhere else.
@@ -92,9 +94,9 @@ struct GoView: View {
     }
 
     private var homeSheet: some View {
-        HomeSheet()
+        HomeSheet(peekHeight: $peekHeight)
             .presentationDetents(
-                Set(HomeSheetDetent.allCases.map(\.presentationDetent)),
+                Set(HomeSheetDetent.allCases.map { $0.presentationDetent(peekHeight: peekHeight) }),
                 selection: detent
             )
             .presentationBackgroundInteraction(.enabled(upThrough: .medium))
@@ -116,7 +118,7 @@ struct GoView: View {
     /// The sheet's detent, through ``AppRouter/homeDetent`` so features can raise and lower it.
     private var detent: Binding<PresentationDetent> {
         Binding {
-            router.homeDetent.presentationDetent
+            router.homeDetent.presentationDetent(peekHeight: peekHeight)
         } set: { detent in
             router.homeDetent = HomeSheetDetent(detent)
         }
@@ -226,4 +228,5 @@ struct GoView: View {
         .environment(AppEnvironment())
         .environment(AppRouter())
         .environment(LocationService(fixed: .notDetermined))
+        .environment(AppEnvironment())
 }
