@@ -9,7 +9,7 @@ struct ExpressApp: App {
     @State private var environment: AppEnvironment
     @State private var router: AppRouter
     @State private var location: LocationService
-    private let transitClient = TransitClient(baseURL: ExpressApp.transitServer.baseURL)
+    private let transitClient: TransitClient
     private let placeSearchService: (any PlaceSearchService)?
 
     init() {
@@ -22,6 +22,9 @@ struct ExpressApp: App {
         let location = screen
             .map { LocationService(fixed: $0.locationAuthorization, location: $0.location) } ?? LocationService()
         _location = State(initialValue: location)
+        // The screenshot harness plans on recorded data and never touches the network.
+        transitClient = launch.fixtures.map(TransitClient.fixtures)
+            ?? TransitClient(baseURL: ExpressApp.transitServer.baseURL)
         GoogleMapsServices.configure()
         placeSearchService = PlaceSearchServices.make(fixtures: launch.fixtures)
         if launch.isScreenshot {
@@ -46,6 +49,7 @@ struct ExpressApp: App {
             .environment(\.transitClient, transitClient)
             .environment(\.placeSearchService, placeSearchService)
             .environment(\.placeSearchSeed, launch.screen?.searchQuery)
+            .environment(\.journeyOptionsSeed, launch.screen?.journeyOptionsSeed)
             .preferredColorScheme(launch.colorScheme)
         }
         .onChange(of: scenePhase) { _, phase in

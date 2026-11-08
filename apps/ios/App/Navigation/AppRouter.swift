@@ -40,6 +40,8 @@ final class AppRouter {
     /// The place picked from search, pinned on the map with its card in the home sheet (``showPlace(_:)``). Journeys
     /// and saved places start from it. Held in memory only: Express persists nothing of a place but its ID.
     var selectedPlace: PlaceDetails?
+    /// The journey option drawn on the map, picked from the journey options (``showJourneyDetail(_:)``).
+    var selectedJourney: Itinerary?
     /// The sheet shown over the home sheet, if any.
     var sheet: AppSheet?
 

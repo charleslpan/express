@@ -31,6 +31,24 @@ struct MapMarker: Identifiable, Equatable {
     var color: Color = .accentColor
 }
 
+/// A journey drawn on the map: each leg a line in its colour, walking legs dashed. The map fits itself to each new
+/// route, keeping it clear of the controls at the top and the home sheet at the bottom.
+struct MapRoute: Identifiable, Equatable {
+    /// One leg of the route.
+    struct Segment: Identifiable, Equatable {
+        var id: String
+        var coordinates: [Coordinate]
+        var color: Color
+        /// Whether the line is dashed, as for a walk.
+        var isDashed = false
+    }
+
+    /// Picks out the route: a new id moves the map to fit it, while the same id with new segments (a refresh)
+    /// leaves the map where it is.
+    var id: String
+    var segments: [Segment]
+}
+
 /// Express's Google map, the one map view every map screen builds on.
 ///
 /// Google offers no SwiftUI map, so this wraps `GMSMapView`. It styles itself with ``MapStyle`` for the current
@@ -46,6 +64,8 @@ struct MapView: View {
     var markers: [MapMarker] = []
     /// The one place the user picked, such as a search result: drawn above every other marker.
     var pin: MapMarker?
+    /// The journey to draw, such as the selected journey option: above ``polylines``, below every marker.
+    var route: MapRoute?
     /// Called once the visible tiles have finished rendering, such as for the screenshot harness to wait on.
     var onTilesRendered: (() -> Void)?
 
@@ -57,6 +77,7 @@ struct MapView: View {
                 polylines: polylines,
                 markers: markers,
                 pin: pin,
+                route: route,
                 onTilesRendered: onTilesRendered
             )
             .accessibilityLabel("Map")
@@ -79,6 +100,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
     var polylines: [MapPolyline]
     var markers: [MapMarker]
     var pin: MapMarker?
+    var route: MapRoute?
     var onTilesRendered: (() -> Void)?
 
     func makeCoordinator() -> Coordinator {
@@ -113,16 +135,18 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         if mapView.isMyLocationEnabled != showsUserLocation {
             mapView.isMyLocationEnabled = showsUserLocation
         }
+        let animated = !context.transaction.disablesAnimations && UIView.areAnimationsEnabled
         if coordinator.shownCamera != camera {
             coordinator.shownCamera = camera
             let position = cameraPosition(for: camera)
-            if context.transaction.disablesAnimations || !UIView.areAnimationsEnabled {
-                mapView.camera = position
-            } else {
+            if animated {
                 mapView.animate(to: position)
+            } else {
+                mapView.camera = position
             }
         }
         coordinator.show(polylines: polylines, on: mapView)
+        coordinator.show(route: route, on: mapView, animated: animated)
         coordinator.show(markers: markers, on: mapView)
         coordinator.show(pin: pin, on: mapView)
     }
@@ -140,6 +164,8 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         private var pins: [GMSMarker] = []
         private var pin: MapMarker?
         private var pinMarker: GMSMarker?
+        private var route: MapRoute?
+        private var routeLines: [GMSPolyline] = []
 
         init(camera: Binding<MapCamera>) {
             self.camera = camera
@@ -157,6 +183,62 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
                 polyline.strokeWidth = line.width
                 polyline.map = mapView
                 return polyline
+            }
+        }
+
+        func show(route: MapRoute?, on mapView: GMSMapView, animated: Bool) {
+            guard route != self.route else { return }
+            let isNew = route?.id != self.route?.id
+            self.route = route
+            routeLines.forEach { $0.map = nil }
+            routeLines = (route?.segments ?? []).map { segment in
+                let path = GMSMutablePath()
+                segment.coordinates.forEach { path.add(CLLocationCoordinate2D($0)) }
+                let line = GMSPolyline(path: path)
+                let color = UIColor(segment.color)
+                if segment.isDashed {
+                    line.strokeWidth = 4
+                    // Dashes in metres along the path: short enough to read as a walk from a street to the city.
+                    line.spans = GMSStyleSpans(
+                        path,
+                        [GMSStrokeStyle.solidColor(color), GMSStrokeStyle.solidColor(.clear)],
+                        [12, 8],
+                        .rhumb
+                    )
+                } else {
+                    line.strokeWidth = 6
+                    line.strokeColor = color
+                }
+                line.zIndex = 1
+                line.map = mapView
+                return line
+            }
+            if let route, isNew {
+                fit(route, on: mapView, animated: animated)
+            }
+        }
+
+        /// Moves the map so the whole route shows between the controls at the top and the sheet at half height.
+        private func fit(_ route: MapRoute, on mapView: GMSMapView, animated: Bool) {
+            let bounds = route.segments.flatMap(\.coordinates).reduce(GMSCoordinateBounds()) { bounds, coordinate in
+                bounds.includingCoordinate(CLLocationCoordinate2D(coordinate))
+            }
+            guard bounds.isValid else { return }
+            // On the next turn of the run loop, once the map has its size.
+            Task { @MainActor [weak mapView] in
+                guard let mapView else { return }
+                let insets = UIEdgeInsets(
+                    top: 120,
+                    left: 48,
+                    bottom: mapView.bounds.height / 2 + 32,
+                    right: 80
+                )
+                let update = GMSCameraUpdate.fit(bounds, with: insets)
+                if animated {
+                    mapView.animate(with: update)
+                } else {
+                    mapView.moveCamera(update)
+                }
             }
         }
 

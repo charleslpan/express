@@ -22,6 +22,20 @@ enum ScreenshotScreen: String, CaseIterable {
     case searchNoKey = "search-no-key"
     /// A place picked from search: its pin on the map and its card in the home sheet (S3).
     case searchPlace = "search-place"
+    /// Journey options to a picked place (J1): the options list at each detent, the second option selected on the map,
+    /// the arrive-by picker, and every state: loading, none found, outside New York, location off, offline, and times
+    /// that may not be real time. Which state shows depends on the fixtures and location each test launches with.
+    case journeysPeek = "journeys-peek"
+    case journeysHalf = "journeys-half"
+    case journeysFull = "journeys-full"
+    case journeysRoute = "journeys-route"
+    case journeysArriveBy = "journeys-arrive-by"
+    case journeysLoading = "journeys-loading"
+    case journeysNoResults = "journeys-no-results"
+    case journeysOutsideNYC = "journeys-outside-nyc"
+    case journeysLocationOff = "journeys-location-off"
+    case journeysError = "journeys-error"
+    case journeysStale = "journeys-stale"
     /// The About sheet over the home sheet (S1).
     case about
     /// Liquid Glass controls and a glass sheet over the Google map, for judging the look (F5).
@@ -47,7 +61,9 @@ enum ScreenshotScreen: String, CaseIterable {
     var view: some View {
         switch self {
         case .homePeek, .homeHalf, .homeFull, .homeOutsideNYC, .about, .searchEmpty, .searchTyping, .searchResults,
-             .searchNoResults, .searchError, .searchNoKey, .searchPlace:
+             .searchNoResults, .searchError, .searchNoKey, .searchPlace, .journeysPeek, .journeysHalf, .journeysFull,
+             .journeysRoute, .journeysArriveBy, .journeysLoading, .journeysNoResults, .journeysOutsideNYC,
+             .journeysLocationOff, .journeysError, .journeysStale:
             RootView()
         case .mapGlass: MapGlassScreen()
         #if DEBUG
@@ -70,7 +86,9 @@ enum ScreenshotScreen: String, CaseIterable {
     var homeDetent: HomeSheetDetent {
         switch self {
         case .homeHalf: .half
-        case .homeFull: .full
+        case .homeFull, .journeysFull, .journeysArriveBy: .full
+        case .journeysPeek: .peek
+        case _ where isJourneys: .half
         default: .peek
         }
     }
@@ -91,24 +109,60 @@ enum ScreenshotScreen: String, CaseIterable {
         }
     }
 
-    /// Puts the router where this screen starts: searching, or showing a picked place.
+    /// Whether this is one of the journey options screens (J1).
+    var isJourneys: Bool {
+        rawValue.hasPrefix("journeys-")
+    }
+
+    /// Puts the router where this screen starts: searching, showing a picked place, or showing journeys to it.
     @MainActor
     func prepare(_ router: AppRouter) {
         if searchQuery != nil {
             router.showPlaceSearch()
         } else if self == .searchPlace {
             router.showPlace(FixturePlaceSearchService.places[0])
+        } else if isJourneys {
+            let place = FixturePlaceSearchService.places[0]
+            router.showPlace(place)
+            var query = JourneyQuery(to: .place(place))
+            if self == .journeysArriveBy {
+                // 7:30 PM, an hour after the fixtures' "now".
+                query.time = .arriveBy(FixtureSet.nycEvening.referenceDate.addingTimeInterval(3600))
+            }
+            router.showJourneys(query)
+            router.homeDetent = homeDetent
+        }
+    }
+
+    /// Where the journey options screen starts: the second option selected, or the time picker open.
+    var journeyOptionsSeed: JourneyOptionsSeed? {
+        switch self {
+        case .journeysRoute: JourneyOptionsSeed(selectedOption: 1)
+        case .journeysArriveBy: JourneyOptionsSeed(editsTime: true)
+        case _ where isJourneys: JourneyOptionsSeed()
+        default: nil
         }
     }
 
     /// The location permission the screen shows; the harness never asks for it.
     var locationAuthorization: LocationService.Authorization {
-        self == .homeOutsideNYC ? .authorized : .notDetermined
+        switch self {
+        case .homeOutsideNYC: .authorized
+        case .journeysLocationOff: .denied
+        case _ where isJourneys: .authorized
+        default: .notDetermined
+        }
     }
 
-    /// The location the screen shows the user at, if any: Philadelphia's City Hall for the outside-NYC banner.
+    /// The location the screen shows the user at, if any: Philadelphia's City Hall for the outside-NYC banner and
+    /// journeys, and Union Square for the other journeys.
     var location: Coordinate? {
-        self == .homeOutsideNYC ? Coordinate(latitude: 39.9526, longitude: -75.1652) : nil
+        switch self {
+        case .homeOutsideNYC, .journeysOutsideNYC: Coordinate(latitude: 39.9526, longitude: -75.1652)
+        case .journeysLocationOff: nil
+        case _ where isJourneys: Coordinate(latitude: 40.7359, longitude: -73.9906)
+        default: nil
+        }
     }
 
     /// The accessibility identifier the harness puts on the screen, which the UI test waits for before capturing.

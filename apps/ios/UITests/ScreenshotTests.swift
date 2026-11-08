@@ -56,6 +56,53 @@ final class ScreenshotTests: XCTestCase {
         capture("search-place", fixtures: "nyc-evening", settledWhen: "map.settled")
     }
 
+    // Journey options (J1) from Union Square to Grand Central Terminal: the list at each detent, a selected route on
+    // the map, the arrive-by picker, and each state.
+
+    func testJourneysPeek() {
+        capture("journeys-peek", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testJourneysHalf() {
+        capture("journeys-half", fixtures: "nyc-evening", settledWhen: "journeys.list")
+    }
+
+    func testJourneysFull() {
+        capture("journeys-full", fixtures: "nyc-evening", settledWhen: "journeys.list")
+    }
+
+    func testJourneysRoute() {
+        capture("journeys-route", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testJourneysArriveBy() {
+        capture("journeys-arrive-by", fixtures: "nyc-evening", settledWhen: "journeys.time-picker")
+    }
+
+    func testJourneysLoading() {
+        capture("journeys-loading", fixtures: "slow-network", settledWhen: "journeys.loading")
+    }
+
+    func testJourneysNoResults() {
+        capture("journeys-no-results", fixtures: "no-journeys", settledWhen: "journeys.no-results")
+    }
+
+    func testJourneysOutsideNYC() {
+        capture("journeys-outside-nyc", fixtures: "nyc-evening", settledWhen: "journeys.outside-area")
+    }
+
+    func testJourneysLocationOff() {
+        capture("journeys-location-off", fixtures: "nyc-evening", settledWhen: "journeys.location-off")
+    }
+
+    func testJourneysError() {
+        capture("journeys-error", fixtures: "offline", settledWhen: "journeys.error")
+    }
+
+    func testJourneysStale() {
+        capture("journeys-stale", fixtures: "stale-data", settledWhen: "journeys.may-not-be-real-time")
+    }
+
     // The About sheet (S1), over the home sheet.
 
     func testAbout() {

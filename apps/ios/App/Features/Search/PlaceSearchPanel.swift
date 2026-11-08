@@ -13,8 +13,20 @@ struct PlaceSearchPanel: View {
     @Environment(\.placeSearchService) private var service
     @Environment(\.placeSearchSeed) private var seed
 
+    /// What picking a place does; nil shows it on the map with ``AppRouter/showPlace(_:)``.
+    private let onPick: ((PlaceDetails) -> Void)?
+    /// What Cancel does; nil ends the search with ``AppRouter/endPlaceSearch()``.
+    private let onCancel: (() -> Void)?
+
     @State private var search: PlaceSearch?
     @FocusState private var isFieldFocused: Bool
+
+    /// Place search. By default a picked place goes on the map; journeys pass `onPick` and `onCancel` to pick a start
+    /// or an end instead.
+    init(onPick: ((PlaceDetails) -> Void)? = nil, onCancel: (() -> Void)? = nil) {
+        self.onPick = onPick
+        self.onCancel = onCancel
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -54,7 +66,11 @@ struct PlaceSearchPanel: View {
             .accessibilityIdentifier("search.field")
             Button("Cancel") {
                 search?.reset()
-                router.endPlaceSearch()
+                if let onCancel {
+                    onCancel()
+                } else {
+                    router.endPlaceSearch()
+                }
             }
             .typography(.body)
             .frame(minHeight: 44)
@@ -97,7 +113,11 @@ struct PlaceSearchPanel: View {
         Task {
             if let place = await search.pick(suggestion) {
                 isFieldFocused = false
-                router.showPlace(place)
+                if let onPick {
+                    onPick(place)
+                } else {
+                    router.showPlace(place)
+                }
             }
         }
     }

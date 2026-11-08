@@ -25,6 +25,7 @@ struct GoView: View {
             camera: $camera,
             showsUserLocation: location.isLive && location.authorization == .authorized,
             pin: placePin,
+            route: router.selectedJourney.map(MapRoute.init(journey:)),
             onTilesRendered: { tilesRendered = true }
         )
         .ignoresSafeArea()

@@ -35,6 +35,10 @@ struct PlaceCard: View {
                         .controlSize(.large)
                         .accessibilityIdentifier("place.close")
                 }
+                // Directions (J1).
+                AdaptiveStack(spacing: Spacing.xs) {
+                    DirectionsButton(place: place)
+                }
             }
             .padding(.horizontal, Spacing.md)
             .padding(.top, Spacing.lg)
@@ -48,9 +52,11 @@ struct PlaceCard: View {
 
 #Preview("Place card") {
     PlaceCard(place: FixturePlaceSearchService.places[0]) {}
+        .environment(AppRouter())
 }
 
 #Preview("Place card, AX5") {
     PlaceCard(place: FixturePlaceSearchService.places[0]) {}
+        .environment(AppRouter())
         .dynamicTypeSize(.accessibility5)
 }

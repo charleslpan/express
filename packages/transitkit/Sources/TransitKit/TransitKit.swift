@@ -9,7 +9,7 @@ import Foundation
 /// so that it builds and tests on Linux.
 public enum TransitKit {
     /// The package's version, bumped by hand when its public API changes.
-    public static let version = "0.3.0"
+    public static let version = "0.4.0"
 
     /// The MOTIS server every ``TransitClient`` talks to unless told otherwise: Express's own backend.
     ///

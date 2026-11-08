@@ -11,11 +11,15 @@ enum FixtureSet: String, CaseIterable, Sendable {
     case offline
     /// The evening rush in a build with no Google Maps key, so place search is unavailable.
     case noKey = "no-key"
+    /// The evening rush, with no journey to be found anywhere.
+    case noJourneys = "no-journeys"
+    /// The evening rush, with the server's realtime feeds five minutes old, so times may not be real time.
+    case staleData = "stale-data"
 
     /// The moment the fixtures describe, which stands in for "now" so times on screen don't drift between runs.
     var referenceDate: Date {
         switch self {
-        case .nycEvening, .slowNetwork, .offline, .noKey:
+        case .nycEvening, .slowNetwork, .offline, .noKey, .noJourneys, .staleData:
             Date(timeIntervalSince1970: 1_793_748_600) // 2026-11-03 18:30 America/New_York
         }
     }
