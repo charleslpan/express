@@ -342,3 +342,34 @@ final class ScreenshotTests: XCTestCase {
         }
     }
 }
+
+/// In an extension, as the class body has reached SwiftLint's length limit; `@objc` so XCTest finds each test.
+extension ScreenshotTests {
+    // Journey detail (J2), pushed over the options: the 6 running late, the L and the M101 with a transfer, the Q and
+    // the shuttle with a tight transfer, the 6 cancelled, times that may not be real time, and the stops between
+    // unfolded.
+
+    @objc func testJourneySubway() {
+        capture("journey-subway", fixtures: "nyc-evening", settledWhen: "journey.loaded")
+    }
+
+    @objc func testJourneyBus() {
+        capture("journey-bus", fixtures: "nyc-evening", settledWhen: "journey.loaded")
+    }
+
+    @objc func testJourneyTight() {
+        capture("journey-tight", fixtures: "nyc-evening", settledWhen: "journey.transfer-tight")
+    }
+
+    @objc func testJourneyCancelled() {
+        capture("journey-cancelled", fixtures: "nyc-evening-cancelled", settledWhen: "journey.problem")
+    }
+
+    @objc func testJourneyStale() {
+        capture("journey-stale", fixtures: "nyc-evening-stale", settledWhen: "journey.may-not-be-real-time")
+    }
+
+    @objc func testJourneyStops() {
+        capture("journey-stops", fixtures: "nyc-evening", settledWhen: "journey.loaded")
+    }
+}

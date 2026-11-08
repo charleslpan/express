@@ -36,7 +36,7 @@ struct GoView: View {
             showsUserLocation: location.isLive && location.authorization == .authorized,
             polylines: router.mapTrip.map { [$0.line] } ?? [],
             pin: placePin,
-            route: router.selectedJourney.map(MapRoute.init(journey:)),
+            route: router.selectedJourney.map { MapRoute(journey: $0, focusedLegs: router.focusedJourneyLegs) },
             vehicles: trains.vehicles + buses.vehicles,
             vehicleMoveDuration: LiveTrains.tick / .seconds(1),
             onTilesRendered: { tilesRendered = true },

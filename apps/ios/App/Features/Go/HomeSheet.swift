@@ -5,7 +5,8 @@ import UIKit
 /// The home sheet that stays over the map, Apple Maps style: ``HomeSheetContent`` scrolling in its own navigation
 /// stack (``AppRouter/homePath``), place search (``PlaceSearchPanel``) in its place while
 /// ``AppRouter/isSearchingPlaces``, or the picked place's ``PlaceCard`` while there is one, with the journey options
-/// to it pushed over the card (``JourneyOptionsView``). It brings no
+/// to it pushed over the card (``JourneyOptionsView``) and a journey's plan over those (``JourneyDetailView``). It
+/// brings no
 /// background of its own, so the system sheet draws its glass, and it presents the router's sheets (About) on top.
 /// ``GoView`` presents it with its detents.
 ///
@@ -56,6 +57,9 @@ struct HomeSheet: View {
             .stopsNavigationDestinations()
             .navigationDestination(for: JourneyOptionsRoute.self) { route in
                 JourneyOptionsView(route: route)
+            }
+            .navigationDestination(for: JourneyDetailRoute.self) { route in
+                JourneyDetailView(route: route)
             }
         }
         .sheet(item: $router.sheet) { sheet in

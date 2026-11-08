@@ -1,0 +1,97 @@
+{
+ "duration": 300,
+ "startTime": "2026-11-03T23:31:00Z",
+ "endTime": "2026-11-03T23:36:00Z",
+ "transfers": 0,
+ "id": "fixture-trip-l",
+ "legs": [
+  {
+   "mode": "SUBWAY",
+   "from": {
+    "name": "6 Av",
+    "stopId": "us-ny-MTA-NYCSubway_L02S",
+    "lat": 40.737335,
+    "lon": -73.996786,
+    "vertexType": "TRANSIT",
+    "tz": "America/New_York",
+    "departure": "2026-11-03T23:31:00Z",
+    "scheduledDeparture": "2026-11-03T23:31:00Z",
+    "departureTimestampReason": "PREDICTED",
+    "pickupType": "NORMAL",
+    "dropoffType": "NORMAL",
+    "cancelled": false
+   },
+   "to": {
+    "name": "1 Av",
+    "stopId": "us-ny-MTA-NYCSubway_L06S",
+    "lat": 40.730953,
+    "lon": -73.981628,
+    "vertexType": "TRANSIT",
+    "tz": "America/New_York",
+    "arrival": "2026-11-03T23:36:00Z",
+    "scheduledArrival": "2026-11-03T23:36:00Z",
+    "arrivalTimestampReason": "PREDICTED",
+    "pickupType": "NORMAL",
+    "dropoffType": "NORMAL",
+    "cancelled": false
+   },
+   "duration": 300,
+   "startTime": "2026-11-03T23:31:00Z",
+   "endTime": "2026-11-03T23:36:00Z",
+   "scheduledStartTime": "2026-11-03T23:31:00Z",
+   "scheduledEndTime": "2026-11-03T23:36:00Z",
+   "realTime": true,
+   "scheduled": true,
+   "headsign": "Canarsie-Rockaway Pkwy",
+   "routeId": "us-ny-MTA-NYCSubway_L",
+   "routeColor": "a7a9ac",
+   "routeTextColor": "ffffff",
+   "routeShortName": "L",
+   "displayName": "L",
+   "tripId": "fixture-trip-l",
+   "agencyName": "MTA New York City Transit",
+   "cancelled": false,
+   "intermediateStops": [
+    {
+     "name": "14 St-Union Sq",
+     "stopId": "us-ny-MTA-NYCSubway_L03S",
+     "lat": 40.734789,
+     "lon": -73.99073,
+     "vertexType": "TRANSIT",
+     "tz": "America/New_York",
+     "arrival": "2026-11-03T23:33:00Z",
+     "scheduledArrival": "2026-11-03T23:33:00Z",
+     "arrivalTimestampReason": "PREDICTED",
+     "departure": "2026-11-03T23:33:00Z",
+     "scheduledDeparture": "2026-11-03T23:33:00Z",
+     "departureTimestampReason": "PREDICTED",
+     "pickupType": "NORMAL",
+     "dropoffType": "NORMAL",
+     "cancelled": false
+    },
+    {
+     "name": "3 Av",
+     "stopId": "us-ny-MTA-NYCSubway_L05S",
+     "lat": 40.732849,
+     "lon": -73.986122,
+     "vertexType": "TRANSIT",
+     "tz": "America/New_York",
+     "arrival": "2026-11-03T23:35:00Z",
+     "scheduledArrival": "2026-11-03T23:35:00Z",
+     "arrivalTimestampReason": "PREDICTED",
+     "departure": "2026-11-03T23:35:00Z",
+     "scheduledDeparture": "2026-11-03T23:35:00Z",
+     "departureTimestampReason": "PREDICTED",
+     "pickupType": "NORMAL",
+     "dropoffType": "NORMAL",
+     "cancelled": false
+    }
+   ],
+   "legGeometry": {
+    "points": "mblulAb~kclCb~CoyJfxB__HnuB{wG",
+    "precision": 6,
+    "length": 4
+   }
+  }
+ ]
+}

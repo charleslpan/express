@@ -1,0 +1,97 @@
+{
+ "duration": 840,
+ "startTime": "2026-11-03T23:30:00Z",
+ "endTime": "2026-11-03T23:44:00Z",
+ "transfers": 0,
+ "id": "fixture-trip-4",
+ "legs": [
+  {
+   "mode": "SUBWAY",
+   "from": {
+    "name": "Brooklyn Bridge-City Hall",
+    "stopId": "us-ny-MTA-NYCSubway_640N",
+    "lat": 40.713065,
+    "lon": -74.004131,
+    "vertexType": "TRANSIT",
+    "tz": "America/New_York",
+    "departure": "2026-11-03T23:30:00Z",
+    "scheduledDeparture": "2026-11-03T23:30:00Z",
+    "departureTimestampReason": "PREDICTED",
+    "pickupType": "NORMAL",
+    "dropoffType": "NORMAL",
+    "cancelled": false
+   },
+   "to": {
+    "name": "59 St",
+    "stopId": "us-ny-MTA-NYCSubway_629N",
+    "lat": 40.762526,
+    "lon": -73.967967,
+    "vertexType": "TRANSIT",
+    "tz": "America/New_York",
+    "arrival": "2026-11-03T23:44:00Z",
+    "scheduledArrival": "2026-11-03T23:44:00Z",
+    "arrivalTimestampReason": "PREDICTED",
+    "pickupType": "NORMAL",
+    "dropoffType": "NORMAL",
+    "cancelled": false
+   },
+   "duration": 840,
+   "startTime": "2026-11-03T23:30:00Z",
+   "endTime": "2026-11-03T23:44:00Z",
+   "scheduledStartTime": "2026-11-03T23:30:00Z",
+   "scheduledEndTime": "2026-11-03T23:44:00Z",
+   "realTime": true,
+   "scheduled": true,
+   "headsign": "Woodlawn",
+   "routeId": "us-ny-MTA-NYCSubway_4",
+   "routeColor": "00933c",
+   "routeTextColor": "ffffff",
+   "routeShortName": "4",
+   "displayName": "4",
+   "tripId": "fixture-trip-4",
+   "agencyName": "MTA New York City Transit",
+   "cancelled": false,
+   "intermediateStops": [
+    {
+     "name": "14 St-Union Sq",
+     "stopId": "us-ny-MTA-NYCSubway_635N",
+     "lat": 40.734673,
+     "lon": -73.989951,
+     "vertexType": "TRANSIT",
+     "tz": "America/New_York",
+     "arrival": "2026-11-03T23:35:00Z",
+     "scheduledArrival": "2026-11-03T23:35:00Z",
+     "arrivalTimestampReason": "PREDICTED",
+     "departure": "2026-11-03T23:35:00Z",
+     "scheduledDeparture": "2026-11-03T23:35:00Z",
+     "departureTimestampReason": "PREDICTED",
+     "pickupType": "NORMAL",
+     "dropoffType": "NORMAL",
+     "cancelled": false
+    },
+    {
+     "name": "Grand Central-42 St",
+     "stopId": "us-ny-MTA-NYCSubway_631N",
+     "lat": 40.751776,
+     "lon": -73.976848,
+     "vertexType": "TRANSIT",
+     "tz": "America/New_York",
+     "arrival": "2026-11-03T23:41:00Z",
+     "scheduledArrival": "2026-11-03T23:41:00Z",
+     "arrivalTimestampReason": "PREDICTED",
+     "departure": "2026-11-03T23:41:00Z",
+     "scheduledDeparture": "2026-11-03T23:41:00Z",
+     "departureTimestampReason": "PREDICTED",
+     "pickupType": "NORMAL",
+     "dropoffType": "NORMAL",
+     "cancelled": false
+    }
+   ],
+   "legGeometry": {
+    "points": "qu|slAdizclCoei@guZ}k`@}qX{~SajP",
+    "precision": 6,
+    "length": 4
+   }
+  }
+ ]
+}

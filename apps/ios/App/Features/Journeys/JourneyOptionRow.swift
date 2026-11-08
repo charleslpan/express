@@ -60,7 +60,7 @@ struct JourneyOptionRow: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
-        .accessibilityHint("Shows this journey on the map")
+        .accessibilityHint("Shows this journey step by step, and on the map")
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 

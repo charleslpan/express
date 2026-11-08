@@ -1,0 +1,62 @@
+{
+ "duration": 120,
+ "startTime": "2026-11-03T23:46:00Z",
+ "endTime": "2026-11-03T23:48:00Z",
+ "transfers": 0,
+ "id": "fixture-trip-s",
+ "legs": [
+  {
+   "mode": "SUBWAY",
+   "from": {
+    "name": "Times Sq-42 St",
+    "stopId": "us-ny-MTA-NYCSubway_902N",
+    "lat": 40.7553,
+    "lon": -73.9869,
+    "vertexType": "TRANSIT",
+    "tz": "America/New_York",
+    "departure": "2026-11-03T23:46:00Z",
+    "scheduledDeparture": "2026-11-03T23:46:00Z",
+    "departureTimestampReason": "NO_RT_DATA",
+    "pickupType": "NORMAL",
+    "dropoffType": "NORMAL",
+    "cancelled": false
+   },
+   "to": {
+    "name": "Grand Central-42 St",
+    "stopId": "us-ny-MTA-NYCSubway_901N",
+    "lat": 40.7524,
+    "lon": -73.9792,
+    "vertexType": "TRANSIT",
+    "tz": "America/New_York",
+    "arrival": "2026-11-03T23:48:00Z",
+    "scheduledArrival": "2026-11-03T23:48:00Z",
+    "arrivalTimestampReason": "NO_RT_DATA",
+    "pickupType": "NORMAL",
+    "dropoffType": "NORMAL",
+    "cancelled": false
+   },
+   "duration": 120,
+   "startTime": "2026-11-03T23:46:00Z",
+   "endTime": "2026-11-03T23:48:00Z",
+   "scheduledStartTime": "2026-11-03T23:46:00Z",
+   "scheduledEndTime": "2026-11-03T23:48:00Z",
+   "realTime": false,
+   "scheduled": true,
+   "headsign": "Grand Central-42 St",
+   "routeId": "us-ny-MTA-NYCSubway_GS",
+   "routeColor": "808183",
+   "routeTextColor": "ffffff",
+   "routeShortName": "S",
+   "displayName": "S",
+   "tripId": "fixture-trip-s",
+   "agencyName": "MTA New York City Transit",
+   "cancelled": false,
+   "intermediateStops": [],
+   "legGeometry": {
+    "points": "geovlAftxblCftDg`N",
+    "precision": 6,
+    "length": 2
+   }
+  }
+ ]
+}

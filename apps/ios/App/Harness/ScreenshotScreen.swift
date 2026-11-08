@@ -56,6 +56,15 @@ enum ScreenshotScreen: String, CaseIterable {
     case journeysLocationOff = "journeys-location-off"
     case journeysError = "journeys-error"
     case journeysStale = "journeys-stale"
+    /// A journey step by step (J2), pushed over its options: the 6 running late (subway only), the L and the M101 with
+    /// a transfer, the Q and the shuttle with a tight transfer, the 6 cancelled (`nyc-evening-cancelled`), times that
+    /// may not be real time (`nyc-evening-stale`), and the 6's stops between unfolded.
+    case journeySubway = "journey-subway"
+    case journeyBus = "journey-bus"
+    case journeyTight = "journey-tight"
+    case journeyCancelled = "journey-cancelled"
+    case journeyStale = "journey-stale"
+    case journeyStops = "journey-stops"
     /// The About sheet over the home sheet (S1).
     case about
     /// Liquid Glass controls and a glass sheet over the Google map, for judging the look (F5).
@@ -107,7 +116,8 @@ enum ScreenshotScreen: String, CaseIterable {
              .placeSaved, .placeHomeWork, .stopHalf, .stopFull, .stopStale, .stopError, .stopEmpty, .trip, .tripFull,
              .tripEnded, .tripError, .journeysPeek, .journeysHalf, .journeysFull, .journeysRoute, .journeysArriveBy,
              .journeysLoading, .journeysNoResults, .journeysOutsideNYC, .journeysLocationOff, .journeysError,
-             .journeysStale:
+             .journeysStale, .journeySubway, .journeyBus, .journeyTight, .journeyCancelled, .journeyStale,
+             .journeyStops:
             RootView()
         case .mapGlass: MapGlassScreen()
         case .trains: GoView(camera: MapCamera(center: Self.midtown, zoom: 14.5))
@@ -135,9 +145,10 @@ enum ScreenshotScreen: String, CaseIterable {
         switch self {
         case .homeHalf, .nearbyHalf, .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError,
              .nearbyEmpty, .stopHalf, .stopStale, .stopError, .stopEmpty, .trip, .tripEnded, .tripError: .half
-        case .homeFull, .nearbyFull, .stopFull, .tripFull, .journeysFull, .journeysArriveBy: .full
+        case .homeFull, .nearbyFull, .stopFull, .tripFull, .journeysFull, .journeysArriveBy, .journeyBus, .journeyTight,
+             .journeyStops: .full
         case .journeysPeek: .peek
-        case _ where isJourneys: .half
+        case _ where isJourneys || isJourneyDetail: .half
         default: .peek
         }
     }
@@ -163,6 +174,21 @@ enum ScreenshotScreen: String, CaseIterable {
         rawValue.hasPrefix("journeys-")
     }
 
+    /// Whether this is one of the journey detail screens (J2).
+    var isJourneyDetail: Bool {
+        rawValue.hasPrefix("journey-")
+    }
+
+    /// The journey a journey detail screen opens, by its id in the fixtures (``FixtureSet/journey(id:)``).
+    private var journeyID: String? {
+        switch self {
+        case .journeySubway, .journeyCancelled, .journeyStale, .journeyStops: "fixture-6"
+        case .journeyBus: "fixture-l-m101"
+        case .journeyTight: "fixture-q-s"
+        default: nil
+        }
+    }
+
     /// Puts the router where this screen starts: searching, showing a picked place or journeys to it, or with a stop
     /// or trip pushed.
     @MainActor
@@ -180,6 +206,12 @@ enum ScreenshotScreen: String, CaseIterable {
                 query.time = .arriveBy(FixtureSet.nycEvening.referenceDate.addingTimeInterval(3600))
             }
             router.showJourneys(query)
+            router.homeDetent = homeDetent
+        } else if let journeyID, let journey = FixtureSet.journey(id: journeyID) {
+            let place = FixturePlaceSearchService.places[0]
+            router.showPlace(place)
+            router.showJourneys(JourneyQuery(to: .place(place)))
+            router.showJourneyDetail(journey, to: place.name)
             router.homeDetent = homeDetent
         }
         let unionSquare = StopRoute(stopId: "us-ny-MTA-NYCSubway_635", name: "14 St-Union Sq", isSubway: true)
@@ -202,6 +234,15 @@ enum ScreenshotScreen: String, CaseIterable {
         case .journeysRoute: JourneyOptionsSeed(selectedOption: 1)
         case .journeysArriveBy: JourneyOptionsSeed(editsTime: true)
         case _ where isJourneys: JourneyOptionsSeed()
+        default: nil
+        }
+    }
+
+    /// Where the journey detail screen starts: the stops between unfolded, or folded as they open.
+    var journeyDetailSeed: JourneyDetailSeed? {
+        switch self {
+        case .journeyStops: JourneyDetailSeed(showsStops: true)
+        case _ where isJourneyDetail: JourneyDetailSeed()
         default: nil
         }
     }
@@ -233,7 +274,7 @@ enum ScreenshotScreen: String, CaseIterable {
         case .homeOutsideNYC, .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyOutsideNYC, .nearbyLoading,
              .nearbyError, .nearbyEmpty: .authorized
         case .nearbyDenied, .journeysLocationOff: .denied
-        case _ where isJourneys: .authorized
+        case _ where isJourneys || isJourneyDetail: .authorized
         default: .notDetermined
         }
     }
@@ -246,7 +287,7 @@ enum ScreenshotScreen: String, CaseIterable {
         case .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyLoading, .nearbyError, .nearbyEmpty:
             FixtureSet.unionSquare
         case .journeysLocationOff: nil
-        case _ where isJourneys: FixtureSet.unionSquare
+        case _ where isJourneys || isJourneyDetail: FixtureSet.unionSquare
         default: nil
         }
     }
