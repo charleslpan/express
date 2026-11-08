@@ -5,11 +5,18 @@ import Foundation
 enum FixtureSet: String, CaseIterable, Sendable {
     /// Weekday evening rush in Manhattan.
     case nycEvening = "nyc-evening"
+    /// The evening rush on a network so slow that nothing comes back, so screens hold their loading state.
+    case slowNetwork = "slow-network"
+    /// The evening rush with no network: every request fails as offline.
+    case offline
+    /// The evening rush in a build with no Google Maps key, so place search is unavailable.
+    case noKey = "no-key"
 
     /// The moment the fixtures describe, which stands in for "now" so times on screen don't drift between runs.
     var referenceDate: Date {
         switch self {
-        case .nycEvening: Date(timeIntervalSince1970: 1_793_748_600) // 2026-11-03 18:30 America/New_York
+        case .nycEvening, .slowNetwork, .offline, .noKey:
+            Date(timeIntervalSince1970: 1_793_748_600) // 2026-11-03 18:30 America/New_York
         }
     }
 }

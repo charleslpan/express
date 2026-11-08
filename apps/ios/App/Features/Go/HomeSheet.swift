@@ -3,7 +3,8 @@ import SwiftUI
 import UIKit
 
 /// The home sheet that stays over the map, Apple Maps style: ``HomeSheetContent`` scrolling in its own navigation
-/// stack (``AppRouter/homePath``), or place search in its place while ``AppRouter/isSearchingPlaces``. It brings no
+/// stack (``AppRouter/homePath``), place search (``PlaceSearchPanel``) in its place while
+/// ``AppRouter/isSearchingPlaces``, or the picked place's ``PlaceCard`` while there is one. It brings no
 /// background of its own, so the system sheet draws its glass, and it presents the router's sheets (About) on top.
 /// ``GoView`` presents it with its detents.
 struct HomeSheet: View {
@@ -14,8 +15,10 @@ struct HomeSheet: View {
         NavigationStack(path: $router.homePath) {
             Group {
                 if router.isSearchingPlaces {
-                    PlaceSearchPlaceholder {
-                        router.endPlaceSearch()
+                    PlaceSearchPanel()
+                } else if let place = router.selectedPlace {
+                    PlaceCard(place: place) {
+                        router.closePlace()
                     }
                 } else {
                     ScrollView {
@@ -64,30 +67,6 @@ extension HomeSheetDetent {
         case .medium: self = .half
         default: self = .peek
         }
-    }
-}
-
-/// Stands in for place search (S3) in the home sheet: a heading, a way back, and what search will do.
-private struct PlaceSearchPlaceholder: View {
-    let onCancel: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            HStack(alignment: .firstTextBaseline) {
-                HomeSectionHeading("Search")
-                Spacer(minLength: Spacing.xs)
-                Button("Cancel", action: onCancel)
-                    .typography(.body)
-            }
-            ContentUnavailableView(
-                "Where To?",
-                systemImage: "magnifyingglass",
-                description: Text("Search for a place, an address, or a station to plan a trip there.")
-            )
-        }
-        .padding(.horizontal, Spacing.md)
-        .padding(.top, Spacing.lg)
-        .frame(maxHeight: .infinity, alignment: .top)
     }
 }
 

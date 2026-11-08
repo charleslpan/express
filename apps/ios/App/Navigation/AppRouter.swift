@@ -1,5 +1,6 @@
 import Observation
 import SwiftUI
+import TransitKit
 
 /// How far the home sheet is pulled up over the map.
 enum HomeSheetDetent: String, CaseIterable, Hashable {
@@ -36,6 +37,9 @@ final class AppRouter {
     var homePath = NavigationPath()
     /// Whether the home sheet is showing place search in place of its sections (``showPlaceSearch()``).
     var isSearchingPlaces = false
+    /// The place picked from search, pinned on the map with its card in the home sheet (``showPlace(_:)``). Journeys
+    /// and saved places start from it. Held in memory only: Express persists nothing of a place but its ID.
+    var selectedPlace: PlaceDetails?
     /// The sheet shown over the home sheet, if any.
     var sheet: AppSheet?
 

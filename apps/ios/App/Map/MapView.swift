@@ -44,6 +44,8 @@ struct MapView: View {
     var showsUserLocation = false
     var polylines: [MapPolyline] = []
     var markers: [MapMarker] = []
+    /// The one place the user picked, such as a search result: drawn above every other marker.
+    var pin: MapMarker?
     /// Called once the visible tiles have finished rendering, such as for the screenshot harness to wait on.
     var onTilesRendered: (() -> Void)?
 
@@ -54,6 +56,7 @@ struct MapView: View {
                 showsUserLocation: showsUserLocation,
                 polylines: polylines,
                 markers: markers,
+                pin: pin,
                 onTilesRendered: onTilesRendered
             )
             .accessibilityLabel("Map")
@@ -75,6 +78,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
     var showsUserLocation: Bool
     var polylines: [MapPolyline]
     var markers: [MapMarker]
+    var pin: MapMarker?
     var onTilesRendered: (() -> Void)?
 
     func makeCoordinator() -> Coordinator {
@@ -120,6 +124,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         }
         coordinator.show(polylines: polylines, on: mapView)
         coordinator.show(markers: markers, on: mapView)
+        coordinator.show(pin: pin, on: mapView)
     }
 
     @MainActor
@@ -133,6 +138,8 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         private var markers: [MapMarker] = []
         private var overlays: [GMSOverlay] = []
         private var pins: [GMSMarker] = []
+        private var pin: MapMarker?
+        private var pinMarker: GMSMarker?
 
         init(camera: Binding<MapCamera>) {
             self.camera = camera
@@ -163,6 +170,20 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
                 pin.icon = GMSMarker.markerImage(with: UIColor(marker.color))
                 pin.map = mapView
                 return pin
+            }
+        }
+
+        func show(pin: MapMarker?, on mapView: GMSMapView) {
+            guard pin != self.pin else { return }
+            self.pin = pin
+            pinMarker?.map = nil
+            pinMarker = pin.map { pin in
+                let marker = GMSMarker(position: CLLocationCoordinate2D(pin.coordinate))
+                marker.title = pin.title
+                marker.icon = GMSMarker.markerImage(with: UIColor(pin.color))
+                marker.zIndex = 1
+                marker.map = mapView
+                return marker
             }
         }
     }
