@@ -55,7 +55,9 @@ struct LineStatusTests {
             response: response,
             now: now
         )
-        #expect(sections.groups.first?.rows.map(\.line.id) == ["L"])
+        // The recorded feed has the 4 skipping Burnside Av for planned work then too, so it's with the L.
+        #expect(sections.groups.first?.level == .severe)
+        #expect(sections.groups.first?.rows.map(\.line.id) == ["4", "L"])
         #expect(sections.upcoming.contains { $0.alert.id == "fixture:planned_work:6-nights" })
         let quiet = try await FixtureSet.nycEvening.transitClient.lineStatus(lines: ["L", "4"])
         #expect(quiet.lines["L"] == [])
