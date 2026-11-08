@@ -20,12 +20,14 @@ enum FixtureSet: String, CaseIterable, Sendable {
     case nycEveningBuses = "nyc-evening-buses"
     /// Buses alone, with Bus Time's feed three minutes old, so the map says bus positions may not be real time.
     case nycEveningBusesStale = "nyc-evening-buses-stale"
+    /// The evening rush, with no journey to be found anywhere.
+    case noJourneys = "no-journeys"
 
     /// The moment the fixtures describe, which stands in for "now" so times on screen don't drift between runs.
     var referenceDate: Date {
         switch self {
         case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .slowNetwork,
-             .offline, .noKey:
+             .offline, .noKey, .noJourneys:
             Date(timeIntervalSince1970: 1_793_748_600) // 2026-11-03 18:30 America/New_York
         }
     }

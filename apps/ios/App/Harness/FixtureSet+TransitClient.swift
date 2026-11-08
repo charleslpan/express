@@ -13,7 +13,9 @@ extension FixtureSet {
     /// routes' labels and colours (`Fixtures/map-routes-midtown.json`: the feed's for the 14 St SBS routes,
     /// illustrative for the rest). The bus-only sets run no trains. The trip view's
     /// requests follow the set's network too: a trip by its id (`Fixtures/trip-<tripId>.json`, such as the uptown 6
-    /// Nearby lists, `fixture-6-0-4`).
+    /// Nearby lists, `fixture-6-0-4`). Journeys plan from Union Square to Grand Central Terminal
+    /// (`Fixtures/plan-nyc-evening.json`: the 4, the 6 running late, the Q and the shuttle, the M101, and a walk),
+    /// except in `no-journeys`, which finds none.
     var transitClient: TransitClient {
         let fixtures = self
         return TransitClient(transport: StubTransport { request in
@@ -35,7 +37,8 @@ extension FixtureSet {
             case .slowNetwork:
                 try await Task.sleep(for: .seconds(24 * 60 * 60))
                 throw CancellationError()
-            case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .noKey:
+            case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .noKey,
+                 .noJourneys:
                 return try Self.response(to: request, fixtures: fixtures)
             }
         })
@@ -45,6 +48,8 @@ extension FixtureSet {
         switch request.path {
         case "/api/v6/map/stops":
             return try fixture("nearby-stops")
+        case "/api/v6/plan":
+            return fixtures == .noJourneys ? emptyPlan : try fixture("plan-nyc-evening")
         case "/api/v6/stoptimes":
             let stopId = request.query["stopId"] ?? ""
             let feedStopId = stopId.split(separator: "_").last.map(String.init) ?? stopId
@@ -64,6 +69,16 @@ extension FixtureSet {
         let timestamp = Int(fixtures.referenceDate.timeIntervalSince1970 - fixtures.realtimeDataAge)
         return Data("nigiri_gtfsrt_feed_timestamp_seconds{tag=\"us-ny-MTA-NYCSubway\"} \(timestamp)\n".utf8)
     }
+
+    /// A `plan` answer with no itineraries, which ``TransitClient/plan(_:)`` reports as no route.
+    private static let emptyPlan = Data("""
+    {
+      "requestParameters": {}, "debugOutput": {},
+      "from": {"name": "START", "lat": 40.7359, "lon": -73.9906},
+      "to": {"name": "END", "lat": 40.7527, "lon": -73.9772},
+      "direct": [], "itineraries": [], "previousPageCursor": "", "nextPageCursor": ""
+    }
+    """.utf8)
 
     /// `/api/vehicles/bus`'s answer, with Bus Time's feed as old as the set's bus data is.
     private static func busPositions(_ fixtures: FixtureSet) throws -> Data {

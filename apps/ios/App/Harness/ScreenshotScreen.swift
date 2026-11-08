@@ -42,6 +42,20 @@ enum ScreenshotScreen: String, CaseIterable {
     case placeSaved = "place-saved"
     /// The place card's Home or Work menu, open, for the place that's Work (P1); the UI test opens it.
     case placeHomeWork = "place-home-work"
+    /// Journey options to a picked place (J1): the options list at each detent, the second option selected on the map,
+    /// the arrive-by picker, and every state: loading, none found, outside New York, location off, offline, and times
+    /// that may not be real time. Which state shows depends on the fixtures and location each test launches with.
+    case journeysPeek = "journeys-peek"
+    case journeysHalf = "journeys-half"
+    case journeysFull = "journeys-full"
+    case journeysRoute = "journeys-route"
+    case journeysArriveBy = "journeys-arrive-by"
+    case journeysLoading = "journeys-loading"
+    case journeysNoResults = "journeys-no-results"
+    case journeysOutsideNYC = "journeys-outside-nyc"
+    case journeysLocationOff = "journeys-location-off"
+    case journeysError = "journeys-error"
+    case journeysStale = "journeys-stale"
     /// The About sheet over the home sheet (S1).
     case about
     /// Liquid Glass controls and a glass sheet over the Google map, for judging the look (F5).
@@ -91,7 +105,9 @@ enum ScreenshotScreen: String, CaseIterable {
              .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError, .nearbyEmpty, .searchEmpty,
              .searchTyping, .searchResults, .searchNoResults, .searchError, .searchNoKey, .searchPlace, .searchRecents,
              .placeSaved, .placeHomeWork, .stopHalf, .stopFull, .stopStale, .stopError, .stopEmpty, .trip, .tripFull,
-             .tripEnded, .tripError:
+             .tripEnded, .tripError, .journeysPeek, .journeysHalf, .journeysFull, .journeysRoute, .journeysArriveBy,
+             .journeysLoading, .journeysNoResults, .journeysOutsideNYC, .journeysLocationOff, .journeysError,
+             .journeysStale:
             RootView()
         case .mapGlass: MapGlassScreen()
         case .trains: GoView(camera: MapCamera(center: Self.midtown, zoom: 14.5))
@@ -119,7 +135,9 @@ enum ScreenshotScreen: String, CaseIterable {
         switch self {
         case .homeHalf, .nearbyHalf, .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError,
              .nearbyEmpty, .stopHalf, .stopStale, .stopError, .stopEmpty, .trip, .tripEnded, .tripError: .half
-        case .homeFull, .nearbyFull, .stopFull, .tripFull: .full
+        case .homeFull, .nearbyFull, .stopFull, .tripFull, .journeysFull, .journeysArriveBy: .full
+        case .journeysPeek: .peek
+        case _ where isJourneys: .half
         default: .peek
         }
     }
@@ -140,13 +158,29 @@ enum ScreenshotScreen: String, CaseIterable {
         }
     }
 
-    /// Puts the router where this screen starts: searching, showing a picked place, or with a stop or trip pushed.
+    /// Whether this is one of the journey options screens (J1).
+    var isJourneys: Bool {
+        rawValue.hasPrefix("journeys-")
+    }
+
+    /// Puts the router where this screen starts: searching, showing a picked place or journeys to it, or with a stop
+    /// or trip pushed.
     @MainActor
     func prepare(_ router: AppRouter) {
         if searchQuery != nil {
             router.showPlaceSearch()
         } else if [.searchPlace, .placeSaved, .placeHomeWork].contains(self) {
             router.showPlace(FixturePlaceSearchService.places[0])
+        } else if isJourneys {
+            let place = FixturePlaceSearchService.places[0]
+            router.showPlace(place)
+            var query = JourneyQuery(to: .place(place))
+            if self == .journeysArriveBy {
+                // 7:30 PM, an hour after the fixtures' "now".
+                query.time = .arriveBy(FixtureSet.nycEvening.referenceDate.addingTimeInterval(3600))
+            }
+            router.showJourneys(query)
+            router.homeDetent = homeDetent
         }
         let unionSquare = StopRoute(stopId: "us-ny-MTA-NYCSubway_635", name: "14 St-Union Sq", isSubway: true)
         switch self {
@@ -159,6 +193,16 @@ enum ScreenshotScreen: String, CaseIterable {
             router.homePath.append(TripRoute(tripId: "fixture-6-0-ended"))
         default:
             break
+        }
+    }
+
+    /// Where the journey options screen starts: the second option selected, or the time picker open.
+    var journeyOptionsSeed: JourneyOptionsSeed? {
+        switch self {
+        case .journeysRoute: JourneyOptionsSeed(selectedOption: 1)
+        case .journeysArriveBy: JourneyOptionsSeed(editsTime: true)
+        case _ where isJourneys: JourneyOptionsSeed()
+        default: nil
         }
     }
 
@@ -188,18 +232,21 @@ enum ScreenshotScreen: String, CaseIterable {
         switch self {
         case .homeOutsideNYC, .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyOutsideNYC, .nearbyLoading,
              .nearbyError, .nearbyEmpty: .authorized
-        case .nearbyDenied: .denied
+        case .nearbyDenied, .journeysLocationOff: .denied
+        case _ where isJourneys: .authorized
         default: .notDetermined
         }
     }
 
     /// The location the screen shows the user at, if any: Philadelphia's City Hall outside New York, and Union Square
-    /// (``FixtureSet/unionSquare``) for Nearby.
+    /// (``FixtureSet/unionSquare``) for Nearby and journeys.
     var location: Coordinate? {
         switch self {
-        case .homeOutsideNYC, .nearbyOutsideNYC: Coordinate(latitude: 39.9526, longitude: -75.1652)
+        case .homeOutsideNYC, .nearbyOutsideNYC, .journeysOutsideNYC: Coordinate(latitude: 39.9526, longitude: -75.1652)
         case .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyLoading, .nearbyError, .nearbyEmpty:
             FixtureSet.unionSquare
+        case .journeysLocationOff: nil
+        case _ where isJourneys: FixtureSet.unionSquare
         default: nil
         }
     }

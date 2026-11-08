@@ -34,8 +34,9 @@ struct PlaceCard: View {
                         .controlSize(.large)
                         .accessibilityIdentifier("place.close")
                 }
-                // The actions row: saved places' Save toggle and Home or Work menu (P1); journeys (J1) add theirs.
+                // The actions row: Directions (J1), then the Save toggle and Home or Work menu (P1).
                 AdaptiveStack(spacing: Spacing.xs) {
+                    DirectionsButton(place: place)
                     PlaceCardActions(place: place)
                 }
             }
@@ -51,9 +52,11 @@ struct PlaceCard: View {
 
 #Preview("Place card") {
     PlaceCard(place: FixturePlaceSearchService.places[0]) {}
+        .environment(AppRouter())
 }
 
 #Preview("Place card, AX5") {
     PlaceCard(place: FixturePlaceSearchService.places[0]) {}
+        .environment(AppRouter())
         .dynamicTypeSize(.accessibility5)
 }
