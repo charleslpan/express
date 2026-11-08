@@ -11,6 +11,20 @@ enum ScreenshotScreen: String, CaseIterable {
     case homeFull = "home-full"
     /// The map home while the user is outside New York, with the banner saying Express covers the city (S2).
     case homeOutsideNYC = "home-outside-nyc"
+    /// The Nearby section in the home sheet at Union Square (N1): its peek (the nearest station's next trains), half,
+    /// and full, with live and scheduled rows.
+    case nearbyPeek = "nearby-peek"
+    case nearbyHalf = "nearby-half"
+    case nearbyFull = "nearby-full"
+    /// Nearby's states other than departures (N1), each at half height: the "may not be real time" notice (with
+    /// `-fixtures nyc-evening-stale`), the location turned off, outside New York, loading (`slow-network`), offline
+    /// (`offline`), and nothing due (`nyc-no-service`).
+    case nearbyStale = "nearby-stale"
+    case nearbyDenied = "nearby-denied"
+    case nearbyOutsideNYC = "nearby-outside-nyc"
+    case nearbyLoading = "nearby-loading"
+    case nearbyError = "nearby-error"
+    case nearbyEmpty = "nearby-empty"
     /// Place search in the home sheet (S3): the hint for an empty query, a query typed while suggestions load, the
     /// suggestions, none found, a failure with Try Again, and "Search Unavailable" without a key. Which of the last
     /// states shows depends on the fixtures each test launches with.
@@ -46,6 +60,9 @@ enum ScreenshotScreen: String, CaseIterable {
     case about
     /// Liquid Glass controls and a glass sheet over the Google map, for judging the look (F5).
     case mapGlass = "map-glass"
+    /// Live subway trains over Midtown and Union Square, and the same map zoomed out, where they hide (V1).
+    case trains
+    case trainsZoomedOut = "trains-zoomed-out"
 
     #if DEBUG
         /// GlassUI's gallery, every section (debug builds only).
@@ -66,12 +83,16 @@ enum ScreenshotScreen: String, CaseIterable {
     @MainActor @ViewBuilder
     var view: some View {
         switch self {
-        case .homePeek, .homeHalf, .homeFull, .homeOutsideNYC, .about, .searchEmpty, .searchTyping, .searchResults,
-             .searchNoResults, .searchError, .searchNoKey, .searchPlace, .searchRecents, .placeSaved, .placeHomeWork,
-             .journeysPeek, .journeysHalf, .journeysFull, .journeysRoute, .journeysArriveBy, .journeysLoading,
-             .journeysNoResults, .journeysOutsideNYC, .journeysLocationOff, .journeysError, .journeysStale:
+        case .homePeek, .homeHalf, .homeFull, .homeOutsideNYC, .about, .nearbyPeek, .nearbyHalf, .nearbyFull,
+             .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError, .nearbyEmpty, .searchEmpty,
+             .searchTyping, .searchResults, .searchNoResults, .searchError, .searchNoKey, .searchPlace, .searchRecents,
+             .placeSaved, .placeHomeWork, .journeysPeek, .journeysHalf, .journeysFull, .journeysRoute,
+             .journeysArriveBy, .journeysLoading, .journeysNoResults, .journeysOutsideNYC, .journeysLocationOff,
+             .journeysError, .journeysStale:
             RootView()
         case .mapGlass: MapGlassScreen()
+        case .trains: GoView(camera: MapCamera(center: Self.midtown, zoom: 14.5))
+        case .trainsZoomedOut: GoView(camera: MapCamera(center: Self.midtown, zoom: 11.5))
         #if DEBUG
             case .gallery: GlassUIGallery()
             case .galleryColors: GlassUIGallery(sections: [.colors])
@@ -91,8 +112,9 @@ enum ScreenshotScreen: String, CaseIterable {
     /// How far the home sheet is pulled up for this screen.
     var homeDetent: HomeSheetDetent {
         switch self {
-        case .homeHalf: .half
-        case .homeFull, .journeysFull, .journeysArriveBy: .full
+        case .homeHalf, .nearbyHalf, .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError,
+             .nearbyEmpty: .half
+        case .homeFull, .nearbyFull, .journeysFull, .journeysArriveBy: .full
         case .journeysPeek: .peek
         case _ where isJourneys: .half
         default: .peek
@@ -174,23 +196,29 @@ enum ScreenshotScreen: String, CaseIterable {
     /// The location permission the screen shows; the harness never asks for it.
     var locationAuthorization: LocationService.Authorization {
         switch self {
-        case .homeOutsideNYC: .authorized
-        case .journeysLocationOff: .denied
+        case .homeOutsideNYC, .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyOutsideNYC, .nearbyLoading,
+             .nearbyError, .nearbyEmpty: .authorized
+        case .nearbyDenied, .journeysLocationOff: .denied
         case _ where isJourneys: .authorized
         default: .notDetermined
         }
     }
 
-    /// The location the screen shows the user at, if any: Philadelphia's City Hall for the outside-NYC banner and
-    /// journeys, and Union Square for the other journeys.
+    /// The location the screen shows the user at, if any: Philadelphia's City Hall outside New York, and Union Square
+    /// (``FixtureSet/unionSquare``) for Nearby and journeys.
     var location: Coordinate? {
         switch self {
-        case .homeOutsideNYC, .journeysOutsideNYC: Coordinate(latitude: 39.9526, longitude: -75.1652)
+        case .homeOutsideNYC, .nearbyOutsideNYC, .journeysOutsideNYC: Coordinate(latitude: 39.9526, longitude: -75.1652)
+        case .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyLoading, .nearbyError, .nearbyEmpty:
+            FixtureSet.unionSquare
         case .journeysLocationOff: nil
-        case _ where isJourneys: Coordinate(latitude: 40.7359, longitude: -73.9906)
+        case _ where isJourneys: FixtureSet.unionSquare
         default: nil
         }
     }
+
+    /// Where the trains screens look: between Union Square and Herald Square, where the `nyc-evening` trips run.
+    private static let midtown = Coordinate(latitude: 40.7445, longitude: -73.9895)
 
     /// The accessibility identifier the harness puts on the screen, which the UI test waits for before capturing.
     var accessibilityIdentifier: String {

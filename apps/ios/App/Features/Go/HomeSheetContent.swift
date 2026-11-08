@@ -1,14 +1,17 @@
 import GlassUI
 import SwiftUI
 
-/// What the home sheet shows over the map: the search field at the top, as in Apple Maps, then slots that later
-/// tasks fill: the service alert chip (A3), Home and Work (P2), and the Nearby (N1) and Saved (P2) sections, which
-/// come into view as the sheet is pulled up.
+/// What the home sheet shows over the map: the search field at the top, as in Apple Maps, then the nearest station's
+/// next departures (N1), which show at the sheet's peek, then the service alert chip (A3) and Home and Work (P2),
+/// which show at half height, then the rest of Nearby (N1) and the Saved section (P2), which come into view as the
+/// sheet is pulled up.
 ///
 /// It knows nothing of the sheet it sits in: it draws no glass (the system sheet brings it) and doesn't scroll; the
-/// sheet's ``HomeSheet`` does that. The search field comes first, so it's what shows at the sheet's peek.
-struct HomeSheetContent<Alert: View, Places: View, Nearby: View, Saved: View>: View {
+/// sheet's ``HomeSheet`` does that. The search field comes first, so it's what shows at the sheet's peek, with what
+/// a slot marks with ``View/homeSheetPeekBoundary(_:)`` under it.
+struct HomeSheetContent<Departures: View, Alert: View, Places: View, Nearby: View, Saved: View>: View {
     private let onSearch: () -> Void
+    private let departures: Departures
     private let alert: Alert
     private let places: Places
     private let nearby: Nearby
@@ -18,12 +21,14 @@ struct HomeSheetContent<Alert: View, Places: View, Nearby: View, Saved: View>: V
     /// each slot shows the view its feature provides.
     init(
         onSearch: @escaping () -> Void,
+        @ViewBuilder departures: () -> Departures,
         @ViewBuilder alert: () -> Alert,
         @ViewBuilder places: () -> Places,
         @ViewBuilder nearby: () -> Nearby,
         @ViewBuilder saved: () -> Saved
     ) {
         self.onSearch = onSearch
+        self.departures = departures()
         self.alert = alert()
         self.places = places()
         self.nearby = nearby()
@@ -36,6 +41,7 @@ struct HomeSheetContent<Alert: View, Places: View, Nearby: View, Saved: View>: V
                 // Past AX2 the field would crowd the map out at the sheet's peek; the system's search bars stop
                 // there too. Clamped from outside so the field's scaled height stops with its text.
                 .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+            departures
             alert
             places
             nearby
@@ -47,20 +53,43 @@ struct HomeSheetContent<Alert: View, Places: View, Nearby: View, Saved: View>: V
     }
 }
 
-extension HomeSheetContent where Alert == AlertChipPlaceholder, Places == SavedPlacesPlaceholder,
-    Nearby == NearbySectionPlaceholder, Saved == SavedSectionPlaceholder
+extension HomeSheetContent where Departures == NearbySection, Alert == AlertChipPlaceholder,
+    Places == SavedPlacesPlaceholder, Nearby == NearbySection, Saved == SavedSectionPlaceholder
 {
-    /// The sheet with every slot showing its placeholder, until A3, N1, and P2 land.
-    init(onSearch: @escaping () -> Void) {
+    /// The sheet with each slot showing its feature, or its placeholder until A3 and P2 land. `nearby` is the board
+    /// both Nearby slots show, which outlives the content (``HomeSheet`` keeps it).
+    init(nearby model: NearbyModel, onSearch: @escaping () -> Void) {
         self.init(onSearch: onSearch) {
+            NearbySection(model: model, part: .next)
+        } alert: {
             AlertChipPlaceholder()
         } places: {
             SavedPlacesPlaceholder()
         } nearby: {
-            NearbySectionPlaceholder()
+            NearbySection(model: model, part: .more)
         } saved: {
             SavedSectionPlaceholder()
         }
+    }
+}
+
+extension View {
+    /// Marks the bottom of what the home sheet shows at its peek, such as the nearest station's second departure
+    /// row: the peek grows to show the search field and everything down to this view. Where nothing is marked (or
+    /// `isActive` is false everywhere), the peek shows the search field alone.
+    func homeSheetPeekBoundary(_ isActive: Bool = true) -> some View {
+        anchorPreference(key: HomePeekBoundary.self, value: .bounds) { isActive ? $0 : nil }
+    }
+}
+
+/// The view that ends the home sheet's peek, from ``View/homeSheetPeekBoundary(_:)``; the first one marked wins.
+struct HomePeekBoundary: PreferenceKey {
+    static var defaultValue: Anchor<CGRect>? {
+        nil
+    }
+
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = value ?? nextValue()
     }
 }
 
@@ -103,15 +132,21 @@ struct HomeSearchField: View {
 
 #Preview("Home sheet content") {
     ScrollView {
-        HomeSheetContent {}
+        HomeSheetContent(nearby: NearbyModel()) {}
             .padding(.top, Spacing.lg)
     }
+    .environment(AppRouter())
+    .environment(LocationService(fixed: .notDetermined))
+    .environment(AppEnvironment())
 }
 
 #Preview("Home sheet content, AX5") {
     ScrollView {
-        HomeSheetContent {}
+        HomeSheetContent(nearby: NearbyModel()) {}
             .padding(.top, Spacing.lg)
     }
     .dynamicTypeSize(.accessibility5)
+    .environment(AppRouter())
+    .environment(LocationService(fixed: .notDetermined))
+    .environment(AppEnvironment())
 }

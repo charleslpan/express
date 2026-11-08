@@ -5,20 +5,29 @@ import UIKit
 
 /// The map home, the app's one screen: the map full screen, centred on the user where they're in New York and on New
 /// York otherwise, with glass controls floating at the top (About, a compass while the map is rotated, and "Show my
-/// location"), a banner while the user is outside the area Express serves, and the ``HomeSheet`` over it all, which
-/// can't be dismissed and leaves the map usable up to half height.
+/// location"), a banner while the user is outside the area Express serves, live subway trains (``LiveTrains``) with a
+/// notice while their positions may not be real time, and the ``HomeSheet`` over it all, which can't be dismissed and
+/// leaves the map usable up to half height.
 struct GoView: View {
     @Environment(AppRouter.self) private var router
     @Environment(LocationService.self) private var location
 
-    @State private var camera = MapCamera.newYork
+    @State private var camera: MapCamera
+    @State private var trains = LiveTrains()
     @State private var tilesRendered = false
     /// Whether the map should move to the next location fix, after "Show my location" asked for one.
     @State private var centersOnNextFix = false
     @State private var showsLocationOff = false
     /// Whether the map has moved to the user's first location fix in New York, which it does once.
     @State private var hasCenteredOnUser = false
+    /// How tall the sheet's peek is, as the sheet measured it; nil for the search field alone.
+    @State private var peekHeight: CGFloat?
     @Namespace private var glass
+
+    /// - Parameter camera: Where the map first looks; New York unless the screenshot harness asks for somewhere else.
+    init(camera: MapCamera = .newYork) {
+        _camera = State(initialValue: camera)
+    }
 
     var body: some View {
         MapView(
@@ -26,9 +35,15 @@ struct GoView: View {
             showsUserLocation: location.isLive && location.authorization == .authorized,
             pin: placePin,
             route: router.selectedJourney.map(MapRoute.init(journey:)),
-            onTilesRendered: { tilesRendered = true }
+            vehicles: trains.vehicles,
+            vehicleMoveDuration: LiveTrains.tick / .seconds(1),
+            onTilesRendered: { tilesRendered = true },
+            onCameraIdle: { trains.cameraDidIdle($0) },
+            onCameraMove: { trains.cameraDidMove() },
+            onVehicleTap: { router.showTrip(id: $0) }
         )
         .ignoresSafeArea()
+        .liveTrains(trains)
         // The controls sit at the top, clear of the sheet at its peek.
         .overlay(alignment: .top) {
             topControls
@@ -66,9 +81,9 @@ struct GoView: View {
     }
 
     private var homeSheet: some View {
-        HomeSheet()
+        HomeSheet(peekHeight: $peekHeight)
             .presentationDetents(
-                Set(HomeSheetDetent.allCases.map(\.presentationDetent)),
+                Set(HomeSheetDetent.allCases.map { $0.presentationDetent(peekHeight: peekHeight) }),
                 selection: detent
             )
             .presentationBackgroundInteraction(.enabled(upThrough: .medium))
@@ -90,7 +105,7 @@ struct GoView: View {
     /// The sheet's detent, through ``AppRouter/homeDetent`` so features can raise and lower it.
     private var detent: Binding<PresentationDetent> {
         Binding {
-            router.homeDetent.presentationDetent
+            router.homeDetent.presentationDetent(peekHeight: peekHeight)
         } set: { detent in
             router.homeDetent = HomeSheetDetent(detent)
         }
@@ -102,6 +117,9 @@ struct GoView: View {
         VStack(alignment: .trailing, spacing: Spacing.floatingInset) {
             if isOutsideServiceArea {
                 OutsideServiceAreaBanner()
+            }
+            if trains.mayNotBeRealTime {
+                LiveTrainsNotice()
             }
             controls
         }
@@ -191,6 +209,8 @@ struct GoView: View {
 
 #Preview {
     GoView()
+        .environment(AppEnvironment())
         .environment(AppRouter())
         .environment(LocationService(fixed: .notDetermined))
+        .environment(AppEnvironment())
 }

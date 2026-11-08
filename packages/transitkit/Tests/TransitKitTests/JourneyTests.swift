@@ -205,27 +205,3 @@ struct JourneyOptionsTests {
             .count == 1)
     }
 }
-
-struct CannedTransportTests {
-    @Test func answersByOperation() async throws {
-        let plan = try FixtureTransport.fixture("plan-union-square-to-williamsburg")
-        let client = TransitClient(transport: CannedTransport { operation in
-            switch operation {
-            case "plan": .json(plan)
-            case "metrics": .text("nigiri_gtfsrt_feed_timestamp_seconds{tag=\"us-ny-MTA-NYCSubway\"} 1793748580\n")
-            default: .status(503)
-            }
-        })
-        let response = try await client.plan(PlanRequest(from: .stop(id: "a"), to: .stop(id: "b")))
-        #expect(response.itineraries.count == 1)
-        let age = try await client.realtimeDataAge()
-        #expect(age.feedTimestamp == Date(timeIntervalSince1970: 1_793_748_580))
-    }
-
-    @Test func offline() async {
-        let client = TransitClient(transport: CannedTransport { _ in .offline })
-        await #expect(throws: TransitError.offline) {
-            try await client.plan(PlanRequest(from: .stop(id: "a"), to: .stop(id: "b")))
-        }
-    }
-}

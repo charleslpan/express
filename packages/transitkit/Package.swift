@@ -38,6 +38,7 @@ let package = Package(
                 "TransitKit",
                 .product(name: "OpenAPIRuntime", package: "swift-openapi-runtime"),
                 .product(name: "HTTPTypes", package: "swift-http-types"),
+                .product(name: "Polyline", package: "Polyline"),
             ],
             resources: [.copy("Fixtures")]
         ),
