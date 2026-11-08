@@ -26,6 +26,47 @@ final class ScreenshotTests: XCTestCase {
         capture("home-outside-nyc", fixtures: "nyc-evening", settledWhen: "map.settled")
     }
 
+    // Nearby (N1) in the home sheet at Union Square: the peek's next trains, then more stops at half and full height.
+
+    func testNearbyPeek() {
+        capture("nearby-peek", fixtures: "nyc-evening", settledWhen: "nearby.loaded", "map.settled")
+    }
+
+    func testNearbyHalf() {
+        capture("nearby-half", fixtures: "nyc-evening", settledWhen: "nearby.loaded")
+    }
+
+    func testNearbyFull() {
+        capture("nearby-full", fixtures: "nyc-evening", settledWhen: "nearby.loaded")
+    }
+
+    // Nearby's other states: times that may not be real time, location off, outside New York, loading, offline, and
+    // nothing due. (Before the location is allowed, the home screens above show Nearby asking for it.)
+
+    func testNearbyStale() {
+        capture("nearby-stale", fixtures: "nyc-evening-stale", settledWhen: "nearby.not-real-time")
+    }
+
+    func testNearbyDenied() {
+        capture("nearby-denied", fixtures: "nyc-evening", settledWhen: "nearby.location-off")
+    }
+
+    func testNearbyOutsideNYC() {
+        capture("nearby-outside-nyc", fixtures: "nyc-evening", settledWhen: "nearby.outside-nyc")
+    }
+
+    func testNearbyLoading() {
+        capture("nearby-loading", fixtures: "slow-network", settledWhen: "nearby.loading")
+    }
+
+    func testNearbyError() {
+        capture("nearby-error", fixtures: "offline", settledWhen: "nearby.failed")
+    }
+
+    func testNearbyEmpty() {
+        capture("nearby-empty", fixtures: "nyc-no-service", settledWhen: "nearby.empty")
+    }
+
     // Place search (S3) in the home sheet, in each state, and a picked place's pin and card.
 
     func testSearchEmpty() {
@@ -164,13 +205,13 @@ final class ScreenshotTests: XCTestCase {
     /// Launches the app on `screen` with `fixtures` in every variant and attaches a screenshot of each, named
     /// `<screen>-<fixtures>-<variant>` (such as `go-nyc-evening-dark`).
     ///
-    /// `settledWhen` names an element the screen shows once it has finished loading what the network serves it,
-    /// such as map tiles; the capture waits for it a while, then goes ahead without it rather than fail. `then` runs
+    /// `settledWhen` names elements the screen shows once it has finished loading what it shows, such as map tiles
+    /// or departures; the capture waits for each a while, then goes ahead without it rather than fail. `then` runs
     /// before each capture, to put the screen in a state only a tap reaches, such as an open menu.
     private func capture(
         _ screen: String,
         fixtures: String,
-        settledWhen settled: String? = nil,
+        settledWhen settled: String...,
         then prepare: ((XCUIApplication) -> Void)? = nil
     ) {
         for variant in Variant.allCases {
@@ -179,7 +220,7 @@ final class ScreenshotTests: XCTestCase {
             app.launch()
             let ready = app.descendants(matching: .any)["screenshot.\(screen)"]
             XCTAssertTrue(ready.waitForExistence(timeout: 15), "\(screen) never appeared")
-            if let settled, !app.descendants(matching: .any)[settled].waitForExistence(timeout: 30) {
+            for settled in settled where !app.descendants(matching: .any)[settled].waitForExistence(timeout: 30) {
                 XCTContext.runActivity(named: "\(screen) never showed \(settled); capturing anyway") { _ in }
             }
             prepare?(app)

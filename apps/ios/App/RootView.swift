@@ -14,6 +14,7 @@ struct RootView: View {
         .environment(AppEnvironment())
         .environment(AppRouter())
         .environment(LocationService(fixed: .notDetermined))
+        .environment(AppEnvironment())
 }
 
 #Preview("About") {
@@ -21,4 +22,5 @@ struct RootView: View {
         .environment(AppEnvironment())
         .environment(AppRouter(sheet: .about))
         .environment(LocationService(fixed: .authorized))
+        .environment(AppEnvironment())
 }

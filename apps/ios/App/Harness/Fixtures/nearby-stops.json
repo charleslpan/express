@@ -1,0 +1,120 @@
+[
+ {
+  "name": "14 St-Union Sq",
+  "stopId": "us-ny-MTA-NYCSubway_635N",
+  "lat": 40.734673,
+  "lon": -73.989951,
+  "vertexType": "TRANSIT",
+  "parentId": "us-ny-MTA-NYCSubway_635",
+  "modes": [
+   "SUBWAY"
+  ]
+ },
+ {
+  "name": "14 St-Union Sq",
+  "stopId": "us-ny-MTA-NYCSubway_635S",
+  "lat": 40.734673,
+  "lon": -73.989951,
+  "vertexType": "TRANSIT",
+  "parentId": "us-ny-MTA-NYCSubway_635",
+  "modes": [
+   "SUBWAY"
+  ]
+ },
+ {
+  "name": "14 St-Union Sq",
+  "stopId": "us-ny-MTA-NYCSubway_L03N",
+  "lat": 40.734789,
+  "lon": -73.99073,
+  "vertexType": "TRANSIT",
+  "parentId": "us-ny-MTA-NYCSubway_L03",
+  "modes": [
+   "SUBWAY"
+  ]
+ },
+ {
+  "name": "14 St-Union Sq",
+  "stopId": "us-ny-MTA-NYCSubway_L03S",
+  "lat": 40.734789,
+  "lon": -73.99073,
+  "vertexType": "TRANSIT",
+  "parentId": "us-ny-MTA-NYCSubway_L03",
+  "modes": [
+   "SUBWAY"
+  ]
+ },
+ {
+  "name": "14 St-Union Sq",
+  "stopId": "us-ny-MTA-NYCSubway_R20N",
+  "lat": 40.735736,
+  "lon": -73.990568,
+  "vertexType": "TRANSIT",
+  "parentId": "us-ny-MTA-NYCSubway_R20",
+  "modes": [
+   "SUBWAY"
+  ]
+ },
+ {
+  "name": "14 St-Union Sq",
+  "stopId": "us-ny-MTA-NYCSubway_R20S",
+  "lat": 40.735736,
+  "lon": -73.990568,
+  "vertexType": "TRANSIT",
+  "parentId": "us-ny-MTA-NYCSubway_R20",
+  "modes": [
+   "SUBWAY"
+  ]
+ },
+ {
+  "name": "3 Av",
+  "stopId": "us-ny-MTA-NYCSubway_L06N",
+  "lat": 40.732849,
+  "lon": -73.986122,
+  "vertexType": "TRANSIT",
+  "parentId": "us-ny-MTA-NYCSubway_L06",
+  "modes": [
+   "SUBWAY"
+  ]
+ },
+ {
+  "name": "3 Av",
+  "stopId": "us-ny-MTA-NYCSubway_L06S",
+  "lat": 40.732849,
+  "lon": -73.986122,
+  "vertexType": "TRANSIT",
+  "parentId": "us-ny-MTA-NYCSubway_L06",
+  "modes": [
+   "SUBWAY"
+  ]
+ },
+ {
+  "name": "E 14 ST/IRVING PL",
+  "stopId": "us-ny-MTA-BusManhattan_403556",
+  "lat": 40.733947,
+  "lon": -73.988902,
+  "vertexType": "TRANSIT",
+  "modes": [
+   "BUS"
+  ]
+ },
+ {
+  "name": "E 14 ST/IRVING PL",
+  "stopId": "us-ny-MTA-BusManhattan_403906",
+  "lat": 40.734417,
+  "lon": -73.989702,
+  "vertexType": "TRANSIT",
+  "modes": [
+   "BUS"
+  ]
+ },
+ {
+  "name": "UNION SQ EAST/E 15 ST",
+  "stopId": "us-ny-MTA-BusManhattan_404120",
+  "lat": 40.73555,
+  "lon": -73.989612,
+  "vertexType": "TRANSIT",
+  "modes": [
+   "BUS"
+  ]
+ }
+]
