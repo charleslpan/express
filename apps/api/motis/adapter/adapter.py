@@ -1,7 +1,9 @@
 """Realtime feeds for MOTIS, served on localhost.
 
 MOTIS polls this server (see config.yml); each poll fetches the upstream feed
-once and answers with it corrected, so there is no timer here.
+once and answers with it corrected, so there is no timer here. The one
+exception is the start: every feed is fetched at once, in parallel, and
+MOTIS's first polls take those results (upstream.py).
 
 - /subway/<feed>: an MTA subway feed with trip ids matched to the static
   timetable baked into the image (matcher.py).
@@ -32,6 +34,7 @@ from google.transit import gtfs_realtime_pb2
 
 from alerts import AlertStats, AlertTypes, alerts_for_routes, fill_alerts
 from matcher import FeedStats, Timetable, rewrite_feed
+from upstream import Upstream
 
 MTA = "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2F"
 SUBWAY_FEEDS = {
@@ -58,23 +61,25 @@ def fetch(url: str) -> bytes:
 
 
 class Subway:
-    def __init__(self, tt: Timetable):
+    def __init__(self, tt: Timetable, upstream: Upstream):
         self.tt = tt
+        self.upstream = upstream
 
     def get(self, name: str) -> bytes | None:
         url = SUBWAY_FEEDS.get(name)
         if url is None:
             return None
         feed = gtfs_realtime_pb2.FeedMessage()
-        feed.ParseFromString(fetch(url))
+        feed.ParseFromString(self.upstream.get(url))
         s = rewrite_feed(feed, self.tt)
         log.info("subway %s: %s", name, _describe(s, feed.header.timestamp))
         return feed.SerializeToString()
 
 
 class Bus:
-    def __init__(self, key: str, routes: dict[str, list[str]]):
+    def __init__(self, key: str, routes: dict[str, list[str]], upstream: Upstream):
         self.key = key
+        self.upstream = upstream
         self.routes = {d: set(r) for d, r in routes.items()}
         self._lock = threading.Lock()
         self._feed: gtfs_realtime_pb2.FeedMessage | None = None
@@ -97,7 +102,7 @@ class Bus:
         with self._lock:
             if self._feed is None or time.monotonic() - self._at >= BUS_MIN_INTERVAL:
                 feed = gtfs_realtime_pb2.FeedMessage()
-                feed.ParseFromString(fetch(f"{BUS_TIME}?key={self.key}"))
+                feed.ParseFromString(self.upstream.get(f"{BUS_TIME}?key={self.key}"))
                 self._feed, self._at = feed, time.monotonic()
                 n = sum(1 for e in feed.entity if e.HasField("trip_update"))
                 known = set().union(*self.routes.values())
@@ -109,8 +114,9 @@ class Bus:
 
 
 class Alerts:
-    def __init__(self, types: AlertTypes, bus_routes: dict[str, list[str]]):
+    def __init__(self, types: AlertTypes, bus_routes: dict[str, list[str]], upstream: Upstream):
         self.types = types
+        self.upstream = upstream
         self.bus_routes = {d: set(r) for d, r in bus_routes.items()}
         self._lock = threading.Lock()
         self._bus: gtfs_realtime_pb2.FeedMessage | None = None
@@ -132,7 +138,7 @@ class Alerts:
 
     def _load(self, kind: str) -> gtfs_realtime_pb2.FeedMessage:
         feed = gtfs_realtime_pb2.FeedMessage()
-        feed.ParseFromString(fetch(ALERT_FEEDS[kind]))
+        feed.ParseFromString(self.upstream.get(ALERT_FEEDS[kind]))
         s = fill_alerts(feed, self.types)
         log.info("alerts %s: %s", kind, self._summary(s, feed.header.timestamp))
         return feed
@@ -154,6 +160,13 @@ def _describe(s: FeedStats, ts: int) -> str:
 
 def _age(ts: int) -> str:
     return f"{time.time() - ts:.0f}s" if ts else "unknown"
+
+
+class Server(ThreadingHTTPServer):
+    # MOTIS opens all of its polls at once (19 today). With the default listen
+    # backlog of 5 the rest are dropped and retried a second later, which
+    # holds up every cycle, the cold start's first one included.
+    request_queue_size = 64
 
 
 def make_handler(subway: Subway, bus: Bus, alerts: Alerts):
@@ -186,17 +199,22 @@ def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [adapter] %(message)s")
     here = os.environ.get("ADAPTER_DATA", "/srv/adapter")
     t = time.monotonic()
-    tt = Timetable.load(os.path.join(here, "subway_index.json"))
-    with open(os.path.join(here, "bus_routes.json")) as f:
-        bus_routes = json.load(f)
     key = os.environ.get("MTA_BUS_TIME_KEY", "")
     if not key:
         log.warning("MTA_BUS_TIME_KEY is not set: bus feeds answer 404")
+    # Fetch every feed at once, first thing, while the index and then MOTIS
+    # load: MOTIS's first cycle takes these instead of fetching feed after
+    # feed, so it turns healthy sooner (upstream.py).
+    upstream = Upstream(fetch)
+    upstream.start([*SUBWAY_FEEDS.values(), *ALERT_FEEDS.values(), *([f"{BUS_TIME}?key={key}"] if key else [])])
+    tt = Timetable.load(os.path.join(here, "subway_index.json"))
+    with open(os.path.join(here, "bus_routes.json")) as f:
+        bus_routes = json.load(f)
     port = int(os.environ.get("ADAPTER_PORT", "8081"))
-    server = ThreadingHTTPServer(
+    server = Server(
         ("127.0.0.1", port),
-        make_handler(Subway(tt), Bus(key, bus_routes),
-                     Alerts(AlertTypes.load(os.path.join(here, "alert_types.json")), bus_routes)),
+        make_handler(Subway(tt, upstream), Bus(key, bus_routes, upstream),
+                     Alerts(AlertTypes.load(os.path.join(here, "alert_types.json")), bus_routes, upstream)),
     )
     log.info("listening on 127.0.0.1:%d (index loaded in %.1fs)", port, time.monotonic() - t)
     # The entrypoint starts MOTIS once this file exists.

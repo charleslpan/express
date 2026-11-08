@@ -75,9 +75,26 @@ targets:
           Express uses your location to find nearby stops and plan trips from where you are.
     scheme:
       testTargets:
+        - ExpressTests
         - ExpressUITests
         - package: TransitKit/TransitKitTests
         - package: GlassUI/GlassUITests
+
+  # The app's unit tests (Swift Testing), hosted in the app so they can reach its internals with @testable.
+  ExpressTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "27.0"
+    sources:
+      - path: Tests
+    dependencies:
+      - target: Express
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.charleslpan.express.tests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: "1"
 
   # The screenshot harness: launches screens with fixture data and attaches screenshots (see AGENTS.md).
   ExpressUITests:
