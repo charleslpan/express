@@ -44,6 +44,9 @@ struct NearbySection: View {
         switch part {
         case .next:
             next
+                // Past AX2 the station and its first row would outgrow the sheet's peek, as the search field above
+                // would; it stops there too. The rest of Nearby, further down, keeps growing.
+                .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("nearby.\(state.identifier)")

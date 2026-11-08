@@ -16,10 +16,13 @@ struct HomeSheetContent<Departures: View, Alert: View, Places: View, Nearby: Vie
     private let places: Places
     private let nearby: Nearby
     private let saved: Saved
+    private let isPeeking: Bool
 
     /// The sheet's content: `onSearch` runs when the search field is tapped (``AppRouter/showPlaceSearch()``), and
-    /// each slot shows the view its feature provides.
+    /// each slot shows the view its feature provides. While `isPeeking`, the slots under `departures` are hidden, so
+    /// none peeks in under the departures at the sheet's peek.
     init(
+        isPeeking: Bool = false,
         onSearch: @escaping () -> Void,
         @ViewBuilder departures: () -> Departures,
         @ViewBuilder alert: () -> Alert,
@@ -27,6 +30,7 @@ struct HomeSheetContent<Departures: View, Alert: View, Places: View, Nearby: Vie
         @ViewBuilder nearby: () -> Nearby,
         @ViewBuilder saved: () -> Saved
     ) {
+        self.isPeeking = isPeeking
         self.onSearch = onSearch
         self.departures = departures()
         self.alert = alert()
@@ -42,10 +46,15 @@ struct HomeSheetContent<Departures: View, Alert: View, Places: View, Nearby: Vie
                 // there too. Clamped from outside so the field's scaled height stops with its text.
                 .dynamicTypeSize(...DynamicTypeSize.accessibility2)
             departures
-            alert
-            places
-            nearby
-            saved
+            Group {
+                alert
+                places
+                nearby
+                saved
+            }
+            .opacity(isPeeking ? 0 : 1)
+            .accessibilityHidden(isPeeking)
+            .animation(.default, value: isPeeking)
         }
         .padding(.horizontal, Spacing.md)
         .padding(.bottom, Spacing.md)
@@ -58,8 +67,8 @@ extension HomeSheetContent where Departures == NearbySection, Alert == AlertChip
 {
     /// The sheet with each slot showing its feature, or its placeholder until P2 lands. `nearby` is the board
     /// both Nearby slots show, which outlives the content (``HomeSheet`` keeps it).
-    init(nearby model: NearbyModel, onSearch: @escaping () -> Void) {
-        self.init(onSearch: onSearch) {
+    init(nearby model: NearbyModel, isPeeking: Bool = false, onSearch: @escaping () -> Void) {
+        self.init(isPeeking: isPeeking, onSearch: onSearch) {
             NearbySection(model: model, part: .next)
         } alert: {
             AlertChip(model: model)
