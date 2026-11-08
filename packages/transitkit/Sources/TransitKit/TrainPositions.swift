@@ -64,7 +64,7 @@ public extension Coordinate {
 ///
 /// The subway has no GPS, so this comes from the trip's times at its stops (realtime where the feed predicts them),
 /// spread evenly along the track between them.
-public struct TrainPosition: Sendable, Hashable, Identifiable {
+public struct TrainPosition: Sendable, Hashable, Identifiable, MapLocated {
     /// The trip's id.
     public var id: String
     public var bullet: LineBullet
@@ -195,7 +195,16 @@ public struct TrainRun: Sendable, Identifiable {
     }
 }
 
-/// Which trains a map shows, so the whole city's never crowd it.
+/// Something with an id and a place on the map, such as a train or a bus, for ``TrainVisibility`` to thin.
+public protocol MapLocated {
+    var id: String { get }
+    var coordinate: Coordinate { get }
+}
+
+/// Which vehicles a map shows (trains or buses), so the whole city's never crowd it.
+public typealias VehicleVisibility = TrainVisibility
+
+/// Which trains a map shows, so the whole city's never crowd it; buses use it too, as ``VehicleVisibility``.
 public struct TrainVisibility: Sendable, Hashable {
     /// The zoom level from which trains show: about 13, where a phone's screen spans a few kilometres of Manhattan.
     public var minimumZoom: Double
@@ -212,16 +221,23 @@ public struct TrainVisibility: Sendable, Hashable {
         zoom >= minimumZoom
     }
 
+    /// Whether vehicles show at `zoom` at all, as ``showsTrains(atZoom:)`` says for trains.
+    public func showsVehicles(atZoom zoom: Double) -> Bool {
+        showsTrains(atZoom: zoom)
+    }
+
     /// The positions to show on a map looking at `bounds` at `zoom`: none when zoomed out past ``minimumZoom``, else
     /// those inside `bounds`, thinned to the ``limit`` nearest its centre.
-    public func visible(_ positions: some Sequence<TrainPosition>, in bounds: CoordinateBounds, zoom: Double)
-        -> [TrainPosition]
-    {
+    public func visible<Position: MapLocated>(
+        _ positions: some Sequence<Position>,
+        in bounds: CoordinateBounds,
+        zoom: Double
+    ) -> [Position] {
         guard showsTrains(atZoom: zoom) else { return [] }
         let inside = positions.filter { bounds.contains($0.coordinate) }
         guard inside.count > limit else { return inside }
         let center = bounds.center
-        let byDistance: [(position: TrainPosition, distance: Double)] = inside.map {
+        let byDistance: [(position: Position, distance: Double)] = inside.map {
             ($0, $0.coordinate.distance(to: center))
         }
         let nearest = byDistance.sorted { lhs, rhs in

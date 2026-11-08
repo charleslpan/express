@@ -18,15 +18,10 @@ enum VehicleMarkerImage {
             return cached
         }
         let diameter = bulletDiameter(traits)
-        let font = UIFont.systemFont(ofSize: diameter * (bullet.text.count > 1 ? 0.48 : 0.62), weight: .bold)
-            .withDesign(.rounded)
-        let text = NSAttributedString(string: bullet.text, attributes: [
-            .font: font,
-            .foregroundColor: textColor(bullet),
-        ])
+        let text = label(bullet, traits: traits)
         let textSize = text.size()
         let ring = ringWidth(traits)
-        let width = bullet.shape == .label ? max(diameter, textSize.width + diameter * 0.6) : diameter
+        let width = bulletWidth(bullet, traits: traits)
         let size = CGSize(width: width + ring * 2, height: diameter + ring * 2)
 
         let image = UIGraphicsImageRenderer(size: size, format: format(traits)).image { _ in
@@ -43,24 +38,29 @@ enum VehicleMarkerImage {
     }
 
     /// The arrow: a square as wide as the bullet plus its tip, with the tip at the top, for a flat marker rotated to
-    /// the vehicle's bearing under the bullet.
+    /// the vehicle's bearing under the bullet. A label wider than it is tall (a bus's "M15-SBS") gets an arrow that
+    /// reaches past its ends, so the tip shows whichever way the vehicle heads.
     static func arrow(_ bullet: LineBullet, traits: UITraitCollection) -> UIImage {
-        let key = "arrow|\(hex(bullet.color))|\(keySuffix(traits))"
+        let width = bulletWidth(bullet, traits: traits)
+        let key = "arrow|\(hex(bullet.color))|\(width)|\(keySuffix(traits))"
         if let cached = cache[key] {
             return cached
         }
         let diameter = bulletDiameter(traits)
         let ring = ringWidth(traits)
         let tip = diameter * 0.42
-        let side = diameter + ring * 2 + tip * 2
+        let side = width + ring * 2 + tip * 2
         let image = UIGraphicsImageRenderer(size: CGSize(width: side, height: side), format: format(traits))
             .image { _ in
                 let mid = side / 2
                 let halfBase = diameter * 0.36
+                // The base sits as far inside the bullet as a circle's does, so a long label's arrow stays joined
+                // to it rather than floating free.
+                let base = tip + ring + diameter * 0.2 + (width - diameter) / 2
                 let arrow = UIBezierPath()
                 arrow.move(to: CGPoint(x: mid, y: ring))
-                arrow.addLine(to: CGPoint(x: mid + halfBase, y: tip + ring + diameter * 0.2))
-                arrow.addLine(to: CGPoint(x: mid - halfBase, y: tip + ring + diameter * 0.2))
+                arrow.addLine(to: CGPoint(x: mid + halfBase, y: base))
+                arrow.addLine(to: CGPoint(x: mid - halfBase, y: base))
                 arrow.close()
                 arrow.lineJoinStyle = .round
                 arrow.lineWidth = ring * 2
@@ -74,6 +74,24 @@ enum VehicleMarkerImage {
     }
 
     private static var cache: [String: UIImage] = [:]
+
+    /// The bullet's text, in its colour.
+    private static func label(_ bullet: LineBullet, traits: UITraitCollection) -> NSAttributedString {
+        let diameter = bulletDiameter(traits)
+        let font = UIFont.systemFont(ofSize: diameter * (bullet.text.count > 1 ? 0.48 : 0.62), weight: .bold)
+            .withDesign(.rounded)
+        return NSAttributedString(string: bullet.text, attributes: [
+            .font: font,
+            .foregroundColor: textColor(bullet),
+        ])
+    }
+
+    /// The bullet's width inside its ring: the diameter, or wider for a label's longer text.
+    private static func bulletWidth(_ bullet: LineBullet, traits: UITraitCollection) -> CGFloat {
+        let diameter = bulletDiameter(traits)
+        guard bullet.shape == .label else { return diameter }
+        return max(diameter, (label(bullet, traits: traits).size().width + diameter * 0.6).rounded(.up))
+    }
 
     /// The bullet's size in points: 22 at the default text size, growing with it up to 33.
     private static func bulletDiameter(_ traits: UITraitCollection) -> CGFloat {
