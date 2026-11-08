@@ -10,7 +10,7 @@ A Turborepo monorepo over pnpm workspaces: deployables in `apps/`, shared code i
 | Path | What lives there |
 | --- | --- |
 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `pnpm-lock.yaml` | The workspace root: pnpm 10 (pinned in `packageManager`), Turborepo 2 tasks (`build`, `test`, `lint`, `typecheck`). Every workspace has a `package.json` whose scripts Turborepo runs. |
-| `apps/ios/` | The iOS app: `project.yml` (XcodeGen spec for `Express.xcodeproj`, which is generated and git-ignored: edit `project.yml`, never the `.xcodeproj`) and `App/` (app target: entry point, root view, assets). |
+| `apps/ios/` | The iOS app: `project.yml` (XcodeGen spec for `Express.xcodeproj`, which is generated and git-ignored: edit `project.yml`, never the `.xcodeproj`) `App/` (app target: entry point, root view, assets), and `ci_scripts/` (Xcode Cloud's post-clone step; see [TestFlight](#testflight)). |
 | `apps/ios/App/Features/<Feature>/` | One folder per feature (views, view models, feature-local helpers). Features don't reach into each other's folders; share code through the packages. |
 | `apps/ios/App/Navigation/`, `apps/ios/App/Location/` | The app shell's shared state: `AppRouter` (`@Observable`: the home sheet's detent, its `NavigationPath`, place search, and the sheet on top) and `LocationService` (When In Use permission, asked only when needed, and live updates), both injected with `.environment(_:)`. There's no tab bar: `RootView` is the map home (`Features/Go`), Apple Maps style, with a system sheet over it that can't be dismissed (peek, half, full) holding search, Home/Work, and the Nearby and Saved sections. Features fill the sheet's slots in `HomeSheetContent`, keeping their views in their own folders. A feature navigates by calling a router method, which it adds in an extension in its own folder (such as `showJourneys(to:)`), never by wiring navigation into views. |
 | `apps/ios/App/Map/` | `MapView`, the one Google map every map screen uses (`GMSMapView` wrapped for SwiftUI), its JSON map styles, and the SDK key setup. |
@@ -41,8 +41,8 @@ open apps/ios/Express.xcodeproj
 ```
 
 - **Google Maps key:** copy `apps/ios/Config/Secrets.example.xcconfig` to `Secrets.xcconfig` and paste a key. Without
-  one the app still builds and map screens show "Map unavailable". CI (`ios.sh`) and TestFlight write that file from
-  the `GOOGLE_MAPS_IOS_API_KEY` secret. Style the map with the JSON styles in `App/Map/Styles/`, never a map ID:
+  one the app still builds and map screens show "Map unavailable". CI (`ios.sh`) and Xcode Cloud (`ci_post_clone.sh`)
+  write that file from their `GOOGLE_MAPS_IOS_API_KEY` secret. Style the map with the JSON styles in `App/Map/Styles/`, never a map ID:
   map loads without a map ID are free, and a map ID makes them billed.
 - **Toolchain:** Xcode 27.2, iOS 27.0 deployment target, iPhone only. Node 22+ with pnpm 10 (via Corepack).
 - **Everything at once:** `pnpm turbo run test` (or `make test`) runs every workspace's tests that apply on the host;
@@ -63,7 +63,7 @@ there costs the developer a manual push. Never edit them. Change what CI does th
 - **Which jobs run:** path filters in `.github/ci-filters.yml`. Each filter gates the job of the same name.
 - **Settings:** `.github/ci-config.env` (Swift container image, iOS runner label).
 - **Secrets** the jobs already receive as env: `GOOGLE_MAPS_IOS_API_KEY` (`ios`, `testflight`), and `ASC_KEY_ID`,
-  `ASC_ISSUER_ID`, `ASC_KEY_P8`, `APPLE_TEAM_ID` (`testflight`).
+  `ASC_ISSUER_ID`, `ASC_KEY_P8`, `APPLE_TEAM_ID` (`testflight`, dormant: releases go through Xcode Cloud).
 - `ci-ok` passes when every job passed or was skipped by its filter. It is the only required check on `main`.
 - The `ios` job uploads `build/screenshots/**` and `build/*.xcresult` as artifacts, so write output there.
 
@@ -74,8 +74,8 @@ What each job runs:
 | `changes` | `ubuntu-latest` | none | Reads `ci-config.env` and evaluates `ci-filters.yml`. |
 | `swift` | `SWIFT_IMAGE` container | `ci-swift` | `scripts/ci/lint.sh` (pinned SwiftFormat `--lint` and SwiftLint `--strict`), then TransitKit's `swift test` (directly: the container has no Node). |
 | `server` | `ubuntu-latest` | `ci-server` | `scripts/ci/node.sh` (pinned pnpm via Corepack, `pnpm install --frozen-lockfile`, then `pnpm turbo run lint typecheck build test` over every non-Swift workspace), then the API checks (`scripts/ci/server.sh`, owned by the server tasks). |
-| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj`, runs the `Express` scheme's tests on the newest standard iPhone Pro simulator (see [Screenshot harness](#screenshot-harness)), writes `build/Express.xcresult`. |
-| `testflight` (own workflow) | `IOS_RUNNER` | `testflight` | `scripts/ci/testflight.sh` on pushes to `main` and manual dispatch: archives, signs, and uploads to TestFlight (see [TestFlight](#testflight)). Not part of `ci-ok`. |
+| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj`, fails if the committed `Package.resolved` doesn't match the resolved packages (see [TestFlight](#testflight)), runs the `Express` scheme's tests on the newest standard iPhone Pro simulator (see [Screenshot harness](#screenshot-harness)), writes `build/Express.xcresult`. |
+| `testflight` (own workflow) | `IOS_RUNNER` | `testflight` | Dormant: `scripts/ci/testflight.sh` skips with a notice without the App Store Connect secrets, which aren't set; Xcode Cloud ships TestFlight builds instead (see [TestFlight](#testflight)). Not part of `ci-ok`. |
 | `ci-ok` | `ubuntu-latest` | none | `re-actors/alls-green` over every job: failed or cancelled fails it, skipped is fine. |
 
 - **Add a check** to the Make target (or its script) of the job it belongs to, and widen that job's filter if it now
@@ -93,21 +93,35 @@ If a change truly needs a workflow edit, ask the developer for it rather than pu
 
 ### TestFlight
 
-`.github/workflows/testflight.yml` runs `make testflight` (`scripts/ci/testflight.sh`) on every push to `main` and on
-manual dispatch (Actions → TestFlight → Run workflow), never on pull requests. It archives the `Express` scheme in
-Release with the same Xcode and XcodeGen as the `ios` job, signs it with Xcode's automatic signing through an App
-Store Connect API key (`-allowProvisioningUpdates`, no certificates or profiles in the repository), and uploads it with
-`xcodebuild -exportArchive` (`method: app-store-connect`, `destination: upload`).
+Xcode Cloud builds every push to `main` and uploads it to TestFlight. Apple signs (automatic signing for
+`DEVELOPMENT_TEAM` `FZ47TN3469`, set on the app target in `project.yml`) and uploads, so there is no App Store Connect
+API key, certificate, profile, or GitHub secret. GitHub CI builds for the simulator unsigned (`CODE_SIGNING_ALLOWED=NO`).
 
-- **Secrets:** `ASC_KEY_ID` (the key's id), `ASC_ISSUER_ID`, `ASC_KEY_P8` (the `AuthKey_<id>.p8` file, base64:
-  `base64 -i AuthKey_<id>.p8`), and `APPLE_TEAM_ID`. The key needs the **Admin** role, which cloud-managed distribution
-  signing requires. Without all four the job prints a notice and passes without uploading (forks, or before they're
-  added). The key is written to a temp file and deleted when the script exits.
-- **Versions:** the build number is the workflow's run number (`CURRENT_PROJECT_VERSION`); the marketing version is
+- **Post-clone:** Xcode Cloud runs `apps/ios/ci_scripts/ci_post_clone.sh` (it must stay next to `project.yml`, where
+  the generated `Express.xcodeproj` lives). It writes `apps/ios/Config/Secrets.xcconfig` from the
+  `GOOGLE_MAPS_IOS_API_KEY` environment variable (or warns and builds without it), downloads the XcodeGen that
+  `scripts/ci/ios.sh` pins, and generates the project.
+- **Package.resolved:** Xcode Cloud won't resolve Swift packages itself, so
+  `apps/ios/Express.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved` is committed (a `.gitignore`
+  exception; the rest of the project stays ignored). The `ios` job resolves packages after generating the project and
+  `scripts/ci/package-resolved.py` fails it if the committed pins differ from the resolved ones, printing the file to
+  commit (`xcodebuild` doesn't write it, so the script builds it from DerivedData's `workspace-state.json`). After
+  changing a package in `project.yml` or a local package's `Package.swift`, commit the file the failed `ios` job
+  prints, or the one `scripts/ci/ios.sh build` rewrites on a Mac.
+- **Versions:** Xcode Cloud sets the build number (`CFBundleVersion`) itself; the marketing version is
   `MARKETING_VERSION` in `apps/ios/project.yml`. Bump that for a new version.
-- **Google Maps:** the script writes `apps/ios/Config/Secrets.xcconfig` (git-ignored) with `GOOGLE_MAPS_IOS_API_KEY`
-  from its secret before archiving, and deletes it afterwards.
 - `ITSAppUsesNonExemptEncryption = NO` is set in `project.yml`, so builds skip the export-compliance question.
+- **The old GitHub Actions upload** (`.github/workflows/testflight.yml`, `scripts/ci/testflight.sh`) stays dormant:
+  without its App Store Connect secrets it prints a notice and passes. Removing it needs a manual workflow push.
+
+One-time setup, by the developer in Xcode (needs the app record for `com.charleslpan.express` in App Store Connect):
+
+1. Generate and open the project (`make generate`, `open apps/ios/Express.xcodeproj`), then Integrate → Create
+   Workflow, and grant Xcode Cloud access to `charleslpan/express` when asked.
+2. Start condition: **Branch Changes** on `main`.
+3. Action: **Archive**, platform iOS, scheme `Express`, deployment preparation **TestFlight (Internal Testing Only)**.
+4. Post-action: **TestFlight Internal Testing**, with the internal testing group.
+5. Environment: add `GOOGLE_MAPS_IOS_API_KEY` as a **secret** environment variable, and pick Xcode 27.2 or later.
 
 ### Screenshot harness
 
