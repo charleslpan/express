@@ -26,6 +26,47 @@ final class ScreenshotTests: XCTestCase {
         capture("home-outside-nyc", fixtures: "nyc-evening", settledWhen: "map.settled")
     }
 
+    // Nearby (N1) in the home sheet at Union Square: the peek's next trains, then more stops at half and full height.
+
+    func testNearbyPeek() {
+        capture("nearby-peek", fixtures: "nyc-evening", settledWhen: "nearby.loaded", "map.settled")
+    }
+
+    func testNearbyHalf() {
+        capture("nearby-half", fixtures: "nyc-evening", settledWhen: "nearby.loaded")
+    }
+
+    func testNearbyFull() {
+        capture("nearby-full", fixtures: "nyc-evening", settledWhen: "nearby.loaded")
+    }
+
+    // Nearby's other states: times that may not be real time, location off, outside New York, loading, offline, and
+    // nothing due. (Before the location is allowed, the home screens above show Nearby asking for it.)
+
+    func testNearbyStale() {
+        capture("nearby-stale", fixtures: "nyc-evening-stale", settledWhen: "nearby.not-real-time")
+    }
+
+    func testNearbyDenied() {
+        capture("nearby-denied", fixtures: "nyc-evening", settledWhen: "nearby.location-off")
+    }
+
+    func testNearbyOutsideNYC() {
+        capture("nearby-outside-nyc", fixtures: "nyc-evening", settledWhen: "nearby.outside-nyc")
+    }
+
+    func testNearbyLoading() {
+        capture("nearby-loading", fixtures: "slow-network", settledWhen: "nearby.loading")
+    }
+
+    func testNearbyError() {
+        capture("nearby-error", fixtures: "offline", settledWhen: "nearby.failed")
+    }
+
+    func testNearbyEmpty() {
+        capture("nearby-empty", fixtures: "nyc-no-service", settledWhen: "nearby.empty")
+    }
+
     // Place search (S3) in the home sheet, in each state, and a picked place's pin and card.
 
     func testSearchEmpty() {
@@ -118,29 +159,7 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func testJourneysStale() {
-        capture("journeys-stale", fixtures: "stale-data", settledWhen: "journeys.may-not-be-real-time")
-    }
-
-    // Home and Work chips and the Saved section (P2) in the home sheet.
-
-    func testHomePlaces() {
-        capture("home-places", fixtures: "nyc-evening", settledWhen: "home.chip.home")
-    }
-
-    func testHomePlacesUnset() {
-        capture("home-places-unset", fixtures: "nyc-evening", settledWhen: "home.chip.home")
-    }
-
-    func testHomeSaved() {
-        capture("home-saved", fixtures: "nyc-evening", settledWhen: "home.saved", then: scrollToSaved)
-    }
-
-    func testHomeSavedLoading() {
-        capture("home-saved-loading", fixtures: "slow-network", settledWhen: "home.saved.loading", then: scrollToSaved)
-    }
-
-    func testHomeSavedEmpty() {
-        capture("home-saved-empty", fixtures: "nyc-evening", settledWhen: "home.saved.empty", then: scrollToSaved)
+        capture("journeys-stale", fixtures: "nyc-evening-stale", settledWhen: "journeys.may-not-be-real-time")
     }
 
     // The About sheet (S1), over the home sheet.
@@ -151,6 +170,82 @@ final class ScreenshotTests: XCTestCase {
 
     func testMapGlass() {
         capture("map-glass", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    // Live subway trains (V1): over Midtown, hidden when zoomed out, and with the notice when live data is stale.
+
+    func testTrains() {
+        capture("trains", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testTrainsZoomedOut() {
+        capture("trains-zoomed-out", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testTrainsStale() {
+        capture("trains", fixtures: "nyc-evening-stale", settledWhen: "trains.notice")
+    }
+
+    // Live buses (V2): alone, with trains, hidden when zoomed out, and with the notice when Bus Time's feed is stale.
+
+    func testBuses() {
+        capture("buses", fixtures: "nyc-evening-buses", settledWhen: "map.settled")
+    }
+
+    func testBusesWithTrains() {
+        capture("buses", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testBusesZoomedOut() {
+        capture("buses-zoomed-out", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testBusesStale() {
+        capture("buses", fixtures: "nyc-evening-buses-stale", settledWhen: "buses.notice")
+    }
+
+    // Stop detail and trip view (N2), pushed in the home sheet: Union Square's board at half and full height, then
+    // with times that may not be real time, offline, and with nothing more today; the uptown 6 followed from it
+    // mid-route at half and full height, a trip that has ended, and offline.
+
+    func testStopHalf() {
+        capture("stop-half", fixtures: "nyc-evening", settledWhen: "stop.loaded")
+    }
+
+    func testStopFull() {
+        capture("stop-full", fixtures: "nyc-evening", settledWhen: "stop.loaded")
+    }
+
+    func testStopStale() {
+        capture("stop-stale", fixtures: "nyc-evening-stale", settledWhen: "stop.not-real-time")
+    }
+
+    func testStopError() {
+        capture("stop-error", fixtures: "offline", settledWhen: "stop.failed")
+    }
+
+    func testStopEmpty() {
+        capture("stop-empty", fixtures: "nyc-no-service", settledWhen: "stop.empty")
+    }
+
+    func testTrip() {
+        capture("trip", fixtures: "nyc-evening", settledWhen: "trip.loaded")
+    }
+
+    func testTripFull() {
+        capture("trip-full", fixtures: "nyc-evening", settledWhen: "trip.loaded")
+    }
+
+    func testTripStale() {
+        capture("trip", fixtures: "nyc-evening-stale", settledWhen: "trip.not-real-time")
+    }
+
+    func testTripEnded() {
+        capture("trip-ended", fixtures: "nyc-evening", settledWhen: "trip.ended")
+    }
+
+    func testTripError() {
+        capture("trip-error", fixtures: "offline", settledWhen: "trip.failed")
     }
 
     // GlassUI's gallery, one section per screen. The gallery shows no transit data; the fixtures only fix the clock.
@@ -219,25 +314,13 @@ final class ScreenshotTests: XCTestCase {
     /// Launches the app on `screen` with `fixtures` in every variant and attaches a screenshot of each, named
     /// `<screen>-<fixtures>-<variant>` (such as `go-nyc-evening-dark`).
     ///
-    /// `settledWhen` names an element the screen shows once it has finished loading what the network serves it,
-    /// such as map tiles; the capture waits for it a while, then goes ahead without it rather than fail. `then` runs
+    /// `settledWhen` names elements the screen shows once it has finished loading what it shows, such as map tiles
+    /// or departures; the capture waits for each a while, then goes ahead without it rather than fail. `then` runs
     /// before each capture, to put the screen in a state only a tap reaches, such as an open menu.
-    /// Scrolls the home sheet until the Saved heading is in its top half, with small drags so it doesn't overshoot.
-    private func scrollToSaved(_ app: XCUIApplication) {
-        let heading = app.descendants(matching: .any)["home.saved.heading"]
-        let window = app.windows.firstMatch
-        for _ in 0 ..< 10 {
-            guard heading.exists, !(heading.isHittable && heading.frame.minY < window.frame.midY) else { return }
-            let start = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85))
-            let end = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
-            start.press(forDuration: 0.05, thenDragTo: end)
-        }
-    }
-
     private func capture(
         _ screen: String,
         fixtures: String,
-        settledWhen settled: String? = nil,
+        settledWhen settled: String...,
         then prepare: ((XCUIApplication) -> Void)? = nil
     ) {
         for variant in Variant.allCases {
@@ -246,7 +329,7 @@ final class ScreenshotTests: XCTestCase {
             app.launch()
             let ready = app.descendants(matching: .any)["screenshot.\(screen)"]
             XCTAssertTrue(ready.waitForExistence(timeout: 15), "\(screen) never appeared")
-            if let settled, !app.descendants(matching: .any)[settled].waitForExistence(timeout: 30) {
+            for settled in settled where !app.descendants(matching: .any)[settled].waitForExistence(timeout: 30) {
                 XCTContext.runActivity(named: "\(screen) never showed \(settled); capturing anyway") { _ in }
             }
             prepare?(app)
@@ -256,6 +339,41 @@ final class ScreenshotTests: XCTestCase {
             attachment.lifetime = .keepAlways
             add(attachment)
             app.terminate()
+        }
+    }
+}
+
+/// Home and Work chips and the Saved section (P2) in the home sheet, apart from the class body to keep it short.
+extension ScreenshotTests {
+    func testHomePlaces() {
+        capture("home-places", fixtures: "nyc-evening", settledWhen: "home.chip.home")
+    }
+
+    func testHomePlacesUnset() {
+        capture("home-places-unset", fixtures: "nyc-evening", settledWhen: "home.chip.home")
+    }
+
+    func testHomeSaved() {
+        capture("home-saved", fixtures: "nyc-evening", settledWhen: "home.saved", then: scrollToSaved)
+    }
+
+    func testHomeSavedLoading() {
+        capture("home-saved-loading", fixtures: "slow-network", settledWhen: "home.saved.loading", then: scrollToSaved)
+    }
+
+    func testHomeSavedEmpty() {
+        capture("home-saved-empty", fixtures: "nyc-evening", settledWhen: "home.saved.empty", then: scrollToSaved)
+    }
+
+    /// Scrolls the home sheet until the Saved heading is in its top half, with small drags so it doesn't overshoot.
+    private func scrollToSaved(_ app: XCUIApplication) {
+        let heading = app.descendants(matching: .any)["home.saved.heading"]
+        let window = app.windows.firstMatch
+        for _ in 0 ..< 10 {
+            guard heading.exists, !(heading.isHittable && heading.frame.minY < window.frame.midY) else { return }
+            let start = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85))
+            let end = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
+            start.press(forDuration: 0.05, thenDragTo: end)
         }
     }
 }

@@ -1,17 +1,33 @@
 import SwiftUI
 
-/// Lays its subviews out left to right, wrapping onto a new line where the next one doesn't fit.
-struct FlowLayout: Layout {
-    var spacing: CGFloat
+/// Lays its subviews out left to right, wrapping onto a new line where the next one doesn't fit, such as a station's
+/// line bullets at accessibility text sizes:
+///
+/// ```swift
+/// FlowLayout(spacing: Spacing.xxs) {
+///     ForEach(lines) { LinePill($0) }
+/// }
+/// ```
+public struct FlowLayout: Layout {
+    public var spacing: CGFloat
 
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) -> CGSize {
+    public init(spacing: CGFloat = Spacing.xs) {
+        self.spacing = spacing
+    }
+
+    public func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) -> CGSize {
         let rows = rows(for: subviews, width: proposal.width ?? .infinity)
         let width = rows.map(\.width).max() ?? 0
         let height = rows.map(\.height).reduce(0, +) + spacing * CGFloat(max(rows.count - 1, 0))
         return CGSize(width: width, height: height)
     }
 
-    func placeSubviews(in bounds: CGRect, proposal _: ProposedViewSize, subviews: Subviews, cache _: inout ()) {
+    public func placeSubviews(
+        in bounds: CGRect,
+        proposal _: ProposedViewSize,
+        subviews: Subviews,
+        cache _: inout ()
+    ) {
         var y = bounds.minY
         for row in rows(for: subviews, width: bounds.width) {
             var x = bounds.minX

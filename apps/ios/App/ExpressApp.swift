@@ -10,12 +10,14 @@ struct ExpressApp: App {
     @State private var router: AppRouter
     @State private var location: LocationService
     @State private var places: PlaceStore
+    /// The app's one ``TransitClient``: on the fixture set's recorded data for the screenshot harness, else live.
     private let transitClient: TransitClient
     private let placeSearchService: (any PlaceSearchService)?
 
     init() {
         let environment = AppEnvironment(fixtures: launch.fixtures)
         _environment = State(initialValue: environment)
+        transitClient = launch.fixtures?.transitClient ?? TransitClient(baseURL: ExpressApp.transitServer.baseURL)
         let screen = launch.screen
         let router = AppRouter(homeDetent: screen?.homeDetent ?? .peek, sheet: screen?.sheet)
         screen?.prepare(router)
@@ -24,9 +26,6 @@ struct ExpressApp: App {
         let location = screen
             .map { LocationService(fixed: $0.locationAuthorization, location: $0.location) } ?? LocationService()
         _location = State(initialValue: location)
-        // The screenshot harness plans on recorded data and never touches the network.
-        transitClient = launch.fixtures.map(TransitClient.fixtures)
-            ?? TransitClient(baseURL: ExpressApp.transitServer.baseURL)
         GoogleMapsServices.configure()
         let placeSearchService = PlaceSearchServices.make(fixtures: launch.fixtures)
         self.placeSearchService = placeSearchService

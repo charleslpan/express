@@ -11,12 +11,16 @@ struct RootView: View {
 
 #Preview("Home") {
     RootView()
+        .environment(AppEnvironment())
         .environment(AppRouter())
         .environment(LocationService(fixed: .notDetermined))
+        .environment(AppEnvironment())
 }
 
 #Preview("About") {
     RootView()
+        .environment(AppEnvironment())
         .environment(AppRouter(sheet: .about))
         .environment(LocationService(fixed: .authorized))
+        .environment(AppEnvironment())
 }

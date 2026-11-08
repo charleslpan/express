@@ -18,6 +18,8 @@ public struct TransitClient: Sendable {
     /// The transport and `User-Agent` the generated client uses, for endpoints outside MOTIS's spec (`/metrics`).
     let transport: any ClientTransport
     let userAgent: UserAgentMiddleware
+    /// The 503 retry the generated client uses, for those same endpoints.
+    let retry: RetryMiddleware
 
     /// - Parameters:
     ///   - baseURL: The MOTIS server's root, without `/api`; defaults to ``TransitKit/defaultBaseURL``.
@@ -36,6 +38,7 @@ public struct TransitClient: Sendable {
         self.baseURL = baseURL
         self.transport = transport
         userAgent = UserAgentMiddleware(appVersion: appVersion)
+        self.retry = retry
         client = Client(serverURL: baseURL, transport: transport, middlewares: [userAgent, retry])
     }
 
