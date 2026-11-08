@@ -16,7 +16,7 @@ A Turborepo monorepo over pnpm workspaces: deployables in `apps/`, shared code i
 | `apps/ios/App/Map/` | `MapView`, the one Google map every map screen uses (`GMSMapView` wrapped for SwiftUI), its JSON map styles, and the SDK key setup. |
 | `apps/ios/Config/` | `Express.xcconfig` and the Info.plist keys it feeds. `Secrets.xcconfig` (git-ignored; copy `Secrets.example.xcconfig`) holds `GOOGLE_MAPS_IOS_API_KEY`. |
 | `apps/ios/UITests/`, `apps/ios/App/Harness/` | The screenshot harness: the `ExpressUITests` target and the app's launch-argument and fixture plumbing (see [Screenshot harness](#screenshot-harness)). |
-| `apps/api/` | The backend: the Vercel project `express-server` (`vercel.json` and its services, such as `motis/`). It has its own [`apps/api/AGENTS.md`](apps/api/AGENTS.md); read it before touching anything there. |
+| `apps/api/` | The backend: the Vercel project `express` (`vercel.json` and its services, such as `motis/`). It has its own [`apps/api/AGENTS.md`](apps/api/AGENTS.md); read it before touching anything there. |
 | `packages/transitkit/` | TransitKit: transit models, networking, and routing logic. Platform-neutral: **no UIKit, SwiftUI, or CoreLocation**, so it builds and tests on Linux. Import `FoundationNetworking` behind `#if canImport(FoundationNetworking)`. |
 | `packages/glassui/` | GlassUI: shared SwiftUI components and Liquid Glass styling (iOS 27+). Depends on SwiftUI only, **never on TransitKit**. |
 | `packages/tsconfig/` | Shared strict TypeScript base config: extend `@express/tsconfig/base.json`. |
