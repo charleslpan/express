@@ -36,6 +36,20 @@ final class ScreenshotTests: XCTestCase {
         capture("map-glass", fixtures: "nyc-evening", settledWhen: "map.settled")
     }
 
+    // Live subway trains (V1): over Midtown, hidden when zoomed out, and with the notice when live data is stale.
+
+    func testTrains() {
+        capture("trains", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testTrainsZoomedOut() {
+        capture("trains-zoomed-out", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testTrainsStale() {
+        capture("trains", fixtures: "nyc-evening-stale", settledWhen: "trains.notice")
+    }
+
     // GlassUI's gallery, one section per screen. The gallery shows no transit data; the fixtures only fix the clock.
 
     func testGalleryColors() {

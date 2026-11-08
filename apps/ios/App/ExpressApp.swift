@@ -9,10 +9,12 @@ struct ExpressApp: App {
     @State private var environment: AppEnvironment
     @State private var router: AppRouter
     @State private var location: LocationService
-    private let transitClient = TransitClient(baseURL: ExpressApp.transitServer.baseURL)
+    /// The app's one ``TransitClient``: on the fixture set's recorded data for the screenshot harness, else live.
+    private let transitClient: TransitClient
 
     init() {
         _environment = State(initialValue: AppEnvironment(fixtures: launch.fixtures))
+        transitClient = launch.fixtures?.transitClient ?? TransitClient(baseURL: ExpressApp.transitServer.baseURL)
         let screen = launch.screen
         _router = State(initialValue: AppRouter(homeDetent: screen?.homeDetent ?? .peek, sheet: screen?.sheet))
         // The screenshot harness never asks for the location; it fixes the permission each screen shows.
