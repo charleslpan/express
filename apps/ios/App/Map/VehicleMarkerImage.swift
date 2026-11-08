@@ -62,7 +62,7 @@ enum VehicleMarkerImage {
                 arrow.addLine(to: CGPoint(x: mid + halfBase, y: tip + ring + diameter * 0.2))
                 arrow.addLine(to: CGPoint(x: mid - halfBase, y: tip + ring + diameter * 0.2))
                 arrow.close()
-                arrow.lineJoin = .round
+                arrow.lineJoinStyle = .round
                 arrow.lineWidth = ring * 2
                 ringColor(traits).setStroke()
                 arrow.stroke()
