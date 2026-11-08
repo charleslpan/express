@@ -1,21 +1,25 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["iad1"],
   "services": {
     "motis": {
       "runtime": "container",
       "root": "motis/",
       "entrypoint": "Dockerfile",
-      "ignoreCommand": "bash \"$(git rev-parse --show-toplevel)/apps/api/ignore-build.sh\""
+      "ignoreCommand": "bash \"$(git rev-parse --show-toplevel)/apps/api/ignore-build.sh\"",
+      "functions": { "**/*": { "maxDuration": 30 } }
     },
     "bus": {
       "root": "bus/",
       "framework": "node",
-      "entrypoint": "api/vehicles/bus.ts"
+      "entrypoint": "api/vehicles/bus.ts",
+      "functions": { "api/**/*.ts": { "maxDuration": 15 } }
     },
     "alerts": {
       "root": "alerts/",
       "framework": "node",
-      "entrypoint": "api/alerts.ts"
+      "entrypoint": "api/alerts.ts",
+      "functions": { "api/**/*.ts": { "maxDuration": 15 } }
     },
     "cron": {
       "root": "cron/",
@@ -32,5 +36,11 @@
     { "source": "/api/cron/(.*)", "destination": { "service": "cron" } },
     { "source": "/metrics", "destination": { "service": "motis" } },
     { "source": "/api/(.*)", "destination": { "service": "motis" } }
+  ],
+  "headers": [
+    {
+      "source": "/api/:version/(stoptimes|trip|map/.*)",
+      "headers": [{ "key": "Vercel-CDN-Cache-Control", "value": "max-age=15, stale-while-revalidate=45" }]
+    }
   ]
 }

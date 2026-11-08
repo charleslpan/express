@@ -1,6 +1,6 @@
 # Express server
 
-The Express backend, deployed as one Vercel project (`express-server`, under
+The Express backend, deployed as one Vercel project (`express`, under
 the developer's personal account "charlespan's projects", Hobby plan).
 
 | Path | Service | What |
@@ -12,7 +12,7 @@ the developer's personal account "charlespan's projects", Hobby plan).
 | `/metrics` | `motis` (container) | MOTIS's Prometheus metrics: realtime data age and match rate. |
 
 Production: <https://express-server-cyan-zeta.vercel.app> (also
-`express-server-charlespan-projects.vercel.app`). Example:
+`express-charlespan-projects.vercel.app`). Example:
 
 ```sh
 curl 'https://express-server-cyan-zeta.vercel.app/api/v6/plan?fromPlace=40.7359,-73.9906&toPlace=40.7171,-73.9566'
@@ -81,12 +81,19 @@ Errors answer `{ "error": "…" }` with `Cache-Control: no-store`: `400` for a
 bad query, `405` for methods other than GET and HEAD, `502` when Bus Time fails,
 `503` when `MTA_BUS_TIME_KEY` is not set.
 
-Caching: the decoded fleet (every bus, about 500 KB of JSON) is kept in Vercel's
-Runtime Cache for 30 s, shared by every instance and every bbox, so Bus Time is
-fetched at most about once per 30 s; misses on one instance share one fetch.
-Responses carry `Cache-Control: public, max-age=0, s-maxage=30`, so the CDN
-also answers repeats of the same URL. The CDN strips `s-maxage` from what
-the client sees (`public, max-age=0`).
+Caching: each instance keeps the decoded fleet in memory for 30 s, and only
+then reads Vercel's Runtime Cache, which holds it for 30 s too, shared by every
+instance and every bbox, so Bus Time is fetched at most about once per 30 s;
+misses on one instance share one read and one fetch. Fluid reuses warm
+instances, so most requests never touch the Runtime Cache, which is billed per
+8 KB read and written and pauses for the month once Hobby's 1M reads or 200K
+writes are spent. It stores the fleet with its fetch time as tuples
+(`compactFleet`), about half the bytes of the JSON the endpoint returns.
+Responses carry `Cache-Control: public, max-age=0, s-maxage=30,
+stale-while-revalidate=30`, so the CDN also answers repeats of the same URL,
+and keeps answering for 30 s more while it refetches in the background. The
+CDN strips `s-maxage` and `stale-while-revalidate` from what the client sees
+(`public, max-age=0`).
 
 Measured on Nov 3, 2026 at 19:20 UTC: Bus Time answered in 69 ms with 350 KB of
 protobuf for 2,639 buses on 288 routes; every bus had a position, route, trip,
@@ -161,10 +168,12 @@ Errors answer `{ "error": "…" }` with `Cache-Control: no-store`: `400` for a
 bad query, `405` for methods other than GET and HEAD, `502` when either MTA
 feed fails.
 
-Caching: both feeds are decoded into one per-line index kept in Vercel's
-Runtime Cache for 60 s (`getCache()`, `ttl: 60`), shared by every instance, so
-the MTA is asked at most about once a minute; misses on one instance share one
-fetch. Responses carry `Cache-Control: public, max-age=0, s-maxage=60`.
+Caching: both feeds are decoded into one per-line index. Each instance keeps
+it in memory for 60 s and only then reads Vercel's Runtime Cache (`getCache()`,
+`ttl: 60`), shared by every instance, so the MTA is asked at most about once a
+minute and the Runtime Cache read about once a minute per instance; misses on
+one instance share one read and one fetch. Responses carry `Cache-Control:
+public, max-age=0, s-maxage=60, stale-while-revalidate=60`.
 
 Tests run on both feeds as recorded on Nov 3, 2026 at about 21:30 UTC
 (`alerts/test/fixtures/`):
@@ -224,8 +233,17 @@ each poll makes one upstream fetch.
   dataset in `config.yml`: the feed-timestamp metric is per dataset and the
   last feed listed sets it.
 - **Cold start**: MOTIS answers 503 (`motis is starting up`) until its first
-  realtime update is in, about 1.5 s after start; retry after a second.
-  `/metrics` and `/api/v1/health` answer meanwhile.
+  realtime update is in, about 1.5 s after start. The adapter fetches every
+  upstream feed in parallel the moment it starts, before MOTIS loads, and
+  serves MOTIS's first polls from those results (`adapter/upstream.py`), so the
+  first cycle doesn't wait on the MTA. TransitKit retries a 503 three times,
+  0.5 s apart. `/metrics` and `/api/v1/health` answer meanwhile.
+- **CDN caching**: MOTIS sets no `Cache-Control` of its own, so `vercel.json`
+  gives `stoptimes`, `trip`, and the `map/*` endpoints
+  `Vercel-CDN-Cache-Control: max-age=15, stale-while-revalidate=45`. Vercel
+  caches only 200 and 404 answers among these (never the cold start's 503),
+  keys on the full URL with its query, and never sends that header to the
+  client. `plan`, `health`, and everything else stay uncached.
 - **Data age**: `nigiri_gtfsrt_feed_timestamp_seconds{tag="us-ny-MTA-NYCSubway"}`
   in `/metrics` is the MTA's own timestamp of the last subway feed MOTIS read
   (0 if the last fetch failed). Show the "may not be real time" notice when
@@ -264,7 +282,7 @@ The MTA's supplemented subway feed changes hourly and covers planned work only
    notification (Account Settings → Notifications → Deployment Failures, on by
    default for the deployment's creator; keep it on for this project).
 
-### Secrets and env vars (project `express-server`, Production)
+### Secrets and env vars (project `express`, Production)
 
 | Name | What | Who sets it |
 | --- | --- | --- |

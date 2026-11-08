@@ -28,17 +28,23 @@ public struct TransitClient: Sendable {
         appVersion: String = TransitKit.version,
         transport: any ClientTransport = URLSessionTransport()
     ) {
+        self.init(baseURL: baseURL, appVersion: appVersion, transport: transport, retry: RetryMiddleware())
+    }
+
+    /// Takes the retry policy, so tests can retry without waiting.
+    init(baseURL: URL, appVersion: String, transport: any ClientTransport, retry: RetryMiddleware) {
         self.baseURL = baseURL
         self.transport = transport
         userAgent = UserAgentMiddleware(appVersion: appVersion)
-        client = Client(serverURL: baseURL, transport: transport, middlewares: [userAgent])
+        client = Client(serverURL: baseURL, transport: transport, middlewares: [userAgent, retry])
     }
 
     /// Wakes the server with one cheap request (`GET /api/v1/health`), so the first real search lands warm.
     ///
     /// Call it when the app comes to the foreground: the server scales to zero about a minute after its last
     /// request and takes over a second to start. Never call it on a timer. It never throws; any answer,
-    /// even an error, has done its job.
+    /// even an error, has done its job. For the few seconds after a cold start the server answers 503 until
+    /// its realtime data is in; every call retries those a few times, half a second apart.
     public func warmUp() async {
         _ = try? await client.health()
     }

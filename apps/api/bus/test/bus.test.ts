@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import GtfsRealtimeBindings from "gtfs-realtime-bindings";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { decodeFleet, filterFleet, parseQuery, type Bus, type Fleet } from "../lib/fleet.js";
+import { compactFleet, decodeFleet, expandFleet, filterFleet, parseQuery, type Bus, type Fleet } from "../lib/fleet.js";
 import { CACHE_KEY, FEED_URL, createHandler, type FleetCache } from "../lib/handler.js";
 
 // Twelve buses and the header from a real Bus Time feed, recorded on
@@ -49,6 +49,15 @@ describe("decodeFleet", () => {
       { id: "d", route: "M3", directionId: null, tripId: null, headsign: null, lat: 40.7, lon: -74, bearing: null, timestamp: null },
       { id: "e", route: "M4", directionId: 0, tripId: null, headsign: null, lat: 40.7, lon: -74, bearing: 0, timestamp: null },
     ]);
+  });
+});
+
+describe("compactFleet", () => {
+  it("round-trips the fleet in fewer bytes", () => {
+    const fleet = decodeFleet(feed);
+    const compact = compactFleet(fleet);
+    expect(expandFleet(compact)).toEqual(fleet);
+    expect(JSON.stringify(compact).length).toBeLessThan(JSON.stringify(fleet).length * 0.6);
   });
 });
 
@@ -120,8 +129,10 @@ describe("filterFleet", () => {
 /** A RuntimeCache stand-in that honours ttl against fake timers. */
 function memoryCache() {
   const store = new Map<string, { value: unknown; expires: number }>();
+  const reads = { count: 0 };
   const cache: FleetCache = {
     async get(key) {
+      reads.count += 1;
       const hit = store.get(key);
       return hit && hit.expires > Date.now() ? structuredClone(hit.value) : null;
     },
@@ -129,7 +140,7 @@ function memoryCache() {
       store.set(key, { value: structuredClone(value), expires: Date.now() + (opts?.ttl ?? Infinity) * 1000 });
     },
   };
-  return { cache, store };
+  return { cache, store, reads };
 }
 
 describe("handler", () => {
@@ -150,7 +161,7 @@ describe("handler", () => {
   it("answers filtered JSON with CDN caching", async () => {
     const res = await get(handler(), `bbox=${LOWER_MANHATTAN}`);
     expect(res.status).toBe(200);
-    expect(res.headers.get("cache-control")).toBe("public, max-age=0, s-maxage=30");
+    expect(res.headers.get("cache-control")).toBe("public, max-age=0, s-maxage=30, stale-while-revalidate=30");
     const body = (await res.json()) as Fleet;
     expect(body.updatedAt).toBe(FEED_TS);
     expect(body.vehicles.map((b) => b.route)).toEqual(["M9", "M9", "M20", "M15", "M55", "M22"]);
@@ -169,6 +180,36 @@ describe("handler", () => {
     vi.advanceTimersByTime(31_000);
     await get(b, `bbox=${NYC}`);
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("reads the Runtime Cache at most once per instance per 30 s", async () => {
+    const a = handler();
+    const b = handler();
+    await get(a, `bbox=${NYC}`); // a misses, fetches, and keeps its copy
+    expect(mem.reads.count).toBe(1);
+    await get(b, `bbox=${NYC}`); // b reads a's copy from the Runtime Cache
+    expect(mem.reads.count).toBe(2);
+    vi.advanceTimersByTime(10_000);
+    for (const h of [a, b, a, b]) await get(h, `bbox=${LOWER_MANHATTAN}`);
+    expect(mem.reads.count).toBe(2);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(21_000); // both copies are 31 s old
+    await get(a, `bbox=${NYC}`);
+    expect(mem.reads.count).toBe(3);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("stores the compact fleet with its fetch time", async () => {
+    await get(handler(), `bbox=${NYC}`);
+    expect(mem.store.get(CACHE_KEY)?.value).toEqual({ fetchedAt: FEED_TS * 1000, fleet: compactFleet(decodeFleet(feed)) });
+  });
+
+  it("ignores a cached copy it can't read", async () => {
+    mem.store.set(CACHE_KEY, { value: { updatedAt: 1, vehicles: [] }, expires: Infinity });
+    const res = await get(handler(), `bbox=${NYC}`);
+    expect(((await res.json()) as Fleet).vehicles).toHaveLength(12);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("shares one upstream fetch between concurrent misses", async () => {

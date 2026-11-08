@@ -20,8 +20,14 @@ enum ScreenshotScreen: String, CaseIterable {
     case searchNoResults = "search-no-results"
     case searchError = "search-error"
     case searchNoKey = "search-no-key"
-    /// A place picked from search: its pin on the map and its card in the home sheet (S3).
+    /// A place picked from search: its pin on the map and its card in the home sheet (S3), not saved (P1).
     case searchPlace = "search-place"
+    /// Place search before you type, listing your recents with Clear (P1).
+    case searchRecents = "search-recents"
+    /// The place card for a saved place (P1).
+    case placeSaved = "place-saved"
+    /// The place card's Home or Work menu, open, for the place that's Work (P1); the UI test opens it.
+    case placeHomeWork = "place-home-work"
     /// Journey options to a picked place (J1): the options list at each detent, the second option selected on the map,
     /// the arrive-by picker, and every state: loading, none found, outside New York, location off, offline, and times
     /// that may not be real time. Which state shows depends on the fixtures and location each test launches with.
@@ -61,9 +67,9 @@ enum ScreenshotScreen: String, CaseIterable {
     var view: some View {
         switch self {
         case .homePeek, .homeHalf, .homeFull, .homeOutsideNYC, .about, .searchEmpty, .searchTyping, .searchResults,
-             .searchNoResults, .searchError, .searchNoKey, .searchPlace, .journeysPeek, .journeysHalf, .journeysFull,
-             .journeysRoute, .journeysArriveBy, .journeysLoading, .journeysNoResults, .journeysOutsideNYC,
-             .journeysLocationOff, .journeysError, .journeysStale:
+             .searchNoResults, .searchError, .searchNoKey, .searchPlace, .searchRecents, .placeSaved, .placeHomeWork,
+             .journeysPeek, .journeysHalf, .journeysFull, .journeysRoute, .journeysArriveBy, .journeysLoading,
+             .journeysNoResults, .journeysOutsideNYC, .journeysLocationOff, .journeysError, .journeysStale:
             RootView()
         case .mapGlass: MapGlassScreen()
         #if DEBUG
@@ -101,7 +107,7 @@ enum ScreenshotScreen: String, CaseIterable {
     /// The query a search screen opens with, as if typed; nil leaves the field empty.
     var searchQuery: String? {
         switch self {
-        case .searchEmpty, .searchNoKey: ""
+        case .searchEmpty, .searchNoKey, .searchRecents: ""
         case .searchTyping: "Grand Cen"
         case .searchResults, .searchError: "Grand"
         case .searchNoResults: "Qwxyz"
@@ -119,7 +125,7 @@ enum ScreenshotScreen: String, CaseIterable {
     func prepare(_ router: AppRouter) {
         if searchQuery != nil {
             router.showPlaceSearch()
-        } else if self == .searchPlace {
+        } else if [.searchPlace, .placeSaved, .placeHomeWork].contains(self) {
             router.showPlace(FixturePlaceSearchService.places[0])
         } else if isJourneys {
             let place = FixturePlaceSearchService.places[0]
@@ -141,6 +147,27 @@ enum ScreenshotScreen: String, CaseIterable {
         case .journeysArriveBy: JourneyOptionsSeed(editsTime: true)
         case _ where isJourneys: JourneyOptionsSeed()
         default: nil
+        }
+    }
+
+    /// Fills the in-memory place store with what this screen shows: recents picked over the past day, or the
+    /// card's place saved, or Work with another place as Home.
+    @MainActor
+    func prepare(_ places: PlaceStore) {
+        let fixtures = FixturePlaceSearchService.places
+        switch self {
+        case .searchRecents:
+            let now = FixtureSet.nycEvening.referenceDate
+            for (place, minutesAgo) in zip([fixtures[0], fixtures[1], fixtures[2], fixtures[4]], [5, 90, 1440, 4320]) {
+                places.addRecent(place, pickedAt: now.addingTimeInterval(-Double(minutesAgo) * 60))
+            }
+        case .placeSaved:
+            places.save(fixtures[0])
+        case .placeHomeWork:
+            places.set(.home, to: fixtures[2])
+            places.set(.work, to: fixtures[0])
+        default:
+            break
         }
     }
 

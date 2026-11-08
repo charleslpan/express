@@ -6,12 +6,13 @@ import TransitKit
 /// Cancel, then Google's suggestions for New York as you type, with Google's attribution under them. Picking one
 /// fetches its details and hands it to ``AppRouter/showPlace(_:)``, which pins it on the map.
 ///
-/// Each state has its own view: a hint for an empty query, loading, no results, offline or failed with Try Again,
-/// and "Search Unavailable" in a build with no Google Maps key.
+/// Each state has its own view: your recents (P1) or a hint for an empty query, loading, no results, offline or failed
+/// with Try Again, and "Search Unavailable" in a build with no Google Maps key.
 struct PlaceSearchPanel: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.placeSearchService) private var service
     @Environment(\.placeSearchSeed) private var seed
+    @Environment(PlaceStore.self) private var places: PlaceStore?
 
     /// What picking a place does; nil shows it on the map with ``AppRouter/showPlace(_:)``.
     private let onPick: ((PlaceDetails) -> Void)?
@@ -33,7 +34,7 @@ struct PlaceSearchPanel: View {
             header
             ScrollView {
                 if let search {
-                    PlaceSearchResults(search: search, onPick: pick)
+                    PlaceSearchResults(search: search, onPick: pick, onPickRecent: onPick)
                         .padding(.bottom, Spacing.md)
                 }
             }
@@ -113,6 +114,7 @@ struct PlaceSearchPanel: View {
         Task {
             if let place = await search.pick(suggestion) {
                 isFieldFocused = false
+                places?.addRecent(place)
                 if let onPick {
                     onPick(place)
                 } else {
@@ -127,6 +129,10 @@ struct PlaceSearchPanel: View {
 private struct PlaceSearchResults: View {
     let search: PlaceSearch
     let onPick: (PlaceSuggestion) -> Void
+    /// What picking a recent does; nil shows it on the map.
+    let onPickRecent: ((PlaceDetails) -> Void)?
+
+    @Environment(PlaceStore.self) private var places: PlaceStore?
 
     var body: some View {
         switch search.status {
@@ -138,12 +144,11 @@ private struct PlaceSearchResults: View {
             )
             .accessibilityIdentifier("search.unavailable")
         case .idle:
-            ContentUnavailableView(
-                "Where To?",
-                systemImage: "magnifyingglass",
-                description: Text("Search New York City for a place, an address, or a station.")
-            )
-            .accessibilityIdentifier("search.hint")
+            if let places, !places.recents.isEmpty {
+                RecentPlacesList(store: places, onPick: onPickRecent)
+            } else {
+                hint
+            }
         case .loading:
             ProgressView("Searching…")
                 .typography(.secondary)
@@ -162,6 +167,15 @@ private struct PlaceSearchResults: View {
         case let .failed(error):
             failure(error)
         }
+    }
+
+    private var hint: some View {
+        ContentUnavailableView(
+            "Where To?",
+            systemImage: "magnifyingglass",
+            description: Text("Search New York City for a place, an address, or a station.")
+        )
+        .accessibilityIdentifier("search.hint")
     }
 
     private func results(_ suggestions: [PlaceSuggestion]) -> some View {

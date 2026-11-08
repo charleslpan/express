@@ -57,10 +57,13 @@ struct RequestTests {
             status: .serviceUnavailable,
             body: Data(#"{"error":"motis is starting up"}"#.utf8)
         )
-        await TransitClient(transport: starting).warmUp()
+        let noWait = RetryMiddleware(sleep: { _ in })
+        await TransitClient(baseURL: TransitKit.defaultBaseURL, appVersion: "1.0", transport: starting, retry: noWait)
+            .warmUp()
         let offline = FixtureTransport(error: URLError(.notConnectedToInternet))
         await TransitClient(transport: offline).warmUp()
-        #expect(starting.requests.count == 1)
+        // A 503 is retried like any call's (RetryTests), then ignored.
+        #expect(starting.requests.count == 4)
         #expect(offline.requests.count == 1)
     }
 
