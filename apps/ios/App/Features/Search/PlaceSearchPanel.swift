@@ -14,15 +14,27 @@ struct PlaceSearchPanel: View {
     @Environment(\.placeSearchSeed) private var seed
     @Environment(PlaceStore.self) private var places: PlaceStore?
 
+    /// What picking a place does; nil shows it on the map with ``AppRouter/showPlace(_:)``.
+    private let onPick: ((PlaceDetails) -> Void)?
+    /// What Cancel does; nil ends the search with ``AppRouter/endPlaceSearch()``.
+    private let onCancel: (() -> Void)?
+
     @State private var search: PlaceSearch?
     @FocusState private var isFieldFocused: Bool
+
+    /// Place search. By default a picked place goes on the map; journeys pass `onPick` and `onCancel` to pick a start
+    /// or an end instead.
+    init(onPick: ((PlaceDetails) -> Void)? = nil, onCancel: (() -> Void)? = nil) {
+        self.onPick = onPick
+        self.onCancel = onCancel
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             header
             ScrollView {
                 if let search {
-                    PlaceSearchResults(search: search, onPick: pick)
+                    PlaceSearchResults(search: search, onPick: pick, onPickRecent: onPick)
                         .padding(.bottom, Spacing.md)
                 }
             }
@@ -55,7 +67,11 @@ struct PlaceSearchPanel: View {
             .accessibilityIdentifier("search.field")
             Button("Cancel") {
                 search?.reset()
-                router.endPlaceSearch()
+                if let onCancel {
+                    onCancel()
+                } else {
+                    router.endPlaceSearch()
+                }
             }
             .typography(.body)
             .frame(minHeight: 44)
@@ -99,7 +115,11 @@ struct PlaceSearchPanel: View {
             if let place = await search.pick(suggestion) {
                 isFieldFocused = false
                 places?.addRecent(place)
-                router.showPlace(place)
+                if let onPick {
+                    onPick(place)
+                } else {
+                    router.showPlace(place)
+                }
             }
         }
     }
@@ -109,6 +129,8 @@ struct PlaceSearchPanel: View {
 private struct PlaceSearchResults: View {
     let search: PlaceSearch
     let onPick: (PlaceSuggestion) -> Void
+    /// What picking a recent does; nil shows it on the map.
+    let onPickRecent: ((PlaceDetails) -> Void)?
 
     @Environment(PlaceStore.self) private var places: PlaceStore?
 
@@ -123,7 +145,7 @@ private struct PlaceSearchResults: View {
             .accessibilityIdentifier("search.unavailable")
         case .idle:
             if let places, !places.recents.isEmpty {
-                RecentPlacesList(store: places)
+                RecentPlacesList(store: places, onPick: onPickRecent)
             } else {
                 hint
             }

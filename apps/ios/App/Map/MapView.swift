@@ -64,6 +64,8 @@ struct MapView: View {
     var markers: [MapMarker] = []
     /// The one place the user picked, such as a search result: drawn above every other marker.
     var pin: MapMarker?
+    /// The journey to draw, such as the selected journey option: above ``polylines``, below every marker.
+    var route: MapRoute?
     /// Vehicles to show. A vehicle that moves glides to its new place over ``vehicleMoveDuration``.
     var vehicles: [MapVehicle] = []
     /// How long a vehicle takes to glide to a new position, such as the time until the next one; 0 jumps.
@@ -85,6 +87,7 @@ struct MapView: View {
                 polylines: polylines,
                 markers: markers,
                 pin: pin,
+                route: route,
                 vehicles: vehicles,
                 vehicleMoveDuration: vehicleMoveDuration,
                 onTilesRendered: onTilesRendered,
@@ -112,6 +115,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
     var polylines: [MapPolyline]
     var markers: [MapMarker]
     var pin: MapMarker?
+    var route: MapRoute?
     var vehicles: [MapVehicle]
     var vehicleMoveDuration: TimeInterval
     var onTilesRendered: (() -> Void)?
@@ -154,16 +158,18 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         if mapView.isMyLocationEnabled != showsUserLocation {
             mapView.isMyLocationEnabled = showsUserLocation
         }
+        let animated = !context.transaction.disablesAnimations && UIView.areAnimationsEnabled
         if coordinator.shownCamera != camera {
             coordinator.shownCamera = camera
             let position = cameraPosition(for: camera)
-            if context.transaction.disablesAnimations || !UIView.areAnimationsEnabled {
-                mapView.camera = position
-            } else {
+            if animated {
                 mapView.animate(to: position)
+            } else {
+                mapView.camera = position
             }
         }
         coordinator.show(polylines: polylines, on: mapView)
+        coordinator.show(route: route, on: mapView, animated: animated)
         coordinator.show(markers: markers, on: mapView)
         coordinator.show(pin: pin, on: mapView)
         let moveDuration = context.transaction.disablesAnimations || !UIView.areAnimationsEnabled
@@ -191,6 +197,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         private var vehicleMarkers: [String: (bullet: GMSMarker, arrow: GMSMarker)] = [:]
         private var pin: MapMarker?
         private var pinMarker: GMSMarker?
+        private let routeOverlay = MapRouteOverlay()
 
         init(camera: Binding<MapCamera>) {
             self.camera = camera
@@ -209,6 +216,10 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
                 polyline.map = mapView
                 return polyline
             }
+        }
+
+        func show(route: MapRoute?, on mapView: GMSMapView, animated: Bool) {
+            routeOverlay.show(route, on: mapView, animated: animated)
         }
 
         func show(markers: [MapMarker], on mapView: GMSMapView) {
@@ -365,7 +376,7 @@ private func cameraPosition(for camera: MapCamera) -> GMSCameraPosition {
     )
 }
 
-private extension CLLocationCoordinate2D {
+extension CLLocationCoordinate2D {
     init(_ coordinate: Coordinate) {
         self.init(latitude: coordinate.latitude, longitude: coordinate.longitude)
     }

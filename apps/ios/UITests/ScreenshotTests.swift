@@ -115,6 +115,53 @@ final class ScreenshotTests: XCTestCase {
         }
     }
 
+    // Journey options (J1) from Union Square to Grand Central Terminal: the list at each detent, a selected route on
+    // the map, the arrive-by picker, and each state.
+
+    func testJourneysPeek() {
+        capture("journeys-peek", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testJourneysHalf() {
+        capture("journeys-half", fixtures: "nyc-evening", settledWhen: "journeys.list")
+    }
+
+    func testJourneysFull() {
+        capture("journeys-full", fixtures: "nyc-evening", settledWhen: "journeys.list")
+    }
+
+    func testJourneysRoute() {
+        capture("journeys-route", fixtures: "nyc-evening", settledWhen: "map.settled")
+    }
+
+    func testJourneysArriveBy() {
+        capture("journeys-arrive-by", fixtures: "nyc-evening", settledWhen: "journeys.time-picker")
+    }
+
+    func testJourneysLoading() {
+        capture("journeys-loading", fixtures: "slow-network", settledWhen: "journeys.loading")
+    }
+
+    func testJourneysNoResults() {
+        capture("journeys-no-results", fixtures: "no-journeys", settledWhen: "journeys.no-results")
+    }
+
+    func testJourneysOutsideNYC() {
+        capture("journeys-outside-nyc", fixtures: "nyc-evening", settledWhen: "journeys.outside-area")
+    }
+
+    func testJourneysLocationOff() {
+        capture("journeys-location-off", fixtures: "nyc-evening", settledWhen: "journeys.location-off")
+    }
+
+    func testJourneysError() {
+        capture("journeys-error", fixtures: "offline", settledWhen: "journeys.error")
+    }
+
+    func testJourneysStale() {
+        capture("journeys-stale", fixtures: "nyc-evening-stale", settledWhen: "journeys.may-not-be-real-time")
+    }
+
     // The About sheet (S1), over the home sheet.
 
     func testAbout() {
@@ -199,46 +246,6 @@ final class ScreenshotTests: XCTestCase {
 
     func testTripError() {
         capture("trip-error", fixtures: "offline", settledWhen: "trip.failed")
-    }
-
-    // Service alerts (A3): banners on Nearby's rows (a red L and an amber uptown 4, and no banner for the 6's work two
-    // weeks away), the alert chip, an alert's full text, and line status with mixed lines, all good service, loading,
-    // and offline.
-
-    func testAlertsNearby() {
-        capture("alerts-nearby", fixtures: "nyc-alerts", settledWhen: "nearby.loaded", "nearby.alert")
-    }
-
-    func testAlertsChip() {
-        capture("alerts-chip", fixtures: "nyc-alerts", settledWhen: "nearby.loaded", "alerts.chip")
-    }
-
-    func testAlertDetail() {
-        capture("alert-detail", fixtures: "nyc-alerts", settledWhen: "nearby.alert") { app in
-            app.descendants(matching: .any).matching(identifier: "nearby.alert").firstMatch.tap()
-            let opened = app.descendants(matching: .any)["alerts.detail"].waitForExistence(timeout: 10)
-            XCTAssertTrue(opened, "The alert's full text never opened")
-        }
-    }
-
-    func testLineStatus() {
-        capture("line-status", fixtures: "nyc-alerts", settledWhen: "line-status.loaded")
-    }
-
-    func testLineStatusGoodService() {
-        capture("line-status", fixtures: "nyc-evening", settledWhen: "line-status.all-good")
-    }
-
-    func testLineStatusLoading() {
-        capture("line-status", fixtures: "slow-network", settledWhen: "line-status.loading")
-    }
-
-    func testLineStatusError() {
-        capture("line-status", fixtures: "offline", settledWhen: "line-status.failed")
-    }
-
-    func testStopAlerts() {
-        capture("stop-alerts", fixtures: "nyc-alerts", settledWhen: "stop.loaded", "stop.alerts")
     }
 
     // GlassUI's gallery, one section per screen. The gallery shows no transit data; the fixtures only fix the clock.
@@ -333,5 +340,48 @@ final class ScreenshotTests: XCTestCase {
             add(attachment)
             app.terminate()
         }
+    }
+}
+
+extension ScreenshotTests {
+    // Service alerts (A3): banners on Nearby's rows (a red L and an amber uptown 4, and no banner for the 6's work two
+    // weeks away), the alert chip, an alert's full text, line status with mixed lines, all good service, loading, and
+    // offline, and a stop's alerts. They sit in an extension so the class stays within SwiftLint's length; `@objc`
+    // keeps them visible to XCTest, which finds tests through the Objective-C runtime.
+
+    @objc func testAlertsNearby() {
+        capture("alerts-nearby", fixtures: "nyc-alerts", settledWhen: "nearby.loaded", "nearby.alert")
+    }
+
+    @objc func testAlertsChip() {
+        capture("alerts-chip", fixtures: "nyc-alerts", settledWhen: "nearby.loaded", "alerts.chip")
+    }
+
+    @objc func testAlertDetail() {
+        capture("alert-detail", fixtures: "nyc-alerts", settledWhen: "nearby.alert") { app in
+            app.descendants(matching: .any).matching(identifier: "nearby.alert").firstMatch.tap()
+            let opened = app.descendants(matching: .any)["alerts.detail"].waitForExistence(timeout: 10)
+            XCTAssertTrue(opened, "The alert's full text never opened")
+        }
+    }
+
+    @objc func testLineStatus() {
+        capture("line-status", fixtures: "nyc-alerts", settledWhen: "line-status.loaded")
+    }
+
+    @objc func testLineStatusGoodService() {
+        capture("line-status", fixtures: "nyc-evening", settledWhen: "line-status.all-good")
+    }
+
+    @objc func testLineStatusLoading() {
+        capture("line-status", fixtures: "slow-network", settledWhen: "line-status.loading")
+    }
+
+    @objc func testLineStatusError() {
+        capture("line-status", fixtures: "offline", settledWhen: "line-status.failed")
+    }
+
+    @objc func testStopAlerts() {
+        capture("stop-alerts", fixtures: "nyc-alerts", settledWhen: "stop.loaded", "stop.alerts")
     }
 }

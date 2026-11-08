@@ -4,14 +4,22 @@ import TransitKit
 
 /// The places you picked in search, newest first, under "Recents" with a Clear button: what place search shows
 /// before you type, once there are any. Each row's name and address are fetched live by place ID (never stored);
-/// tapping one shows the place as a pick from search would, through ``AppRouter/showPlace(_:)``.
+/// tapping one shows the place as a pick from search would, through ``AppRouter/showPlace(_:)``, or hands it to
+/// `onPick` where place search was opened to pick a journey's start or end.
 struct RecentPlacesList: View {
     @Environment(AppRouter.self) private var router
     let store: PlaceStore
+    /// What picking a recent does; nil shows it on the map.
+    private let onPick: ((PlaceDetails) -> Void)?
 
     /// The recent being fetched before it's shown, while it is.
     @State private var opening: String?
     @State private var openFailed = false
+
+    init(store: PlaceStore, onPick: ((PlaceDetails) -> Void)? = nil) {
+        self.store = store
+        self.onPick = onPick
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -65,7 +73,11 @@ struct RecentPlacesList: View {
                 return
             }
             store.addRecent(place)
-            router.showPlace(place)
+            if let onPick {
+                onPick(place)
+            } else {
+                router.showPlace(place)
+            }
         }
     }
 }

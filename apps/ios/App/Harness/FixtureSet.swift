@@ -20,6 +20,8 @@ enum FixtureSet: String, CaseIterable, Sendable {
     case nycEveningBuses = "nyc-evening-buses"
     /// Buses alone, with Bus Time's feed three minutes old, so the map says bus positions may not be real time.
     case nycEveningBusesStale = "nyc-evening-buses-stale"
+    /// The evening rush, with no journey to be found anywhere.
+    case noJourneys = "no-journeys"
     /// The same evening with service alerts (A3): the L suspended in Brooklyn and uptown 4s delayed, both now, and
     /// night work on the 6 two weeks away that must not show yet, on Nearby's departures; and the MTA's alerts as
     /// recorded that evening for line status.
@@ -29,7 +31,7 @@ enum FixtureSet: String, CaseIterable, Sendable {
     var referenceDate: Date {
         switch self {
         case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .slowNetwork,
-             .offline, .noKey, .nycAlerts:
+             .offline, .noKey, .noJourneys, .nycAlerts:
             Date(timeIntervalSince1970: 1_793_748_600) // 2026-11-03 18:30 America/New_York
         }
     }
