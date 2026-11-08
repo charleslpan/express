@@ -47,19 +47,19 @@ struct HomeSheetContent<Alert: View, Places: View, Nearby: View, Saved: View>: V
     }
 }
 
-extension HomeSheetContent where Alert == AlertChipPlaceholder, Places == SavedPlacesPlaceholder,
-    Nearby == NearbySectionPlaceholder, Saved == SavedSectionPlaceholder
+extension HomeSheetContent where Alert == AlertChipPlaceholder, Places == HomeWorkChips,
+    Nearby == NearbySectionPlaceholder, Saved == SavedPlacesSection
 {
-    /// The sheet with every slot showing its placeholder, until A3, N1, and P2 land.
+    /// The sheet with each slot showing its feature, or its placeholder until A3 and N1 land.
     init(onSearch: @escaping () -> Void) {
         self.init(onSearch: onSearch) {
             AlertChipPlaceholder()
         } places: {
-            SavedPlacesPlaceholder()
+            HomeWorkChips()
         } nearby: {
             NearbySectionPlaceholder()
         } saved: {
-            SavedSectionPlaceholder()
+            SavedPlacesSection()
         }
     }
 }
@@ -106,6 +106,8 @@ struct HomeSearchField: View {
         HomeSheetContent {}
             .padding(.top, Spacing.lg)
     }
+    .environment(AppRouter(homeDetent: .full))
+    .environment(PlaceStore.inMemory())
 }
 
 #Preview("Home sheet content, AX5") {
@@ -114,4 +116,6 @@ struct HomeSearchField: View {
             .padding(.top, Spacing.lg)
     }
     .dynamicTypeSize(.accessibility5)
+    .environment(AppRouter(homeDetent: .full))
+    .environment(PlaceStore.inMemory())
 }

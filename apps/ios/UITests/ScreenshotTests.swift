@@ -121,6 +121,28 @@ final class ScreenshotTests: XCTestCase {
         capture("journeys-stale", fixtures: "stale-data", settledWhen: "journeys.may-not-be-real-time")
     }
 
+    // Home and Work chips and the Saved section (P2) in the home sheet.
+
+    func testHomePlaces() {
+        capture("home-places", fixtures: "nyc-evening", settledWhen: "home.chip.home")
+    }
+
+    func testHomePlacesUnset() {
+        capture("home-places-unset", fixtures: "nyc-evening", settledWhen: "home.chip.home")
+    }
+
+    func testHomeSaved() {
+        capture("home-saved", fixtures: "nyc-evening", settledWhen: "home.saved", then: scrollToSaved)
+    }
+
+    func testHomeSavedLoading() {
+        capture("home-saved-loading", fixtures: "slow-network", settledWhen: "home.saved.loading", then: scrollToSaved)
+    }
+
+    func testHomeSavedEmpty() {
+        capture("home-saved-empty", fixtures: "nyc-evening", settledWhen: "home.saved.empty", then: scrollToSaved)
+    }
+
     // The About sheet (S1), over the home sheet.
 
     func testAbout() {
@@ -200,6 +222,18 @@ final class ScreenshotTests: XCTestCase {
     /// `settledWhen` names an element the screen shows once it has finished loading what the network serves it,
     /// such as map tiles; the capture waits for it a while, then goes ahead without it rather than fail. `then` runs
     /// before each capture, to put the screen in a state only a tap reaches, such as an open menu.
+    /// Scrolls the home sheet until the Saved heading is in its top half, with small drags so it doesn't overshoot.
+    private func scrollToSaved(_ app: XCUIApplication) {
+        let heading = app.descendants(matching: .any)["home.saved.heading"]
+        let window = app.windows.firstMatch
+        for _ in 0 ..< 10 {
+            guard heading.exists, !(heading.isHittable && heading.frame.minY < window.frame.midY) else { return }
+            let start = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85))
+            let end = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
+            start.press(forDuration: 0.05, thenDragTo: end)
+        }
+    }
+
     private func capture(
         _ screen: String,
         fixtures: String,

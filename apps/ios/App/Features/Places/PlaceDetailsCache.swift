@@ -46,6 +46,12 @@ final class PlaceDetailsCache {
         entries[details.placeID] = .loaded(details)
     }
 
+    /// Drops the place's details, as a new launch would, so they're fetched again: the screenshot harness's, to show
+    /// a row still loading.
+    func forget(_ placeID: String) {
+        entries[placeID] = nil
+    }
+
     /// The place's details: from this session where they're here, else fetched live (once, however many ask at a
     /// time). Nil where the fetch fails or the build can't look places up; a later call tries again.
     @discardableResult

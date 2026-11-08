@@ -34,6 +34,9 @@ struct HomeSheet: View {
             .navigationDestination(for: JourneyOptionsRoute.self) { route in
                 JourneyOptionsView(route: route)
             }
+            .navigationDestination(for: ChoosePlaceRoute.self) { route in
+                ChoosePlaceView(route: route)
+            }
         }
         .sheet(item: $router.sheet) { sheet in
             switch sheet {
@@ -83,4 +86,5 @@ extension HomeSheetDetent {
                 .interactiveDismissDisabled()
         }
         .environment(AppRouter(homeDetent: .half))
+        .environment(PlaceStore.inMemory())
 }

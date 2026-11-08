@@ -18,29 +18,6 @@ struct AlertChipPlaceholder: View {
     }
 }
 
-/// Stands in for Home and Work (P2): the two chips, side by side where they fit and stacked where they don't.
-struct SavedPlacesPlaceholder: View {
-    var body: some View {
-        AdaptiveStack(spacing: Spacing.xs) {
-            chip("Home", systemImage: "house.fill")
-            chip("Work", systemImage: "briefcase.fill")
-        }
-    }
-
-    private func chip(_ title: LocalizedStringKey, systemImage: String) -> some View {
-        Button {
-            // Saved places (P2) sets and opens these.
-        } label: {
-            Label(title, systemImage: systemImage)
-                .typography(.button)
-        }
-        .buttonStyle(.bordered)
-        .buttonBorderShape(.capsule)
-        .controlSize(.large)
-        .accessibilityHint("Saving places is coming soon")
-    }
-}
-
 /// A section's heading in the home sheet, such as "Nearby".
 struct HomeSectionHeading: View {
     let title: LocalizedStringKey
@@ -93,17 +70,4 @@ struct NearbySectionPlaceholder: View {
             departures: [DepartureTime(minutes: 6, status: .live), DepartureTime(minutes: 14, status: .scheduled)]
         ),
     ]
-}
-
-/// Stands in for the Saved section (P2): its heading and a note on what it will hold.
-struct SavedSectionPlaceholder: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            HomeSectionHeading("Saved")
-            Text("Places and lines you save will show here.")
-                .typography(.secondary)
-                .foregroundStyle(.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
 }
