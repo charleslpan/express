@@ -28,9 +28,9 @@ enum FixtureSet: String, CaseIterable, Sendable {
     /// night work on the 6 two weeks away that must not show yet, on Nearby's departures; and the MTA's alerts as
     /// recorded that evening for line status.
     case nycAlerts = "nyc-alerts"
-    /// `nyc-alerts` with a minor service change beside its red ones (A5): uptown Q trains running local, which the MTA
-    /// types "Planned - Express to Local", a neutral notice next to the L's suspension on Nearby and next to the 42 St
-    /// Shuttle's on the Q and shuttle journey.
+    /// `nyc-alerts` with minor service changes beside its red ones (A5), which the MTA types "Planned - Express to
+    /// Local": Pelham Bay Park-bound 6s running local, a neutral notice between the L's suspensions on Nearby, and
+    /// uptown Q trains running local, next to the 42 St Shuttle's suspension on the Q and shuttle journey.
     case nycAlertsMixed = "nyc-alerts-mixed"
 
     /// The moment the fixtures describe, which stands in for "now" so times on screen don't drift between runs.
