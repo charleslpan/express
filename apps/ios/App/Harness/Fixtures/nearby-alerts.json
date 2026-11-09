@@ -15,6 +15,7 @@
    ],
    "cause": "UNKNOWN_CAUSE",
    "effect": "NO_SERVICE",
+   "effectDetail": "Part Suspended",
    "headerText": "No [L] trains between Broadway Junction and Canarsie-Rockaway Pkwy while we address a signal problem at Atlantic Av.",
    "descriptionText": "[L] trains are running between 8 Av and Broadway Junction.\nFor service to and from Canarsie, take the B42 or B60 bus."
   }
@@ -35,6 +36,7 @@
    ],
    "cause": "UNKNOWN_CAUSE",
    "effect": "SIGNIFICANT_DELAYS",
+   "effectDetail": "Delays",
    "headerText": "Woodlawn-bound [4] trains are running with delays while we request NYPD for a person being disruptive on a train at 125 St.",
    "descriptionText": ""
   }
@@ -79,6 +81,7 @@
    ],
    "cause": "MAINTENANCE",
    "effect": "NO_SERVICE",
+   "effectDetail": "Planned - Part Suspended",
    "headerText": "No [6] trains between 3 Av-138 St and Pelham Bay Park",
    "descriptionText": "Take the [4] or [5], or free shuttle buses.\nWhat's happening? We're making track repairs."
   }
@@ -123,6 +126,7 @@
    ],
    "cause": "MAINTENANCE",
    "effect": "NO_SERVICE",
+   "effectDetail": "Planned - Part Suspended",
    "headerText": "No [6] trains between 3 Av-138 St and Pelham Bay Park",
    "descriptionText": "Take the [4] or [5], or free shuttle buses.\nWhat's happening? We're making track repairs."
   }

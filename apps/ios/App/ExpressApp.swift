@@ -20,7 +20,7 @@ struct ExpressApp: App {
         transitClient = launch.fixtures?.transitClient ?? TransitClient(baseURL: ExpressApp.transitServer.baseURL)
         let screen = launch.screen
         let router = AppRouter(homeDetent: screen?.homeDetent ?? .peek, sheet: screen?.sheet)
-        screen?.prepare(router)
+        screen?.prepare(router, fixtures: launch.fixtures)
         _router = State(initialValue: router)
         // The screenshot harness never asks for the location; it fixes the permission each screen shows.
         let location = screen

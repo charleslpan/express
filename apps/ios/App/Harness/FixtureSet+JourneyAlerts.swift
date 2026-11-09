@@ -8,14 +8,20 @@ extension FixtureSet {
     ///
     /// They make `nyc-alerts`' journeys: the 4 delayed (amber), the 42 St Shuttle suspended (red), the L skipping
     /// 14 St-Union Sq where the rider boards it, and the 6 with night work two weeks away and delays that ended before
-    /// the ride, neither of which applies.
-    static func withJourneyAlerts(_ data: Data) throws -> Data {
-        guard let url = Bundle.main.url(forResource: "journey-alerts", withExtension: "json") else {
-            throw URLError(.fileDoesNotExist)
+    /// the ride, neither of which applies. `nyc-alerts-mixed` adds `Fixtures/journey-alerts-mixed.json`'s after them:
+    /// the Q running local (neutral) on the Q and shuttle journey.
+    static func withJourneyAlerts(_ data: Data, fixtures: FixtureSet = .nycAlerts) throws -> Data {
+        var lines: [String: [Any]] = [:]
+        var stops: [String: [Any]] = [:]
+        let names = fixtures == .nycAlertsMixed ? ["journey-alerts", "journey-alerts-mixed"] : ["journey-alerts"]
+        for name in names {
+            guard let url = Bundle.main.url(forResource: name, withExtension: "json") else {
+                throw URLError(.fileDoesNotExist)
+            }
+            let alerts = try JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: [String: [Any]]]
+            lines.merge(alerts?["lines"] ?? [:]) { $0 + $1 }
+            stops.merge(alerts?["stops"] ?? [:]) { $0 + $1 }
         }
-        let alerts = try JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: [String: [Any]]] ?? [:]
-        let lines = alerts["lines"] ?? [:]
-        let stops = alerts["stops"] ?? [:]
         guard var answer = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { return data }
 
         func place(_ value: Any, trip: String) -> Any {

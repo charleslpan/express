@@ -1,0 +1,15 @@
+{
+ "lines": {
+  "fixture-trip-q": [
+   {
+    "communicationPeriod": [{ "start": "2026-11-03T22:00:00Z", "end": "2026-11-04T09:30:00Z" }],
+    "cause": "MAINTENANCE",
+    "effect": "MODIFIED_SERVICE",
+    "effectDetail": "Planned - Express to Local",
+    "headerText": "Uptown [Q] trains run local from Canal St to 57 St-7 Av",
+    "descriptionText": "Trains stop at Prince St, 8 St-NYU, 23 St, 28 St, and 49 St.\nWhat's happening? We're making signal improvements."
+   }
+  ]
+ },
+ "stops": {}
+}

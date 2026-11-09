@@ -42,6 +42,16 @@ extension ScreenshotTests {
         capture("journey-alert-suspension", fixtures: "nyc-alerts", settledWhen: "journey.loaded", "journey.alert")
     }
 
+    /// A5: the Q running local, a neutral notice, on the ride before the shuttle's red suspension.
+    @objc func testJourneyAlertSuspensionMixed() {
+        capture(
+            "journey-alert-suspension",
+            fixtures: "nyc-alerts-mixed",
+            settledWhen: "journey.loaded",
+            "journey.alert"
+        )
+    }
+
     @objc func testJourneyAlertSkipped() {
         capture(
             "journey-alert-skipped",

@@ -2,12 +2,18 @@ import XCTest
 
 extension ScreenshotTests {
     // Service alerts (A3): banners on Nearby's rows (a red L and an amber uptown 4, and no banner for the 6's work two
-    // weeks away), the alert chip, an alert's full text, line status with mixed lines, all good service, loading, and
-    // offline, and a stop's alerts. They sit in a file of their own so `ScreenshotTests.swift` stays within
-    // SwiftLint's length; `@objc` keeps them visible to XCTest, which finds tests through the Objective-C runtime.
+    // weeks away; with A5's `nyc-alerts-mixed`, a neutral uptown Q running local too), the alert chip, an alert's full
+    // text, line status with mixed lines, all good service, loading, and offline, and a stop's alerts. They sit in a
+    // file of their own so `ScreenshotTests.swift` stays within SwiftLint's length; `@objc` keeps them visible to
+    // XCTest, which finds tests through the Objective-C runtime.
 
     @objc func testAlertsNearby() {
         capture("alerts-nearby", fixtures: "nyc-alerts", settledWhen: "nearby.loaded", "nearby.alert")
+    }
+
+    /// A5: the uptown Q running local, a neutral notice, beside the L's red suspension.
+    @objc func testAlertsNearbyMixed() {
+        capture("alerts-nearby", fixtures: "nyc-alerts-mixed", settledWhen: "nearby.loaded", "nearby.alert")
     }
 
     @objc func testAlertsChip() {

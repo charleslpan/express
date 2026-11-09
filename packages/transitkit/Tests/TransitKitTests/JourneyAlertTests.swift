@@ -18,12 +18,14 @@ struct JourneyAlertTests {
         effect: Components.Schemas.AlertEffect = .noService,
         from start: String,
         to end: String,
-        severity: Components.Schemas.AlertSeverityLevel? = nil
+        severity: Components.Schemas.AlertSeverityLevel? = nil,
+        type: String? = nil
     ) throws -> Components.Schemas.Alert {
         try Components.Schemas.Alert(
             communicationPeriod: [.init(start: date(start), end: date(end))],
             cause: .unknownCause,
             effect: effect,
+            effectDetail: type,
             headerText: header,
             descriptionText: "",
             severityLevel: severity
@@ -120,6 +122,41 @@ struct JourneyAlertTests {
         #expect(leg.skippedStops.isEmpty)
         // They still show as banners.
         #expect(leg.applicableAlerts.count == 3)
+    }
+
+    /// With the MTA's type (MOTIS's `effectDetail`), only "Stops Skipped" and suspensions skip a stop, whatever the
+    /// effect: "Local to Express" is a modified service that reads as severe but skips nothing at this stop.
+    @Test func skippedStopsKeyOffTheMTAsType() throws {
+        var leg = try Self.itinerary().legs[3]
+        leg.from.alerts = try [
+            Self.alert(
+                "[M] runs local",
+                effect: .modifiedService,
+                from: "20:00",
+                to: "21:00",
+                type: "Express to Local"
+            ),
+            Self.alert(
+                "[M] runs express",
+                effect: .modifiedService,
+                from: "20:00",
+                to: "21:00",
+                type: "Planned - Local to Express"
+            ),
+        ]
+        leg.to.alerts = try [Self.alert(
+            "[M] trains skip Marcy Av",
+            effect: .modifiedService,
+            from: "20:00",
+            to: "21:00",
+            type: "Planned - Stops Skipped"
+        )]
+        #expect(leg.skippedStops.map(\.name) == ["Marcy Av"])
+
+        leg.to.alerts = try [Self.alert("No [M] at Marcy Av", from: "20:00", to: "21:00", type: "Part Suspended")]
+        #expect(leg.skippedStops.map(\.name) == ["Marcy Av"])
+        // The local service is a neutral notice, the express one red, as on line status.
+        #expect(leg.applicableAlerts.map(\.level) == [.severe, .severe, .info])
     }
 
     @Test func aLineWideSuspensionIsNotASkippedStop() throws {

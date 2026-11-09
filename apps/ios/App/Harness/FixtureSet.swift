@@ -28,12 +28,16 @@ enum FixtureSet: String, CaseIterable, Sendable {
     /// night work on the 6 two weeks away that must not show yet, on Nearby's departures; and the MTA's alerts as
     /// recorded that evening for line status.
     case nycAlerts = "nyc-alerts"
+    /// `nyc-alerts` with a minor service change beside its red ones (A5): uptown Q trains running local, which the MTA
+    /// types "Planned - Express to Local", a neutral notice next to the L's suspension on Nearby and next to the 42 St
+    /// Shuttle's on the Q and shuttle journey.
+    case nycAlertsMixed = "nyc-alerts-mixed"
 
     /// The moment the fixtures describe, which stands in for "now" so times on screen don't drift between runs.
     var referenceDate: Date {
         switch self {
         case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .slowNetwork,
-             .offline, .noKey, .noJourneys, .nycEveningCancelled, .nycAlerts:
+             .offline, .noKey, .noJourneys, .nycEveningCancelled, .nycAlerts, .nycAlertsMixed:
             Date(timeIntervalSince1970: 1_793_748_600) // 2026-11-03 18:30 America/New_York
         }
     }
@@ -58,6 +62,11 @@ enum FixtureSet: String, CaseIterable, Sendable {
             ),
             name: nil
         )
+    }
+
+    /// Whether the set carries service alerts, on departures, journeys, and line status.
+    var hasAlerts: Bool {
+        [.nycAlerts, .nycAlertsMixed].contains(self)
     }
 
     /// How old the server's realtime data is at ``referenceDate``.

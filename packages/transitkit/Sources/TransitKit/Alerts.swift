@@ -54,12 +54,13 @@ public enum AlertLevel: Int, Sendable, Hashable, Comparable, CaseIterable {
     case severe
 
     /// The level for an alert's GTFS-RT effect (`NO_SERVICE`, `SIGNIFICANT_DELAYS`, …) and, where known, its severity
-    /// level (`INFO`, `WARNING`, `SEVERE`).
+    /// level (`INFO`, `WARNING`, `SEVERE`): the one rule every screen colours alerts by.
     ///
-    /// Our server fills the effect from the MTA's alert type ("Stops Skipped" becomes `MODIFIED_SERVICE`). A modified
-    /// service reads as severe unless the severity says it's only information (such as "Express to Local"); MOTIS
-    /// passes no severity, so on departures every modified service reads as severe. An effect this doesn't know, or
-    /// none, is a neutral notice.
+    /// Our server fills the effect and severity from the MTA's alert type ("Stops Skipped" becomes `MODIFIED_SERVICE`
+    /// and `WARNING`, "Express to Local" `MODIFIED_SERVICE` and `INFO`). A modified service reads as severe unless the
+    /// severity says it's only information. Line status carries the severity; on departures and legs it comes from
+    /// the type MOTIS passes on (``MTAAlertType/severity(of:)``), and without one a modified service reads as severe.
+    /// An effect this doesn't know, or none, is a neutral notice.
     public init(effect: String?, severity: String? = nil) {
         switch effect {
         case "NO_SERVICE":
@@ -83,11 +84,13 @@ public struct ServiceAlert: Sendable, Hashable, Identifiable {
     /// The MTA's alert id where the source gives one (line status does); else one made from the alert's text and
     /// times, the same for the same alert on every departure.
     public var id: String
-    /// The MTA's own alert type ("Planned - Part Suspended"), where the source gives one (line status does).
+    /// The MTA's own alert type ("Planned - Part Suspended"), where the source gives one: line status does, and MOTIS
+    /// does as the alert's `effectDetail`, which our server fills with it.
     public var type: String?
     /// The GTFS-RT effect, such as `NO_SERVICE`; `nil` where the source gives none.
     public var effect: String?
-    /// The GTFS-RT severity level, such as `WARNING`; `nil` where the source gives none (MOTIS doesn't).
+    /// The GTFS-RT severity level, such as `WARNING`: line status's, or on departures and legs, which MOTIS gives
+    /// none, the one ``MTAAlertType`` gives the type. `nil` where neither is known.
     public var severity: String?
     /// Whether it's planned work (the MTA's "Planned - …" types, which our server gives the `MAINTENANCE` cause).
     public var isPlanned: Bool
@@ -120,11 +123,13 @@ public struct ServiceAlert: Sendable, Hashable, Identifiable {
     }
 
     /// An alert MOTIS attached to a departure or leg, with its `communicationPeriod` (the MTA's `active_period`) as
-    /// its active periods.
+    /// its active periods, its `effectDetail` as the MTA's type, and that type's severity where MOTIS gives none.
     public init(_ alert: Components.Schemas.Alert) {
+        let type = alert.effectDetail.flatMap { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : $0 }
         self.init(
+            type: type,
             effect: alert.effect?.rawValue,
-            severity: alert.severityLevel?.rawValue,
+            severity: alert.severityLevel?.rawValue ?? MTAAlertType.severity(of: type),
             isPlanned: alert.cause == .maintenance,
             activePeriods: (alert.communicationPeriod ?? []).map { AlertPeriod(start: $0.start, end: $0.end) },
             header: alert.headerText,

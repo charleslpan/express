@@ -28,11 +28,12 @@ public struct SkippedStop: Sendable, Hashable {
 }
 
 public extension ServiceAlert {
-    /// Whether the alert, attached to a stop, says the stop is skipped or not served: a stops-skipped
-    /// (`MODIFIED_SERVICE`) or suspension (`NO_SERVICE`) effect that reads as severe. Other stop alerts, such as an
-    /// elevator outage, are only notices.
+    /// Whether the alert, attached to a stop, says the stop is skipped or not served: the MTA's "Stops Skipped",
+    /// "Suspended", or "Part Suspended" types (``MTAAlertType/skipsStops(_:)``). Without a type the table knows, a
+    /// stops-skipped (`MODIFIED_SERVICE`) or suspension (`NO_SERVICE`) effect that reads as severe. Other stop alerts,
+    /// such as a boarding change or "Express to Local", are only notices.
     var skipsStop: Bool {
-        ["MODIFIED_SERVICE", "NO_SERVICE"].contains(effect) && level == .severe
+        MTAAlertType.skipsStops(type) ?? (["MODIFIED_SERVICE", "NO_SERVICE"].contains(effect) && level == .severe)
     }
 }
 

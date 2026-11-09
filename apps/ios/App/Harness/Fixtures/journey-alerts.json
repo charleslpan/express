@@ -5,6 +5,7 @@
     "communicationPeriod": [{ "start": "2026-11-03T23:10:00Z", "end": "2026-12-03T23:30:00Z" }],
     "cause": "UNKNOWN_CAUSE",
     "effect": "SIGNIFICANT_DELAYS",
+    "effectDetail": "Delays",
     "headerText": "Woodlawn-bound [4] trains are running with delays while we request NYPD for a person being disruptive on a train at 125 St.",
     "descriptionText": ""
    }
@@ -14,6 +15,7 @@
     "communicationPeriod": [{ "start": "2026-11-03T23:05:00Z", "end": "2026-11-04T05:00:00Z" }],
     "cause": "UNKNOWN_CAUSE",
     "effect": "NO_SERVICE",
+    "effectDetail": "Suspended",
     "headerText": "No [S] 42 St Shuttle trains between Times Sq-42 St and Grand Central-42 St while we address a signal problem.",
     "descriptionText": "For service between Times Sq-42 St and Grand Central-42 St, take the [7]."
    }
@@ -28,6 +30,7 @@
     ],
     "cause": "MAINTENANCE",
     "effect": "NO_SERVICE",
+    "effectDetail": "Planned - Part Suspended",
     "headerText": "No [6] trains between 3 Av-138 St and Pelham Bay Park",
     "descriptionText": "Take the [4] or [5], or free shuttle buses.\nWhat's happening? We're making track repairs."
    },
@@ -35,6 +38,7 @@
     "communicationPeriod": [{ "start": "2026-11-03T20:00:00Z", "end": "2026-11-03T23:00:00Z" }],
     "cause": "UNKNOWN_CAUSE",
     "effect": "SIGNIFICANT_DELAYS",
+    "effectDetail": "Delays",
     "headerText": "Uptown [6] trains were running with delays after we addressed a signal problem at Brooklyn Bridge-City Hall.",
     "descriptionText": ""
    }
@@ -46,6 +50,7 @@
     "communicationPeriod": [{ "start": "2026-11-03T23:15:00Z", "end": "2026-11-04T01:00:00Z" }],
     "cause": "UNKNOWN_CAUSE",
     "effect": "MODIFIED_SERVICE",
+    "effectDetail": "Stops Skipped",
     "headerText": "Canarsie-bound [L] trains skip 14 St-Union Sq while we remove debris from the tracks.",
     "descriptionText": "For service to this station, take the [L] to 3 Av and transfer to an 8 Av-bound [L]."
    }

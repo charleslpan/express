@@ -4,8 +4,14 @@ The MTA leaves the standard `effect`, `cause`, and `severity_level` empty and
 says what an alert is in its own `mercury_alert` extension (field 1001 on
 Alert, `alert_type` its field 3: "Delays", "Planned - Part Suspended", ...).
 fill_alerts() fills the three standard fields from that type with the table in
-alert_types.json and changes nothing else: the extension and every other field
-survive decoding and re-encoding as unknown fields.
+alert_types.json, writes the type itself into `effect_detail`, and changes
+nothing else: the extension and every other field survive decoding and
+re-encoding as unknown fields.
+
+MOTIS (v2.11.4, `include/motis/to_alert.h`) passes `effect_detail` through on
+stoptimes and plan legs as `effectDetail`, but drops `severity_level` and the
+extension, so `effect_detail` is how the app learns the type and, from the same
+table, the severity line status shows.
 """
 
 from __future__ import annotations
@@ -87,7 +93,8 @@ def mta_alert_type(alert: Alert) -> str | None:
 
 
 def fill_alerts(feed: gtfs_realtime_pb2.FeedMessage, types: AlertTypes) -> AlertStats:
-    """Fills effect, cause, and severity_level where the feed leaves them unset."""
+    """Fills effect, cause, and severity_level where the feed leaves them unset, and
+    effect_detail with the MTA's type (in English) where the feed sets none."""
     stats = AlertStats()
     for entity in feed.entity:
         if not entity.HasField("alert"):
@@ -108,6 +115,8 @@ def fill_alerts(feed: gtfs_realtime_pb2.FeedMessage, types: AlertTypes) -> Alert
         if (not alert.HasField("severity_level")
                 or alert.severity_level == Alert.SeverityLevel.UNKNOWN_SEVERITY):
             alert.severity_level = mapped.severity
+        if kind and not alert.HasField("effect_detail"):
+            alert.effect_detail.translation.add(text=kind, language="en")
     return stats
 
 
