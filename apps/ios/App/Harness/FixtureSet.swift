@@ -22,12 +22,14 @@ enum FixtureSet: String, CaseIterable, Sendable {
     case nycEveningBusesStale = "nyc-evening-buses-stale"
     /// The evening rush, with no journey to be found anywhere.
     case noJourneys = "no-journeys"
+    /// The evening rush with the uptown 6 the journeys ride (`fixture-trip-6`) cancelled on live times.
+    case nycEveningCancelled = "nyc-evening-cancelled"
 
     /// The moment the fixtures describe, which stands in for "now" so times on screen don't drift between runs.
     var referenceDate: Date {
         switch self {
         case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .slowNetwork,
-             .offline, .noKey, .noJourneys:
+             .offline, .noKey, .noJourneys, .nycEveningCancelled:
             Date(timeIntervalSince1970: 1_793_748_600) // 2026-11-03 18:30 America/New_York
         }
     }

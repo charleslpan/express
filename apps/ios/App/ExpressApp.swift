@@ -61,6 +61,7 @@ struct ExpressApp: App {
             .environment(\.placeSearchService, placeSearchService)
             .environment(\.placeSearchSeed, launch.screen?.searchQuery)
             .environment(\.journeyOptionsSeed, launch.screen?.journeyOptionsSeed)
+            .environment(\.journeyDetailSeed, launch.screen?.journeyDetailSeed)
             .preferredColorScheme(launch.colorScheme)
         }
         .onChange(of: scenePhase) { _, phase in

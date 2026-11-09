@@ -20,6 +20,20 @@ public enum DurationFormat {
     }
 }
 
+/// Formats walking distances for display.
+public enum DistanceFormat {
+    /// A distance in metres as New Yorkers read it: feet to the nearest 10 under a tenth of a mile ("450 ft"), else
+    /// miles to one decimal ("1.3 mi"). English until the app localizes.
+    public static func string(meters: Double) -> String {
+        let miles = max(meters, 0) / 1609.344
+        if miles < 0.1 {
+            let feet = Int((max(meters, 0) * 3.280_84 / 10).rounded()) * 10
+            return "\(max(feet, 10)) ft"
+        }
+        return String(format: "%.1f mi", miles)
+    }
+}
+
 public extension Itinerary {
     /// The itinerary's duration for display, such as "22 min".
     var formattedDuration: String {

@@ -176,7 +176,7 @@ struct JourneyOptionsView: View {
                             isSelected: router.selectedJourney?.id == option.id,
                             mayNotBeRealTime: mayNotBeRealTime
                         ) {
-                            router.showJourneyDetail(option.itinerary)
+                            router.showJourneyDetail(option.itinerary, to: destinationName)
                         }
                     }
                 }
@@ -189,6 +189,14 @@ struct JourneyOptionsView: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("journeys.list")
+    }
+
+    /// The journey's end as the rider named it, for its plan's last walk.
+    private var destinationName: String? {
+        if case let .place(place) = planner.query.to {
+            return place.name
+        }
+        return nil
     }
 
     private func progress(_ title: LocalizedStringKey, id: String) -> some View {
@@ -260,7 +268,9 @@ private struct PlanningKey: Hashable {
 
 /// The NYC layer's notice that times may not be real time, which the MTA's terms require once data is more than a
 /// minute old. A filled panel rather than glass, since it sits in the sheet's glass.
-private struct MayNotBeRealTimeNotice: View {
+struct MayNotBeRealTimeNotice: View {
+    var identifier = "journeys.may-not-be-real-time"
+
     @ScaledMetric(relativeTo: .subheadline) private var gap = Spacing.xs
 
     var body: some View {
@@ -277,6 +287,6 @@ private struct MayNotBeRealTimeNotice: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.fill.tertiary, in: Radius.shape(Radius.sm))
         .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("journeys.may-not-be-real-time")
+        .accessibilityIdentifier(identifier)
     }
 }

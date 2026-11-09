@@ -317,7 +317,7 @@ final class ScreenshotTests: XCTestCase {
     /// `settledWhen` names elements the screen shows once it has finished loading what it shows, such as map tiles
     /// or departures; the capture waits for each a while, then goes ahead without it rather than fail. `then` runs
     /// before each capture, to put the screen in a state only a tap reaches, such as an open menu.
-    private func capture(
+    func capture(
         _ screen: String,
         fixtures: String,
         settledWhen settled: String...,

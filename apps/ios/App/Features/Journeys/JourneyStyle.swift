@@ -81,8 +81,9 @@ enum JourneyStyle {
 }
 
 extension MapRoute {
-    /// An itinerary's legs, each in its line's colour and walks dashed, decoded from MOTIS's polylines.
-    init(journey itinerary: Itinerary) {
+    /// An itinerary's legs, each in its line's colour and walks dashed, decoded from MOTIS's polylines, with the map
+    /// zoomed to `focusedLegs` (by their place in the itinerary) where there are any.
+    init(journey itinerary: Itinerary, focusedLegs: [Int] = []) {
         self.init(
             id: itinerary.id,
             segments: itinerary.legs.enumerated().map { index, leg in
@@ -93,7 +94,8 @@ extension MapRoute {
                     color: JourneyStyle.mapColor(leg),
                     isDashed: leg.tripId == nil
                 )
-            }
+            },
+            focusedSegmentIDs: focusedLegs.map(String.init)
         )
     }
 }
