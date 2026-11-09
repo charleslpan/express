@@ -19,7 +19,8 @@ extension FixtureSet {
     /// running late, the Q and the shuttle, the M101, and a walk), except in `no-journeys`, which finds none.
     /// Line status (`/api/alerts`) answers every requested line with no alerts, but in `nyc-alerts`, which answers from
     /// `Fixtures/line-status-nyc-alerts.json` (the MTA's alerts recorded that evening, with the set's own) and adds
-    /// `Fixtures/nearby-alerts.json` to the departures.
+    /// `Fixtures/nearby-alerts.json` to the departures and `Fixtures/journey-alerts.json` to the journeys' legs and
+    /// trips.
     var transitClient: TransitClient {
         let fixtures = self
         return TransitClient(transport: StubTransport { request in
@@ -53,7 +54,7 @@ extension FixtureSet {
         case "/api/v6/map/stops":
             return try fixture("nearby-stops")
         case "/api/v6/plan":
-            return fixtures == .noJourneys ? emptyPlan : try fixture("plan-nyc-evening")
+            return fixtures == .noJourneys ? emptyPlan : try itineraries("plan-nyc-evening", fixtures: fixtures)
         case "/api/v6/stoptimes":
             let stopId = request.query["stopId"] ?? ""
             let feedStopId = stopId.split(separator: "_").last.map(String.init) ?? stopId
@@ -69,12 +70,18 @@ extension FixtureSet {
             if fixtures == .nycEveningCancelled, let cancelled = try? fixture("trip-\(tripId)-cancelled") {
                 return cancelled
             }
-            return try fixture("trip-\(tripId)")
+            return try itineraries("trip-\(tripId)", fixtures: fixtures)
         case "/api/alerts":
             return try lineStatus(lines: request.query["lines"] ?? "", fixtures: fixtures)
         default:
             throw URLError(.resourceUnavailable)
         }
+    }
+
+    /// A plan or trip fixture, with the set's journey alerts in `nyc-alerts` (``withJourneyAlerts(_:)``).
+    private static func itineraries(_ name: String, fixtures: FixtureSet) throws -> Data {
+        let data = try fixture(name)
+        return fixtures == .nycAlerts ? try withJourneyAlerts(data) : data
     }
 
     /// The server's `/metrics`, with the subway feed's timestamp as old as the set's data is.
@@ -148,17 +155,20 @@ extension FixtureSet {
 
     /// A journey the screenshot harness opens in detail, by its id: one the plan offers
     /// (`Fixtures/plan-nyc-evening.json`), or one only the harness opens (`Fixtures/journeys-detail.json`: the L and
-    /// the M101 with a transfer at 3 Av, `fixture-l-m101`).
-    static func journey(id: String) -> Itinerary? {
+    /// the M101 with a transfer at 3 Av, `fixture-l-m101`). In `nyc-alerts` it carries the set's journey alerts
+    /// (``withJourneyAlerts(_:)``), as the plan does.
+    static func journey(id: String, fixtures: FixtureSet = .nycEvening) -> Itinerary? {
         struct Journeys: Decodable {
             var itineraries: [Itinerary]
         }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         for name in ["plan-nyc-evening", "journeys-detail"] {
-            guard let data = try? fixture(name), let journeys = try? decoder.decode(Journeys.self, from: data) else {
-                continue
+            guard var data = try? fixture(name) else { continue }
+            if fixtures == .nycAlerts, let withAlerts = try? withJourneyAlerts(data) {
+                data = withAlerts
             }
+            guard let journeys = try? decoder.decode(Journeys.self, from: data) else { continue }
             if let journey = journeys.itineraries.first(where: { $0.id == id }) {
                 return journey
             }

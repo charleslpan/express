@@ -1,0 +1,54 @@
+{
+ "lines": {
+  "fixture-trip-4": [
+   {
+    "communicationPeriod": [{ "start": "2026-11-03T23:10:00Z", "end": "2026-12-03T23:30:00Z" }],
+    "cause": "UNKNOWN_CAUSE",
+    "effect": "SIGNIFICANT_DELAYS",
+    "headerText": "Woodlawn-bound [4] trains are running with delays while we request NYPD for a person being disruptive on a train at 125 St.",
+    "descriptionText": ""
+   }
+  ],
+  "fixture-trip-s": [
+   {
+    "communicationPeriod": [{ "start": "2026-11-03T23:05:00Z", "end": "2026-11-04T05:00:00Z" }],
+    "cause": "UNKNOWN_CAUSE",
+    "effect": "NO_SERVICE",
+    "headerText": "No [S] 42 St Shuttle trains between Times Sq-42 St and Grand Central-42 St while we address a signal problem.",
+    "descriptionText": "For service between Times Sq-42 St and Grand Central-42 St, take the [7]."
+   }
+  ],
+  "fixture-trip-6": [
+   {
+    "communicationPeriod": [
+     { "start": "2026-11-18T04:45:00Z", "end": "2026-11-18T10:00:00Z" },
+     { "start": "2026-11-19T04:45:00Z", "end": "2026-11-19T10:00:00Z" },
+     { "start": "2026-11-20T04:45:00Z", "end": "2026-11-20T10:00:00Z" },
+     { "start": "2026-11-21T04:45:00Z", "end": "2026-11-21T10:00:00Z" }
+    ],
+    "cause": "MAINTENANCE",
+    "effect": "NO_SERVICE",
+    "headerText": "No [6] trains between 3 Av-138 St and Pelham Bay Park",
+    "descriptionText": "Take the [4] or [5], or free shuttle buses.\nWhat's happening? We're making track repairs."
+   },
+   {
+    "communicationPeriod": [{ "start": "2026-11-03T20:00:00Z", "end": "2026-11-03T23:00:00Z" }],
+    "cause": "UNKNOWN_CAUSE",
+    "effect": "SIGNIFICANT_DELAYS",
+    "headerText": "Uptown [6] trains were running with delays after we addressed a signal problem at Brooklyn Bridge-City Hall.",
+    "descriptionText": ""
+   }
+  ]
+ },
+ "stops": {
+  "fixture-trip-l|14 St-Union Sq": [
+   {
+    "communicationPeriod": [{ "start": "2026-11-03T23:15:00Z", "end": "2026-11-04T01:00:00Z" }],
+    "cause": "UNKNOWN_CAUSE",
+    "effect": "MODIFIED_SERVICE",
+    "headerText": "Canarsie-bound [L] trains skip 14 St-Union Sq while we remove debris from the tracks.",
+    "descriptionText": "For service to this station, take the [L] to 3 Av and transfer to an 8 Av-bound [L]."
+   }
+  ]
+ }
+}

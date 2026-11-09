@@ -174,7 +174,8 @@ struct JourneyOptionsView: View {
                             summary: option.summary,
                             now: environment.now,
                             isSelected: router.selectedJourney?.id == option.id,
-                            mayNotBeRealTime: mayNotBeRealTime
+                            mayNotBeRealTime: mayNotBeRealTime,
+                            alertFlag: option.itinerary.alertFlag
                         ) {
                             router.showJourneyDetail(option.itinerary, to: destinationName)
                         }

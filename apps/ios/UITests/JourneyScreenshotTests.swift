@@ -29,4 +29,32 @@ extension ScreenshotTests {
     func testJourneyStops() {
         capture("journey-stops", fixtures: "nyc-evening", settledWhen: "journey.loaded")
     }
+
+    // Alerts on journeys (A4): the options with a red and an amber flag, the shuttle's suspension on its ride, the L
+    // skipping the boarding stop, and the 6, whose alerts in the feed fall outside the ride and show nothing.
+    // `@objc`, as in `AlertScreenshotTests.swift`, keeps them visible to XCTest.
+
+    @objc func testJourneysAlerts() {
+        capture("journeys-alerts", fixtures: "nyc-alerts", settledWhen: "journeys.list")
+    }
+
+    @objc func testJourneyAlertSuspension() {
+        capture("journey-alert-suspension", fixtures: "nyc-alerts", settledWhen: "journey.loaded", "journey.alert")
+    }
+
+    @objc func testJourneyAlertSkipped() {
+        capture(
+            "journey-alert-skipped",
+            fixtures: "nyc-alerts",
+            settledWhen: "journey.loaded",
+            "journey.stop-skipped"
+        )
+    }
+
+    @objc func testJourneyAlertOutside() {
+        capture("journey-alert-outside", fixtures: "nyc-alerts", settledWhen: "journey.loaded") { app in
+            let banner = app.descendants(matching: .any)["journey.alert"]
+            XCTAssertFalse(banner.exists, "An alert outside the ride's time showed")
+        }
+    }
 }
