@@ -70,6 +70,28 @@ struct MTAAlertTypeTests {
         #expect(alert.level == .severe)
     }
 
+    /// Until the server that writes `effectDetail` deploys, MOTIS sends none: every effect then reads exactly as the
+    /// effect-only rule read it before A5, and a stop alert skips the stop by that rule.
+    @Test func withoutEffectDetailEveryEffectReadsAsBefore() {
+        let before: [Components.Schemas.AlertEffect: AlertLevel] = [
+            .noService: .severe, .modifiedService: .severe, .significantDelays: .warning, .detour: .warning,
+            .reducedService: .warning, .additionalService: .info, .stopMoved: .info, .otherEffect: .info,
+            .unknownEffect: .info, .noEffect: .info, .accessibilityIssue: .info,
+        ]
+        for (effect, level) in before {
+            let alert = ServiceAlert(Components.Schemas.Alert(
+                cause: .unknownCause,
+                effect: effect,
+                headerText: "Alert",
+                descriptionText: ""
+            ))
+            #expect(alert.type == nil)
+            #expect(alert.severity == nil)
+            #expect(alert.level == level, "\(effect)")
+            #expect(alert.skipsStop == [.noService, .modifiedService].contains(effect), "\(effect)")
+        }
+    }
+
     @Test func mirrorsTheServersTable() throws {
         let table = try Self.table()
         #expect(MTAAlertType.plannedPrefix == table.plannedPrefix)
