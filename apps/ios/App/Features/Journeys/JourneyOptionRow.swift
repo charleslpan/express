@@ -4,13 +4,15 @@ import TransitKit
 
 /// One journey option: how long it takes, when it leaves and arrives, its legs on a segment bar, its walking and
 /// transfers, and when the first ride leaves, live where realtime data stands behind it. The selected option (the one
-/// on the map) is tinted. VoiceOver reads it as one button.
+/// on the map) is tinted, and an option with an alert on one of its legs is flagged. VoiceOver reads it as one button.
 struct JourneyOptionRow: View {
     let summary: JourneySummary
     let now: Date
     let isSelected: Bool
     /// Whether the list says its times may not be real time, which mutes the live badge.
     let mayNotBeRealTime: Bool
+    /// The option's alert flag: its most severe alert that applies while the rider would be on a leg; `nil` for none.
+    var alertFlag: JourneyAlertFlag?
     let action: () -> Void
 
     var body: some View {
@@ -38,6 +40,9 @@ struct JourneyOptionRow: View {
                     }
                 }
                 JourneySegmentBar(legs: JourneyStyle.legs(summary))
+                if let alertFlag {
+                    JourneyAlertFlagLabel(flag: alertFlag)
+                }
                 Label(details, systemImage: "figure.walk")
                     .typography(.caption)
                     .foregroundStyle(.textSecondary)
@@ -101,6 +106,9 @@ struct JourneyOptionRow: View {
         ]
         if let departure {
             parts.append(String(localized: "leaves in \(departure.accessibilityLabel)"))
+        }
+        if let alertFlag {
+            parts.append(JourneyAlertText.flag(alertFlag))
         }
         return parts.joined(separator: ", ")
     }

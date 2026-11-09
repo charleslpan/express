@@ -73,6 +73,13 @@ enum ScreenshotScreen: String, CaseIterable {
     case journeyCancelled = "journey-cancelled"
     case journeyStale = "journey-stale"
     case journeyStops = "journey-stops"
+    /// Alerts on journeys (A4), in `nyc-alerts`: the options with a red flag (the 42 St Shuttle suspended) and an amber
+    /// one (the 4 delayed), and journeys step by step with the shuttle's suspension on its ride, the L skipping the
+    /// stop the rider boards at, and the 6 with alerts in the feed outside the ride's time, which show nothing.
+    case journeysAlerts = "journeys-alerts"
+    case journeyAlertSuspension = "journey-alert-suspension"
+    case journeyAlertSkipped = "journey-alert-skipped"
+    case journeyAlertOutside = "journey-alert-outside"
     /// The About sheet over the home sheet (S1).
     case about
     /// Liquid Glass controls and a glass sheet over the Google map, for judging the look (F5).
@@ -137,7 +144,8 @@ enum ScreenshotScreen: String, CaseIterable {
              .tripError, .journeysPeek, .journeysHalf, .journeysFull, .journeysRoute, .journeysArriveBy,
              .journeysLoading, .journeysNoResults, .journeysOutsideNYC, .journeysLocationOff, .journeysError,
              .journeysStale, .journeySubway, .journeyBus, .journeyTight, .journeyCancelled, .journeyStale,
-             .journeyStops, .alertsNearby, .alertsChip, .alertDetail, .lineStatus, .stopAlerts:
+             .journeyStops, .alertsNearby, .alertsChip, .alertDetail, .lineStatus, .stopAlerts, .journeysAlerts,
+             .journeyAlertSuspension, .journeyAlertSkipped, .journeyAlertOutside:
             RootView()
         case .mapGlass: MapGlassScreen()
         case .trains: GoView(camera: MapCamera(center: Self.midtown, zoom: 14.5))
@@ -168,7 +176,7 @@ enum ScreenshotScreen: String, CaseIterable {
              .tripEnded, .tripError, .alertsChip, .alertDetail: .half
         case .homeFull, .homeSaved, .homeSavedLoading, .homeSavedEmpty, .nearbyFull, .stopFull, .tripFull,
              .journeysFull, .journeysArriveBy, .journeyBus, .journeyTight, .journeyStops, .alertsNearby, .lineStatus,
-             .stopAlerts: .full
+             .stopAlerts, .journeysAlerts, .journeyAlertSuspension: .full
         case .journeysPeek: .peek
         case _ where isJourneys || isJourneyDetail: .half
         default: .peek
@@ -204,9 +212,9 @@ enum ScreenshotScreen: String, CaseIterable {
     /// The journey a journey detail screen opens, by its id in the fixtures (``FixtureSet/journey(id:)``).
     private var journeyID: String? {
         switch self {
-        case .journeySubway, .journeyCancelled, .journeyStale, .journeyStops: "fixture-6"
-        case .journeyBus: "fixture-l-m101"
-        case .journeyTight: "fixture-q-s"
+        case .journeySubway, .journeyCancelled, .journeyStale, .journeyStops, .journeyAlertOutside: "fixture-6"
+        case .journeyBus, .journeyAlertSkipped: "fixture-l-m101"
+        case .journeyTight, .journeyAlertSuspension: "fixture-q-s"
         default: nil
         }
     }
@@ -231,7 +239,7 @@ enum ScreenshotScreen: String, CaseIterable {
             }
             router.showJourneys(query)
             router.homeDetent = homeDetent
-        } else if let journeyID, let journey = FixtureSet.journey(id: journeyID) {
+        } else if let journeyID, let journey = FixtureSet.journey(id: journeyID, fixtures: journeyFixtures) {
             let place = FixturePlaceSearchService.places[0]
             router.showPlace(place)
             router.showJourneys(JourneyQuery(to: .place(place)))
@@ -326,6 +334,11 @@ enum ScreenshotScreen: String, CaseIterable {
 
 /// Kept apart from the enum's body so it stays within SwiftLint's type length.
 extension ScreenshotScreen {
+    /// The fixtures a journey detail screen's journey comes from: `nyc-alerts`, with its alerts, for A4's.
+    var journeyFixtures: FixtureSet {
+        rawValue.hasPrefix("journey-alert-") ? .nycAlerts : .nycEvening
+    }
+
     /// The location the screen shows the user at, if any: Philadelphia's City Hall outside New York, and Union Square
     /// (``FixtureSet/unionSquare``) for Nearby and journeys.
     var location: Coordinate? {
