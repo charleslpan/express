@@ -28,7 +28,8 @@ struct JourneyAlertFixtureTests {
         let six = try journey("fixture-6")
         #expect(!six.legs.flatMap(\.serviceAlerts).isEmpty)
         #expect(six.alertFlag == nil)
-        #expect(six.legs.allSatisfy(\.applicableAlerts.isEmpty))
+        let applicable = six.legs.flatMap(\.applicableAlerts)
+        #expect(applicable.isEmpty)
     }
 
     @Test func noAlertsOutsideTheAlertsSet() throws {
