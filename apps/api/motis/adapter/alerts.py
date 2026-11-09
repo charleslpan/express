@@ -26,10 +26,6 @@ from google.transit import gtfs_realtime_pb2
 Alert = gtfs_realtime_pb2.Alert
 MERCURY_ALERT = 1001  # extension field on Alert
 ALERT_TYPE = 3  # field of MercuryAlert
-# Alert.effect_detail, a TranslatedString (translation 1: Translation, with text 1 and
-# language 2). The pinned gtfs-realtime-bindings (2.0.0) predate it, so it is read and
-# written as raw bytes, which survive as an unknown field.
-EFFECT_DETAIL = 18
 
 log = logging.getLogger("adapter")
 
@@ -119,44 +115,9 @@ def fill_alerts(feed: gtfs_realtime_pb2.FeedMessage, types: AlertTypes) -> Alert
         if (not alert.HasField("severity_level")
                 or alert.severity_level == Alert.SeverityLevel.UNKNOWN_SEVERITY):
             alert.severity_level = mapped.severity
-        if kind and effect_detail(alert) is None:
-            alert.MergeFromString(_effect_detail_bytes(kind, "en"))
+        if kind and not alert.HasField("effect_detail"):
+            alert.effect_detail.translation.add(text=kind, language="en")
     return stats
-
-
-def effect_detail(alert: Alert) -> list[tuple[str, str | None]] | None:
-    """The alert's effect_detail as (text, language) pairs; None if it has none."""
-    found = None
-    for num, wire, value in _fields(alert.SerializeToString()):
-        if num == EFFECT_DETAIL and wire == 2:
-            found = found or []
-            for n, w, translation in _fields(value):
-                if n == 1 and w == 2:
-                    parts = {k: v.decode("utf-8", "replace") for k, wt, v in _fields(translation) if wt == 2}
-                    found.append((parts.get(1, ""), parts.get(2)))
-    return found
-
-
-def _effect_detail_bytes(text: str, language: str) -> bytes:
-    """An Alert holding only effect_detail, encoded, to merge into another."""
-    translation = _len_field(1, text.encode()) + _len_field(2, language.encode())
-    return _len_field(EFFECT_DETAIL, _len_field(1, translation))
-
-
-def _len_field(num: int, value: bytes) -> bytes:
-    return _encode_varint(num << 3 | 2) + _encode_varint(len(value)) + value
-
-
-def _encode_varint(n: int) -> bytes:
-    out = bytearray()
-    while True:
-        b = n & 0x7F
-        n >>= 7
-        if n:
-            out.append(b | 0x80)
-        else:
-            out.append(b)
-            return bytes(out)
 
 
 def alerts_for_routes(feed: gtfs_realtime_pb2.FeedMessage,

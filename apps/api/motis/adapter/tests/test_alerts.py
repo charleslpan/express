@@ -17,8 +17,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 
 from google.transit import gtfs_realtime_pb2  # noqa: E402
 
-from alerts import (EFFECT_DETAIL, AlertTypes, _effect_detail_bytes, _encode_varint,  # noqa: E402
-                    _fields, alerts_for_routes, effect_detail, fill_alerts, mta_alert_type)
+from alerts import AlertTypes, alerts_for_routes, fill_alerts, mta_alert_type  # noqa: E402
 
 Alert = gtfs_realtime_pb2.Alert
 FIXTURES = os.path.join(HERE, "fixtures", "alerts-20261103")
@@ -31,22 +30,6 @@ def recorded(name):
     feed = gtfs_realtime_pb2.FeedMessage()
     feed.ParseFromString(raw)
     return raw, feed
-
-
-def _without_field(b, num):
-    """A message's bytes with every occurrence of field `num` taken out."""
-    out = b""
-    for n, wire, value in _fields(b):
-        if n == num:
-            continue
-        key = _encode_varint(n << 3 | wire)
-        if wire == 0:
-            out += key + _encode_varint(value)
-        elif wire == 2:
-            out += key + _encode_varint(len(value)) + value
-        else:
-            out += key + value
-    return out
 
 
 def alert_by_id(feed, alert_id):
@@ -98,7 +81,8 @@ class FillAlertsTest(unittest.TestCase):
         self.assertEqual(delays.effect, Alert.SIGNIFICANT_DELAYS)
         self.assertEqual(delays.severity_level, Alert.WARNING)
         self.assertFalse(delays.HasField("cause"))
-        self.assertEqual(effect_detail(delays), [("Delays", "en")])
+        self.assertEqual([(t.text, t.language) for t in delays.effect_detail.translation],
+                         [("Delays", "en")])
 
         planned = [e.alert for e in feed.entity
                    if mta_alert_type(e.alert).startswith("Planned - ")]
@@ -109,17 +93,13 @@ class FillAlertsTest(unittest.TestCase):
         for name in ("subway-alerts", "bus-alerts"):
             raw, feed = recorded(name)
             fill_alerts(feed, TYPES)
-            # Decode the output afresh, clear the three fields and effect_detail, and it
-            # is the input.
+            # Decode the output afresh, clear the four fields, and it is the input.
             out = gtfs_realtime_pb2.FeedMessage()
             out.ParseFromString(feed.SerializeToString())
             for e in out.entity:
                 self.assertIsNotNone(mta_alert_type(e.alert), "extension survives")
-                for f in ("effect", "cause", "severity_level"):
+                for f in ("effect", "cause", "severity_level", "effect_detail"):
                     e.alert.ClearField(f)
-                without = _without_field(e.alert.SerializeToString(), EFFECT_DETAIL)
-                e.alert.Clear()
-                e.alert.ParseFromString(without)
             self.assertEqual(out.SerializeToString(), raw, name)
 
     def test_respects_fields_the_feed_sets(self):
@@ -137,7 +117,7 @@ class FillAlertsTest(unittest.TestCase):
         fill_alerts(feed, TYPES)
         for e in feed.entity:
             kind = mta_alert_type(e.alert)
-            self.assertEqual(effect_detail(e.alert), [(kind, "en")], e.id)
+            self.assertEqual([t.text for t in e.alert.effect_detail.translation], [kind], e.id)
         local = [e.alert for e in feed.entity
                  if mta_alert_type(e.alert) == "Planned - Express to Local"]
         self.assertTrue(local)
@@ -151,9 +131,9 @@ class FillAlertsTest(unittest.TestCase):
     def test_keeps_an_effect_detail_the_feed_sets(self):
         _, feed = recorded("subway-alerts")
         a = alert_by_id(feed, "lmm:alert:274734:26")
-        a.MergeFromString(_effect_detail_bytes("Trains delayed", "en"))
+        a.effect_detail.translation.add(text="Trains delayed", language="en")
         fill_alerts(feed, TYPES)
-        self.assertEqual(effect_detail(a), [("Trains delayed", "en")])
+        self.assertEqual([t.text for t in a.effect_detail.translation], ["Trains delayed"])
 
     def test_counts_unknown_types(self):
         feed = gtfs_realtime_pb2.FeedMessage()
@@ -162,7 +142,7 @@ class FillAlertsTest(unittest.TestCase):
         stats = fill_alerts(feed, TYPES)
         self.assertEqual(stats.unknown, {"(none)": 1})
         self.assertEqual(feed.entity[0].alert.effect, Alert.OTHER_EFFECT)
-        self.assertIsNone(effect_detail(feed.entity[0].alert), "no type, no detail")
+        self.assertFalse(feed.entity[0].alert.HasField("effect_detail"), "no type, no detail")
 
 
 class BusDatasetTest(unittest.TestCase):

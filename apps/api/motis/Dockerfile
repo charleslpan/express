@@ -40,7 +40,7 @@ RUN ./motis import \
  && mv data/config.yml config.server.yml
 
 # The adapter matches against exactly the files MOTIS just imported.
-ARG GTFS_RT_BINDINGS_VERSION=2.0.0
+ARG GTFS_RT_BINDINGS_VERSION=2.2.0
 RUN pip install --no-cache-dir --no-deps --break-system-packages --target /srv/adapter/lib \
     "gtfs-realtime-bindings==${GTFS_RT_BINDINGS_VERSION}"
 COPY adapter/*.py adapter/alert_types.json /srv/adapter/
