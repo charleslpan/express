@@ -1,5 +1,5 @@
 {
- "us-ny-MTA-NYCSubway_Q|0": [
+ "us-ny-MTA-NYCSubway_6|0": [
   {
    "communicationPeriod": [
     {
@@ -16,8 +16,8 @@
    "cause": "MAINTENANCE",
    "effect": "MODIFIED_SERVICE",
    "effectDetail": "Planned - Express to Local",
-   "headerText": "Uptown [Q] trains run local from Canal St to 57 St-7 Av",
-   "descriptionText": "Trains stop at Prince St, 8 St-NYU, 23 St, 28 St, and 49 St.\nWhat's happening? We're making signal improvements."
+   "headerText": "Pelham Bay Park-bound [6] trains run local from Parkchester to 3 Av-138 St",
+   "descriptionText": "Trains stop at Castle Hill Av, Zerega Av, Middletown Rd, and Buhre Av.\nWhat's happening? We're making track repairs."
   }
  ]
 }
