@@ -67,11 +67,14 @@ if [ "${SMOKE_SKIP_REALTIME:-}" != 1 ]; then
   done
 
   # Alerts reach MOTIS through the adapter, which fills the effect from the
-  # MTA's alert type (adapter/alert_types.json). Take alerts from the MTA's own
-  # feed that name a line at a stop, and look for one on a departure of that
-  # line (and direction) at that stop, with the mapped effect. Several are
-  # tried: a skipped stop has no departures of its line to carry the alert.
-  echo "MTA subway alert on a matching departure, with its mapped effect"
+  # MTA's alert type (adapter/alert_types.json) and writes the type itself into
+  # effect_detail, which MOTIS passes on as effectDetail (it drops
+  # severity_level; the app maps the type to its severity). Take alerts from the
+  # MTA's own feed that name a line at a stop, and look for one on a departure
+  # of that line (and direction) at that stop, with the mapped effect and the
+  # type. Several are tried: a skipped stop has no departures of its line to
+  # carry the alert.
+  echo "MTA subway alert on a matching departure, with its mapped effect and type"
   types="$(dirname "$0")/adapter/alert_types.json"
   alerts="$(get "https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/camsys%2Fsubway-alerts.json")"
   candidates="$(jq -c --slurpfile t "$types" '
@@ -97,17 +100,18 @@ if [ "${SMOKE_SKIP_REALTIME:-}" != 1 ]; then
        | select($c.dir == null or .directionId == ($c.dir | tostring))
        | .place.alerts[]? | select(.headerText == $c.header)] as $hits
       | if ($hits | length) == 0 then "none"
-        elif any($hits[]; .effect == $c.effect) then "ok"
-        else "effect \($hits[0].effect // "missing")" end' <<<"$st")"
+        elif any($hits[]; .effect == $c.effect and .effectDetail == ($c.type | if . == "" then null else . end))
+          then "ok"
+        else "effect \($hits[0].effect // "missing") and effectDetail \($hits[0].effectDetail // "missing")" end' <<<"$st")"
     case "$hit" in
       ok) found="$c"; break ;;
       none) ;;
-      *) fail "alert $(jq -r '"\(.type) on \(.route) at \(.stop)"' <<<"$c") has $hit, expected $(jq -r .effect <<<"$c")" ;;
+      *) fail "alert $(jq -r '"\(.type) on \(.route) at \(.stop)"' <<<"$c") has $hit, expected $(jq -r '"\(.effect) and \(.type)"' <<<"$c")" ;;
     esac
   done <<<"$candidates"
   [ -n "$candidates" ] || fail "the MTA's subway alerts name no line at a stop"
   [ -n "$found" ] || fail "none of $(wc -l <<<"$candidates") MTA alerts appears on a matching departure"
-  echo "  ok: $(jq -r '"\(.type) on the \(.route) at \(.stop): \(.effect)"' <<<"$found")"
+  echo "  ok: $(jq -r '"\(.type) on the \(.route) at \(.stop): \(.effect), effectDetail \(.type)"' <<<"$found")"
 
   echo "realtime age and match rate in /metrics"
   m="$(get "$BASE_URL/metrics")"

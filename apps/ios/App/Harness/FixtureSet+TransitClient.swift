@@ -20,7 +20,8 @@ extension FixtureSet {
     /// Line status (`/api/alerts`) answers every requested line with no alerts, but in `nyc-alerts`, which answers from
     /// `Fixtures/line-status-nyc-alerts.json` (the MTA's alerts recorded that evening, with the set's own) and adds
     /// `Fixtures/nearby-alerts.json` to the departures and `Fixtures/journey-alerts.json` to the journeys' legs and
-    /// trips.
+    /// trips. `nyc-alerts-mixed` answers as `nyc-alerts` does and adds `Fixtures/nearby-alerts-mixed.json` and
+    /// `Fixtures/journey-alerts-mixed.json` to them.
     var transitClient: TransitClient {
         let fixtures = self
         return TransitClient(transport: StubTransport { request in
@@ -43,7 +44,7 @@ extension FixtureSet {
                 try await Task.sleep(for: .seconds(24 * 60 * 60))
                 throw CancellationError()
             case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .noKey,
-                 .noJourneys, .nycEveningCancelled, .nycAlerts:
+                 .noJourneys, .nycEveningCancelled, .nycAlerts, .nycAlertsMixed:
                 return try Self.response(to: request, fixtures: fixtures)
             }
         })
@@ -59,8 +60,8 @@ extension FixtureSet {
             let stopId = request.query["stopId"] ?? ""
             let feedStopId = stopId.split(separator: "_").last.map(String.init) ?? stopId
             if fixtures != .nycNoService, let data = try? fixture("nearby-stoptimes-\(feedStopId)") {
-                if fixtures == .nycAlerts {
-                    return try withAlerts(data)
+                if fixtures.hasAlerts {
+                    return try withAlerts(data, fixtures: fixtures)
                 }
                 return data
             }
@@ -78,10 +79,10 @@ extension FixtureSet {
         }
     }
 
-    /// A plan or trip fixture, with the set's journey alerts in `nyc-alerts` (``withJourneyAlerts(_:)``).
+    /// A plan or trip fixture, with the set's journey alerts in the alert sets (``withJourneyAlerts(_:fixtures:)``).
     private static func itineraries(_ name: String, fixtures: FixtureSet) throws -> Data {
         let data = try fixture(name)
-        return fixtures == .nycAlerts ? try withJourneyAlerts(data) : data
+        return fixtures.hasAlerts ? try withJourneyAlerts(data, fixtures: fixtures) : data
     }
 
     /// The server's `/metrics`, with the subway feed's timestamp as old as the set's data is.
@@ -91,9 +92,14 @@ extension FixtureSet {
     }
 
     /// A `stoptimes` answer with each departure given the alerts `Fixtures/nearby-alerts.json` lists for its route, or
-    /// for its route and direction (`<routeId>|<directionId>`), as MOTIS attaches them (`place.alerts`).
-    private static func withAlerts(_ data: Data) throws -> Data {
-        let alerts = try JSONSerialization.jsonObject(with: fixture("nearby-alerts")) as? [String: [Any]] ?? [:]
+    /// for its route and direction (`<routeId>|<directionId>`), as MOTIS attaches them (`place.alerts`), and in
+    /// `nyc-alerts-mixed` those `Fixtures/nearby-alerts-mixed.json` lists after them.
+    private static func withAlerts(_ data: Data, fixtures: FixtureSet) throws -> Data {
+        var alerts = try JSONSerialization.jsonObject(with: fixture("nearby-alerts")) as? [String: [Any]] ?? [:]
+        if fixtures == .nycAlertsMixed {
+            let mixed = try JSONSerialization.jsonObject(with: fixture("nearby-alerts-mixed")) as? [String: [Any]]
+            alerts.merge(mixed ?? [:]) { $0 + $1 }
+        }
         guard var answer = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let stopTimes = answer["stopTimes"] as? [[String: Any]]
         else { return data }
@@ -115,7 +121,7 @@ extension FixtureSet {
     private static func lineStatus(lines: String, fixtures: FixtureSet) throws -> Data {
         var recorded: [String: Any] = [:]
         var updatedAt: Any = ["subway": NSNull(), "bus": NSNull()]
-        if fixtures == .nycAlerts,
+        if fixtures.hasAlerts,
            let answer = try JSONSerialization.jsonObject(with: fixture("line-status-nyc-alerts")) as? [String: Any]
         {
             recorded = answer["lines"] as? [String: Any] ?? [:]
@@ -155,8 +161,8 @@ extension FixtureSet {
 
     /// A journey the screenshot harness opens in detail, by its id: one the plan offers
     /// (`Fixtures/plan-nyc-evening.json`), or one only the harness opens (`Fixtures/journeys-detail.json`: the L and
-    /// the M101 with a transfer at 3 Av, `fixture-l-m101`). In `nyc-alerts` it carries the set's journey alerts
-    /// (``withJourneyAlerts(_:)``), as the plan does.
+    /// the M101 with a transfer at 3 Av, `fixture-l-m101`). In the alert sets it carries the set's journey alerts
+    /// (``withJourneyAlerts(_:fixtures:)``), as the plan does.
     static func journey(id: String, fixtures: FixtureSet = .nycEvening) -> Itinerary? {
         struct Journeys: Decodable {
             var itineraries: [Itinerary]
@@ -165,7 +171,7 @@ extension FixtureSet {
         decoder.dateDecodingStrategy = .iso8601
         for name in ["plan-nyc-evening", "journeys-detail"] {
             guard var data = try? fixture(name) else { continue }
-            if fixtures == .nycAlerts, let withAlerts = try? withJourneyAlerts(data) {
+            if fixtures.hasAlerts, let withAlerts = try? withJourneyAlerts(data, fixtures: fixtures) {
                 data = withAlerts
             }
             guard let journeys = try? decoder.decode(Journeys.self, from: data) else { continue }

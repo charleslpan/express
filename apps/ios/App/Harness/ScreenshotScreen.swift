@@ -210,7 +210,7 @@ enum ScreenshotScreen: String, CaseIterable {
     }
 
     /// The journey a journey detail screen opens, by its id in the fixtures (``FixtureSet/journey(id:)``).
-    private var journeyID: String? {
+    var journeyID: String? {
         switch self {
         case .journeySubway, .journeyCancelled, .journeyStale, .journeyStops, .journeyAlertOutside: "fixture-6"
         case .journeyBus, .journeyAlertSkipped: "fixture-l-m101"
@@ -220,9 +220,9 @@ enum ScreenshotScreen: String, CaseIterable {
     }
 
     /// Puts the router where this screen starts: searching, showing a picked place or journeys to it, or with a stop
-    /// or trip pushed.
+    /// or trip pushed. A journey comes from the launch's `fixtures` where they carry alerts.
     @MainActor
-    func prepare(_ router: AppRouter) {
+    func prepare(_ router: AppRouter, fixtures: FixtureSet? = nil) {
         if self == .lineStatus {
             router.showLineStatus(nearbyBuses: FixtureSet.unionSquareBuses)
         } else if searchQuery != nil {
@@ -239,7 +239,7 @@ enum ScreenshotScreen: String, CaseIterable {
             }
             router.showJourneys(query)
             router.homeDetent = homeDetent
-        } else if let journeyID, let journey = FixtureSet.journey(id: journeyID, fixtures: journeyFixtures) {
+        } else if let journey = self.journey(launchedWith: fixtures) {
             let place = FixturePlaceSearchService.places[0]
             router.showPlace(place)
             router.showJourneys(JourneyQuery(to: .place(place)))
@@ -334,9 +334,18 @@ enum ScreenshotScreen: String, CaseIterable {
 
 /// Kept apart from the enum's body so it stays within SwiftLint's type length.
 extension ScreenshotScreen {
-    /// The fixtures a journey detail screen's journey comes from: `nyc-alerts`, with its alerts, for A4's.
-    var journeyFixtures: FixtureSet {
-        rawValue.hasPrefix("journey-alert-") ? .nycAlerts : .nycEvening
+    /// The fixtures a journey detail screen's journey comes from: the launch's where they carry alerts (A5's
+    /// `nyc-alerts-mixed`), else `nyc-alerts`, with its alerts, for A4's, and `nyc-evening` for the rest.
+    func journeyFixtures(launchedWith fixtures: FixtureSet?) -> FixtureSet {
+        if let fixtures, fixtures.hasAlerts {
+            return fixtures
+        }
+        return rawValue.hasPrefix("journey-alert-") ? .nycAlerts : .nycEvening
+    }
+
+    /// The journey a journey detail screen opens, from ``journeyFixtures(launchedWith:)``; `nil` for other screens.
+    func journey(launchedWith fixtures: FixtureSet?) -> Itinerary? {
+        journeyID.flatMap { FixtureSet.journey(id: $0, fixtures: journeyFixtures(launchedWith: fixtures)) }
     }
 
     /// The location the screen shows the user at, if any: Philadelphia's City Hall outside New York, and Union Square

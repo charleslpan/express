@@ -81,6 +81,8 @@ class FillAlertsTest(unittest.TestCase):
         self.assertEqual(delays.effect, Alert.SIGNIFICANT_DELAYS)
         self.assertEqual(delays.severity_level, Alert.WARNING)
         self.assertFalse(delays.HasField("cause"))
+        self.assertEqual([(t.text, t.language) for t in delays.effect_detail.translation],
+                         [("Delays", "en")])
 
         planned = [e.alert for e in feed.entity
                    if mta_alert_type(e.alert).startswith("Planned - ")]
@@ -91,12 +93,12 @@ class FillAlertsTest(unittest.TestCase):
         for name in ("subway-alerts", "bus-alerts"):
             raw, feed = recorded(name)
             fill_alerts(feed, TYPES)
-            # Decode the output afresh, clear the three fields, and it is the input.
+            # Decode the output afresh, clear the four fields, and it is the input.
             out = gtfs_realtime_pb2.FeedMessage()
             out.ParseFromString(feed.SerializeToString())
             for e in out.entity:
                 self.assertIsNotNone(mta_alert_type(e.alert), "extension survives")
-                for f in ("effect", "cause", "severity_level"):
+                for f in ("effect", "cause", "severity_level", "effect_detail"):
                     e.alert.ClearField(f)
             self.assertEqual(out.SerializeToString(), raw, name)
 
@@ -108,6 +110,31 @@ class FillAlertsTest(unittest.TestCase):
         self.assertEqual((a.effect, a.cause, a.severity_level),
                          (Alert.DETOUR, Alert.WEATHER, Alert.SEVERE))
 
+    def test_effect_detail_names_the_type_for_motis(self):
+        # MOTIS drops severity_level, so the app reads the type from effect_detail and
+        # maps it with the same table: "Express to Local" is a notice, "Stops Skipped" not.
+        _, feed = recorded("subway-alerts")
+        fill_alerts(feed, TYPES)
+        for e in feed.entity:
+            kind = mta_alert_type(e.alert)
+            self.assertEqual([t.text for t in e.alert.effect_detail.translation], [kind], e.id)
+        local = [e.alert for e in feed.entity
+                 if mta_alert_type(e.alert) == "Planned - Express to Local"]
+        self.assertTrue(local)
+        self.assertTrue(all(a.effect == Alert.MODIFIED_SERVICE and a.severity_level == Alert.INFO
+                            for a in local))
+        skipped = [e.alert for e in feed.entity
+                   if mta_alert_type(e.alert) == "Planned - Stops Skipped"]
+        self.assertTrue(skipped)
+        self.assertTrue(all(a.severity_level == Alert.WARNING for a in skipped))
+
+    def test_keeps_an_effect_detail_the_feed_sets(self):
+        _, feed = recorded("subway-alerts")
+        a = alert_by_id(feed, "lmm:alert:274734:26")
+        a.effect_detail.translation.add(text="Trains delayed", language="en")
+        fill_alerts(feed, TYPES)
+        self.assertEqual([t.text for t in a.effect_detail.translation], ["Trains delayed"])
+
     def test_counts_unknown_types(self):
         feed = gtfs_realtime_pb2.FeedMessage()
         feed.header.gtfs_realtime_version = "2.0"
@@ -115,6 +142,7 @@ class FillAlertsTest(unittest.TestCase):
         stats = fill_alerts(feed, TYPES)
         self.assertEqual(stats.unknown, {"(none)": 1})
         self.assertEqual(feed.entity[0].alert.effect, Alert.OTHER_EFFECT)
+        self.assertFalse(feed.entity[0].alert.HasField("effect_detail"), "no type, no detail")
 
 
 class BusDatasetTest(unittest.TestCase):

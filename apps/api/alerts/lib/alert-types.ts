@@ -1,7 +1,7 @@
 // A checked copy of apps/api/motis/adapter/alert_types.json, the one alert-type table (the adapter reads that
 // file; the test fails when the two differ). Edit the JSON, then mirror it here.
 export const table = {
-  comment: "MTA alert type (the mercury_alert extension's alert_type) -> standard GTFS-RT effect and severity_level. A type starting with plannedPrefix is looked up whole, then without the prefix, and gets cause plannedCause. Unknown types get fallback and are logged. Read by the adapter (alerts.py) and, as a checked copy, by the alerts Function (apps/api/alerts/lib/alert-types.ts); edit this file, then mirror it there.",
+  comment: "MTA alert type (the mercury_alert extension's alert_type) -> standard GTFS-RT effect and severity_level. A type starting with plannedPrefix is looked up whole, then without the prefix, and gets cause plannedCause. Unknown types get fallback and are logged. Read by the adapter (alerts.py) and, as a checked copy, by the alerts Function (apps/api/alerts/lib/alert-types.ts); edit this file, then mirror it there and its severities in TransitKit (packages/transitkit/Sources/TransitKit/MTAAlertType.swift).",
   plannedPrefix: "Planned - ",
   plannedCause: "MAINTENANCE",
   fallback: { effect: "OTHER_EFFECT", severity: "INFO" },

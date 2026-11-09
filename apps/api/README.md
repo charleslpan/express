@@ -225,8 +225,13 @@ each poll makes one upstream fetch.
   answer `UNKNOWN_EFFECT` for all of them. The adapter fills the three fields
   from [`motis/adapter/alert_types.json`](motis/adapter/alert_types.json)
   (fields the feed sets are kept; `Planned - …` types get `cause:
-  MAINTENANCE`; an unknown type gets `OTHER_EFFECT` and is logged once) and
-  changes nothing else. The bus alerts feed is fetched once per cycle and each
+  MAINTENANCE`; an unknown type gets `OTHER_EFFECT` and is logged once),
+  writes the type itself into `effect_detail` (English, where the feed sets
+  none), and changes nothing else. MOTIS (v2.11.4) drops `severity_level` and
+  the extension but passes `effect_detail` on as `effectDetail`, so the app
+  reads the type there and takes its severity from TransitKit's copy of the same
+  table (`MTAAlertType`): a departure's alert is coloured as line status colours
+  it. The bus alerts feed is fetched once per cycle and each
   bus dataset gets the alerts naming its routes. MOTIS attaches them to
   departures (`place.alerts`) and legs, with the MTA's `active_period` as
   `communicationPeriod`, whatever its time. Alert feeds are listed first per

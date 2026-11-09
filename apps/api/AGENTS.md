@@ -36,8 +36,10 @@ on every call.
   MOTIS's first cycle (shortening the cold start's 503s), and the adapter's
   server keeps a listen backlog of 64, since MOTIS opens all its polls at
   once; `build_index.py` runs at image build; `record.py` records live feeds as test fixtures and prints match rates. `alerts.py` fills the
-  MTA alerts' standard effect, cause, and severity from `alert_types.json`
-  for `/alerts/subway` and `/alerts/bus/<dataset>`. To add a feed, add it to
+  MTA alerts' standard effect, cause, and severity from `alert_types.json`,
+  and `effect_detail` with the MTA's type (MOTIS drops `severity_level` but
+  passes `effectDetail` on, which the app maps to a severity), for
+  `/alerts/subway` and `/alerts/bus/<dataset>`. To add a feed, add it to
   `adapter.py` and a `rt` entry to `config.yml` (alert feeds first in a
   dataset's list: the last feed listed sets its feed-timestamp metric).
 - `motis/smoke.sh`: smoke test against any base URL (`SMOKE_TIME` pins the
@@ -68,7 +70,8 @@ on every call.
 - `alerts/`: the line status Function (`api/alerts.ts`, `GET /api/alerts`),
   the pnpm workspace `@express/alerts`, set up like `bus/`. Its
   `lib/alert-types.ts` is a checked copy of `motis/adapter/alert_types.json`
-  (a test fails when they differ): edit the JSON, then mirror it.
+  (a test fails when they differ): edit the JSON, then mirror it there and in
+  TransitKit's `MTAAlertType.swift` (its severities, also checked).
 
 ## Build and run locally
 
