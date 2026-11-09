@@ -3,7 +3,7 @@ import SwiftUI
 import TransitKit
 
 /// A stop's full departures board, pushed in the home sheet (``AppRouter/showStop(_:)``): the stop's name with its
-/// lines as bullets in the feed's colours, a place for service alerts (``StopAlertsSlot``), then every line and
+/// lines as bullets in the feed's colours, the alerts that apply there (``StopAlertsSlot``), then every line and
 /// direction that calls there in a fixed order (``StopBoard``), each with its upcoming departures, live countdowns,
 /// and delays. Tapping a departure follows that vehicle's trip (``AppRouter/showTrip(_:)``).
 ///
@@ -24,7 +24,7 @@ struct StopDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 header
-                StopAlertsSlot(stopId: route.stopId)
+                StopAlertsSlot(board: loadedBoard)
                 content
                     .accessibilityElement(children: .contain)
                     .accessibilityIdentifier("stop.\(state.identifier)")
@@ -102,6 +102,15 @@ struct StopDetailView: View {
         }
     }
 
+    /// The board once it has loaded, for the alerts under the stop's name.
+    private var loadedBoard: StopBoard? {
+        if case let .loaded(board) = model.content {
+            board
+        } else {
+            nil
+        }
+    }
+
     private var state: StopState {
         switch model.content {
         case .idle, .loading: .loading
@@ -135,22 +144,50 @@ private enum StopState: Equatable {
     }
 }
 
-/// Where service alerts for the stop go, between its name and its departures. Empty until alert banners (A3) fill
-/// it from the stop's id.
+/// The service alerts that apply to the stop's departures, between its name and its departures: a banner each, the
+/// most severe first, up to ``limit``, then a button for them all. Each opens its full text
+/// (``AppRouter/showAlerts(_:on:)``). Nothing while none applies or the board hasn't loaded.
 struct StopAlertsSlot: View {
-    let stopId: String
+    let board: StopBoard?
+    @Environment(AppRouter.self) private var router
+
+    /// How many banners show before "Show All".
+    static let limit = 3
 
     var body: some View {
-        EmptyView()
+        let alerts = board?.currentAlerts() ?? []
+        if !alerts.isEmpty {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                ForEach(alerts.prefix(Self.limit)) { alert in
+                    Button {
+                        router.showAlerts([alert], on: nil)
+                    } label: {
+                        ServiceAlertBanner(alert)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityHint("Shows the alert's full text.")
+                }
+                if alerts.count > Self.limit {
+                    Button("Show All \(alerts.count) Alerts") {
+                        router.showAlerts(alerts, on: nil)
+                    }
+                    .typography(.button)
+                }
+            }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("stop.alerts")
+        }
     }
 }
 
-/// One line in one direction at the stop: its bullet and headsign, then a row per upcoming departure.
+/// One line in one direction at the stop: its bullet and headsign, a banner while an alert applies to it, then a row
+/// per upcoming departure.
 struct StopLineSection: View {
     let line: LineDepartures
     let now: Date
     let realtimeIsStale: Bool
     let onSelect: (Departure) -> Void
+    @Environment(AppRouter.self) private var router
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.xxs) {
@@ -164,6 +201,7 @@ struct StopLineSection: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("\(TransitLine(line).accessibilityName) to \(line.displayHeadsign)")
             .accessibilityAddTraits(.isHeader)
+            alertBanner
             VStack(spacing: 0) {
                 ForEach(Array(line.departures.enumerated()), id: \.element.id) { index, departure in
                     Button {
@@ -180,6 +218,24 @@ struct StopLineSection: View {
             }
             .padding(.horizontal, Spacing.sm)
             .background(.fill.quaternary, in: Radius.shape(Radius.md))
+        }
+    }
+}
+
+extension StopLineSection {
+    /// The most severe alert that applies to the line's departures; tapping it opens all of them.
+    @ViewBuilder
+    private var alertBanner: some View {
+        let alerts = line.currentAlerts(now: now)
+        if let first = alerts.first {
+            Button {
+                router.showAlerts(alerts, on: LineStatusLine(id: line.lineStatusId, bullet: line.bullet, name: nil))
+            } label: {
+                ServiceAlertBanner(first)
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint(alerts.count == 1 ? "Shows the alert's full text." : "Shows all \(alerts.count) alerts.")
+            .accessibilityIdentifier("stop.line-alert")
         }
     }
 }

@@ -62,16 +62,16 @@ struct HomeSheetContent<Departures: View, Alert: View, Places: View, Nearby: Vie
     }
 }
 
-extension HomeSheetContent where Departures == NearbySection, Alert == AlertChipPlaceholder,
+extension HomeSheetContent where Departures == NearbySection, Alert == AlertChip,
     Places == HomeWorkChips, Nearby == NearbySection, Saved == SavedPlacesSection
 {
-    /// The sheet with each slot showing its feature, or its placeholder until A3 lands. `nearby` is the board
+    /// The sheet with each slot showing its feature. `nearby` is the board
     /// both Nearby slots show, which outlives the content (``HomeSheet`` keeps it).
     init(nearby model: NearbyModel, isPeeking: Bool = false, onSearch: @escaping () -> Void) {
         self.init(isPeeking: isPeeking, onSearch: onSearch) {
             NearbySection(model: model, part: .next)
         } alert: {
-            AlertChipPlaceholder()
+            AlertChip(model: model)
         } places: {
             HomeWorkChips()
         } nearby: {

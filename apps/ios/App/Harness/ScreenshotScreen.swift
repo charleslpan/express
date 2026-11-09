@@ -98,6 +98,17 @@ enum ScreenshotScreen: String, CaseIterable {
     case tripFull = "trip-full"
     case tripEnded = "trip-ended"
     case tripError = "trip-error"
+    /// Service alerts (A3), with `-fixtures nyc-alerts`: banners on Nearby's rows at full height, the alert chip at
+    /// half height, and an alert's full text, which the UI test opens by tapping a banner.
+    case alertsNearby = "alerts-nearby"
+    case alertsChip = "alerts-chip"
+    case alertDetail = "alert-detail"
+    /// Line status (A3), pushed onto the home sheet: mixed lines (`nyc-alerts`), all good service (`nyc-evening`),
+    /// loading (`slow-network`), and offline (`offline`).
+    case lineStatus = "line-status"
+    /// Union Square's board (N2) with `-fixtures nyc-alerts`: the stop's alerts under its name, and a banner on each
+    /// line and direction they apply to (A3).
+    case stopAlerts = "stop-alerts"
 
     #if DEBUG
         /// GlassUI's gallery, every section (debug builds only).
@@ -126,7 +137,7 @@ enum ScreenshotScreen: String, CaseIterable {
              .tripError, .journeysPeek, .journeysHalf, .journeysFull, .journeysRoute, .journeysArriveBy,
              .journeysLoading, .journeysNoResults, .journeysOutsideNYC, .journeysLocationOff, .journeysError,
              .journeysStale, .journeySubway, .journeyBus, .journeyTight, .journeyCancelled, .journeyStale,
-             .journeyStops:
+             .journeyStops, .alertsNearby, .alertsChip, .alertDetail, .lineStatus, .stopAlerts:
             RootView()
         case .mapGlass: MapGlassScreen()
         case .trains: GoView(camera: MapCamera(center: Self.midtown, zoom: 14.5))
@@ -154,9 +165,10 @@ enum ScreenshotScreen: String, CaseIterable {
         switch self {
         case .homeHalf, .homePlaces, .homePlacesUnset, .nearbyHalf, .nearbyStale, .nearbyDenied, .nearbyOutsideNYC,
              .nearbyLoading, .nearbyError, .nearbyEmpty, .stopHalf, .stopStale, .stopError, .stopEmpty, .trip,
-             .tripEnded, .tripError: .half
+             .tripEnded, .tripError, .alertsChip, .alertDetail: .half
         case .homeFull, .homeSaved, .homeSavedLoading, .homeSavedEmpty, .nearbyFull, .stopFull, .tripFull,
-             .journeysFull, .journeysArriveBy, .journeyBus, .journeyTight, .journeyStops: .full
+             .journeysFull, .journeysArriveBy, .journeyBus, .journeyTight, .journeyStops, .alertsNearby, .lineStatus,
+             .stopAlerts: .full
         case .journeysPeek: .peek
         case _ where isJourneys || isJourneyDetail: .half
         default: .peek
@@ -203,7 +215,9 @@ enum ScreenshotScreen: String, CaseIterable {
     /// or trip pushed.
     @MainActor
     func prepare(_ router: AppRouter) {
-        if searchQuery != nil {
+        if self == .lineStatus {
+            router.showLineStatus(nearbyBuses: FixtureSet.unionSquareBuses)
+        } else if searchQuery != nil {
             router.showPlaceSearch()
         } else if [.searchPlace, .placeSaved, .placeHomeWork].contains(self) {
             router.showPlace(FixturePlaceSearchService.places[0])
@@ -226,7 +240,7 @@ enum ScreenshotScreen: String, CaseIterable {
         }
         let unionSquare = StopRoute(stopId: "us-ny-MTA-NYCSubway_635", name: "14 St-Union Sq", isSubway: true)
         switch self {
-        case .stopHalf, .stopFull, .stopStale, .stopError, .stopEmpty:
+        case .stopHalf, .stopFull, .stopStale, .stopError, .stopEmpty, .stopAlerts:
             router.homePath.append(unionSquare)
         case .trip, .tripFull, .tripError:
             router.homePath.append(unionSquare)
@@ -293,23 +307,10 @@ enum ScreenshotScreen: String, CaseIterable {
     var locationAuthorization: LocationService.Authorization {
         switch self {
         case .homeOutsideNYC, .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyOutsideNYC, .nearbyLoading,
-             .nearbyError, .nearbyEmpty: .authorized
+             .nearbyError, .nearbyEmpty, .alertsNearby, .alertsChip, .alertDetail: .authorized
         case .nearbyDenied, .journeysLocationOff: .denied
         case _ where isJourneys || isJourneyDetail: .authorized
         default: .notDetermined
-        }
-    }
-
-    /// The location the screen shows the user at, if any: Philadelphia's City Hall outside New York, and Union Square
-    /// (``FixtureSet/unionSquare``) for Nearby and journeys.
-    var location: Coordinate? {
-        switch self {
-        case .homeOutsideNYC, .nearbyOutsideNYC, .journeysOutsideNYC: Coordinate(latitude: 39.9526, longitude: -75.1652)
-        case .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyLoading, .nearbyError, .nearbyEmpty:
-            FixtureSet.unionSquare
-        case .journeysLocationOff: nil
-        case _ where isJourneys || isJourneyDetail: FixtureSet.unionSquare
-        default: nil
         }
     }
 
@@ -320,5 +321,22 @@ enum ScreenshotScreen: String, CaseIterable {
     /// The accessibility identifier the harness puts on the screen, which the UI test waits for before capturing.
     var accessibilityIdentifier: String {
         "screenshot.\(rawValue)"
+    }
+}
+
+/// Kept apart from the enum's body so it stays within SwiftLint's type length.
+extension ScreenshotScreen {
+    /// The location the screen shows the user at, if any: Philadelphia's City Hall outside New York, and Union Square
+    /// (``FixtureSet/unionSquare``) for Nearby and journeys.
+    var location: Coordinate? {
+        switch self {
+        case .homeOutsideNYC, .nearbyOutsideNYC, .journeysOutsideNYC: Coordinate(latitude: 39.9526, longitude: -75.1652)
+        case .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyLoading, .nearbyError, .nearbyEmpty,
+             .alertsNearby, .alertsChip, .alertDetail:
+            FixtureSet.unionSquare
+        case .journeysLocationOff: nil
+        case _ where isJourneys || isJourneyDetail: FixtureSet.unionSquare
+        default: nil
+        }
     }
 }

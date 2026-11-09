@@ -114,6 +114,16 @@
                         }
                     }
                 }
+                GalleryCard(title: "Service alerts") {
+                    VStack(spacing: Spacing.xs) {
+                        ServiceAlertBanner(
+                            level: .severe,
+                            header: "No [6] trains between 3 Av-138 St and Pelham Bay Park"
+                        )
+                        ServiceAlertBanner(level: .warning, header: "[L] trains are running with delays")
+                        ServiceAlertBanner(level: .info, header: "Enter 5 Av/53 St [E][F] Station at 5 Av only")
+                    }
+                }
                 GalleryCard(title: "Realtime") {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
                         ForEach(Self.states, id: \.title) { state in

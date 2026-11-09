@@ -3,8 +3,9 @@ import SwiftUI
 import TransitKit
 
 /// A nearby stop and its next departures: a header with the stop's mode, name, and walk, then a row per line and
-/// direction, soonest first. Tapping a row opens that line's departures (``AppRouter/showDepartures(_:at:)``), and
-/// tapping the header the stop's full board (``AppRouter/showStop(_:)``).
+/// direction, soonest first, each with a banner under it while an alert applies to it. Tapping a row opens that line's
+/// departures (``AppRouter/showDepartures(_:at:)``), and tapping the header the stop's full board
+/// (``AppRouter/showStop(_:)``).
 struct NearbyStopView: View {
     let stop: NearbyStop
     /// The lines to show, soonest first.
@@ -40,25 +41,46 @@ struct NearbyStopView: View {
             header
             VStack(spacing: 0) {
                 ForEach(Array(lines.enumerated()), id: \.element.id) { index, line in
-                    Button {
-                        onSelect(line)
-                    } label: {
-                        DepartureRow(
-                            line: TransitLine(line),
-                            headsign: line.displayHeadsign,
-                            detail: line.detail(realtimeIsStale: realtimeIsStale),
-                            departures: line.departures.map {
-                                DepartureTime($0, now: now, realtimeIsStale: realtimeIsStale)
-                            }
-                        )
+                    VStack(spacing: 0) {
+                        Button {
+                            onSelect(line)
+                        } label: {
+                            DepartureRow(
+                                line: TransitLine(line),
+                                headsign: line.displayHeadsign,
+                                detail: line.detail(realtimeIsStale: realtimeIsStale),
+                                departures: line.departures.map {
+                                    DepartureTime($0, now: now, realtimeIsStale: realtimeIsStale)
+                                }
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        alertBanner(for: line)
                     }
-                    .buttonStyle(.plain)
                     .homeSheetPeekBoundary(marksPeek && index == peekRow)
                     if index < lines.count - 1 {
                         Divider()
                     }
                 }
             }
+        }
+    }
+
+    /// The most severe alert that applies to the line's departures, under its row; tapping it opens the full text
+    /// of all of them (``AppRouter/showAlerts(_:on:)``). Nothing where none applies.
+    @ViewBuilder
+    private func alertBanner(for line: LineDepartures) -> some View {
+        let alerts = line.currentAlerts(now: now)
+        if let first = alerts.first {
+            Button {
+                router.showAlerts(alerts, on: LineStatusLine(id: line.lineStatusId, bullet: line.bullet, name: nil))
+            } label: {
+                ServiceAlertBanner(first)
+            }
+            .buttonStyle(.plain)
+            .padding(.bottom, Spacing.xs)
+            .accessibilityHint(alerts.count == 1 ? "Shows the alert's full text." : "Shows all \(alerts.count) alerts.")
+            .accessibilityIdentifier("nearby.alert")
         }
     }
 
