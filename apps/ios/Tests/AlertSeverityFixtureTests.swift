@@ -9,7 +9,7 @@ import TransitKit
 struct AlertSeverityFixtureTests {
     private static let fixtures = FixtureSet.nycAlertsMixed
 
-    @Test func nearbyShowsTheLocalQAsANoticeBesideTheSuspendedL() async throws {
+    @Test func nearbyShowsTheLocal6AsANoticeBesideTheSuspendedL() async throws {
         let response = try await Self.fixtures.transitClient
             .departures(DeparturesRequest(stopId: "us-ny-MTA-NYCSubway_635"))
         func levels(_ route: String, direction: String) -> [AlertLevel] {
@@ -19,8 +19,9 @@ struct AlertSeverityFixtureTests {
                 .active(at: Self.fixtures.referenceDate)
                 .map(\.level)
         }
-        #expect(levels("Q", direction: "0") == [.info])
-        #expect(levels("Q", direction: "1").isEmpty)
+        #expect(levels("6", direction: "0") == [.info])
+        #expect(levels("6", direction: "1").isEmpty)
+        #expect(levels("Q", direction: "0").isEmpty, "the local Q is the journey's")
         #expect(levels("L", direction: "0") == [.severe])
         #expect(levels("4", direction: "0") == [.warning])
     }
