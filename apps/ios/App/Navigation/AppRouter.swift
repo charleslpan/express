@@ -42,6 +42,9 @@ final class AppRouter {
     var selectedPlace: PlaceDetails?
     /// The journey option drawn on the map, picked from the journey options (``showJourneyDetail(_:)``).
     var selectedJourney: Itinerary?
+    /// The selected journey's legs the map zooms to, by their place in its itinerary; empty for the whole journey
+    /// (``showJourneyLegs(_:)``).
+    var focusedJourneyLegs: [Int] = []
     /// The sheet shown over the home sheet, if any.
     var sheet: AppSheet?
     /// The trip drawn on the map while its trip view shows (``showOnMap(_:)``).

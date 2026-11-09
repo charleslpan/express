@@ -1,0 +1,450 @@
+{
+ "itineraries": [
+  {
+   "duration": 1680,
+   "startTime": "2026-11-03T23:30:00Z",
+   "endTime": "2026-11-03T23:58:00Z",
+   "transfers": 1,
+   "id": "fixture-l-m101",
+   "legs": [
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "START",
+      "lat": 40.7343,
+      "lon": -73.9895,
+      "vertexType": "NORMAL"
+     },
+     "to": {
+      "name": "14 St-Union Sq",
+      "stopId": "us-ny-MTA-NYCSubway_L03S",
+      "lat": 40.734789,
+      "lon": -73.99073,
+      "vertexType": "TRANSIT",
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T23:33:00Z",
+      "scheduledArrival": "2026-11-03T23:33:00Z",
+      "arrivalTimestampReason": "PREDICTED",
+      "departure": "2026-11-03T23:33:00Z",
+      "scheduledDeparture": "2026-11-03T23:33:00Z",
+      "departureTimestampReason": "PREDICTED",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false
+     },
+     "duration": 180,
+     "startTime": "2026-11-03T23:30:00Z",
+     "endTime": "2026-11-03T23:33:00Z",
+     "scheduledStartTime": "2026-11-03T23:30:00Z",
+     "scheduledEndTime": "2026-11-03T23:33:00Z",
+     "realTime": false,
+     "scheduled": true,
+     "distance": 200,
+     "legGeometry": {
+      "points": "wdfulAvv}blCg^~iA",
+      "precision": 6,
+      "length": 2
+     },
+     "steps": [
+      {
+       "relativeDirection": "DEPART",
+       "distance": 60,
+       "fromLevel": 0,
+       "toLevel": 0,
+       "polyline": {
+        "points": "",
+        "precision": 6,
+        "length": 0
+       },
+       "streetName": "Union Square East",
+       "exit": "",
+       "stayOn": false,
+       "area": false
+      },
+      {
+       "relativeDirection": "LEFT",
+       "distance": 90,
+       "fromLevel": 0,
+       "toLevel": 0,
+       "polyline": {
+        "points": "",
+        "precision": 6,
+        "length": 0
+       },
+       "streetName": "East 14th Street",
+       "exit": "",
+       "stayOn": false,
+       "area": false
+      },
+      {
+       "relativeDirection": "STAIRS",
+       "distance": 50,
+       "fromLevel": 0,
+       "toLevel": 0,
+       "polyline": {
+        "points": "",
+        "precision": 6,
+        "length": 0
+       },
+       "streetName": "",
+       "exit": "",
+       "stayOn": false,
+       "area": false
+      }
+     ]
+    },
+    {
+     "mode": "SUBWAY",
+     "from": {
+      "name": "14 St-Union Sq",
+      "stopId": "us-ny-MTA-NYCSubway_L03S",
+      "lat": 40.734789,
+      "lon": -73.99073,
+      "vertexType": "TRANSIT",
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T23:33:00Z",
+      "scheduledArrival": "2026-11-03T23:33:00Z",
+      "arrivalTimestampReason": "PREDICTED",
+      "departure": "2026-11-03T23:33:00Z",
+      "scheduledDeparture": "2026-11-03T23:33:00Z",
+      "departureTimestampReason": "PREDICTED",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false
+     },
+     "to": {
+      "name": "3 Av",
+      "stopId": "us-ny-MTA-NYCSubway_L05S",
+      "lat": 40.732849,
+      "lon": -73.986122,
+      "vertexType": "TRANSIT",
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T23:35:00Z",
+      "scheduledArrival": "2026-11-03T23:35:00Z",
+      "arrivalTimestampReason": "PREDICTED",
+      "departure": "2026-11-03T23:35:00Z",
+      "scheduledDeparture": "2026-11-03T23:35:00Z",
+      "departureTimestampReason": "PREDICTED",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false
+     },
+     "duration": 120,
+     "startTime": "2026-11-03T23:33:00Z",
+     "endTime": "2026-11-03T23:35:00Z",
+     "scheduledStartTime": "2026-11-03T23:33:00Z",
+     "scheduledEndTime": "2026-11-03T23:35:00Z",
+     "realTime": true,
+     "scheduled": true,
+     "headsign": "Canarsie-Rockaway Pkwy",
+     "routeId": "us-ny-MTA-NYCSubway_L",
+     "routeColor": "a7a9ac",
+     "routeTextColor": "ffffff",
+     "routeShortName": "L",
+     "displayName": "L",
+     "tripId": "fixture-trip-l",
+     "agencyName": "MTA New York City Transit",
+     "cancelled": false,
+     "intermediateStops": [],
+     "legGeometry": {
+      "points": "icgulArc`clCfxB__H",
+      "precision": 6,
+      "length": 2
+     }
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "3 Av",
+      "stopId": "us-ny-MTA-NYCSubway_L05S",
+      "lat": 40.732849,
+      "lon": -73.986122,
+      "vertexType": "TRANSIT",
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T23:35:00Z",
+      "scheduledArrival": "2026-11-03T23:35:00Z",
+      "arrivalTimestampReason": "PREDICTED",
+      "departure": "2026-11-03T23:35:00Z",
+      "scheduledDeparture": "2026-11-03T23:35:00Z",
+      "departureTimestampReason": "PREDICTED",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false
+     },
+     "to": {
+      "name": "3 Av/E 14 St",
+      "stopId": "us-ny-MTA-BusManhattan_401907",
+      "lat": 40.733,
+      "lon": -73.9871,
+      "vertexType": "TRANSIT",
+      "tz": "America/New_York",
+      "departure": "2026-11-03T23:39:00Z",
+      "scheduledDeparture": "2026-11-03T23:38:00Z",
+      "departureTimestampReason": "PREDICTED",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false
+     },
+     "duration": 60,
+     "startTime": "2026-11-03T23:35:00Z",
+     "endTime": "2026-11-03T23:36:00Z",
+     "scheduledStartTime": "2026-11-03T23:35:00Z",
+     "scheduledEndTime": "2026-11-03T23:36:00Z",
+     "realTime": false,
+     "scheduled": true,
+     "distance": 60,
+     "legGeometry": {
+      "points": "ajculArcwblCmHb|@",
+      "precision": 6,
+      "length": 2
+     },
+     "steps": [
+      {
+       "relativeDirection": "DEPART",
+       "distance": 60,
+       "fromLevel": 0,
+       "toLevel": 0,
+       "polyline": {
+        "points": "",
+        "precision": 6,
+        "length": 0
+       },
+       "streetName": "East 14th Street",
+       "exit": "",
+       "stayOn": false,
+       "area": false
+      }
+     ]
+    },
+    {
+     "mode": "BUS",
+     "from": {
+      "name": "3 Av/E 14 St",
+      "stopId": "us-ny-MTA-BusManhattan_401907",
+      "lat": 40.733,
+      "lon": -73.9871,
+      "vertexType": "TRANSIT",
+      "tz": "America/New_York",
+      "departure": "2026-11-03T23:39:00Z",
+      "scheduledDeparture": "2026-11-03T23:38:00Z",
+      "departureTimestampReason": "PREDICTED",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false
+     },
+     "to": {
+      "name": "3 Av/E 42 St",
+      "stopId": "us-ny-MTA-BusManhattan_401920",
+      "lat": 40.7497,
+      "lon": -73.9746,
+      "vertexType": "TRANSIT",
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T23:53:00Z",
+      "scheduledArrival": "2026-11-03T23:52:00Z",
+      "arrivalTimestampReason": "PREDICTED",
+      "departure": "2026-11-03T23:53:00Z",
+      "scheduledDeparture": "2026-11-03T23:52:00Z",
+      "departureTimestampReason": "PREDICTED",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false
+     },
+     "duration": 840,
+     "startTime": "2026-11-03T23:39:00Z",
+     "endTime": "2026-11-03T23:53:00Z",
+     "scheduledStartTime": "2026-11-03T23:38:00Z",
+     "scheduledEndTime": "2026-11-03T23:52:00Z",
+     "realTime": true,
+     "scheduled": true,
+     "headsign": "Fort George",
+     "routeId": "us-ny-MTA-BusManhattan_M101",
+     "routeColor": "0039a6",
+     "routeTextColor": "ffffff",
+     "routeShortName": "M101",
+     "displayName": "M101",
+     "tripId": "fixture-trip-m101-b",
+     "agencyName": "MTA New York City Transit",
+     "cancelled": false,
+     "intermediateStops": [
+      {
+       "name": "3 Av/E 18 St",
+       "stopId": "us-ny-MTA-BusManhattan_401909",
+       "lat": 40.7356,
+       "lon": -73.9853,
+       "vertexType": "TRANSIT",
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T23:41:00Z",
+       "scheduledArrival": "2026-11-03T23:40:00Z",
+       "arrivalTimestampReason": "PREDICTED",
+       "departure": "2026-11-03T23:41:00Z",
+       "scheduledDeparture": "2026-11-03T23:40:00Z",
+       "departureTimestampReason": "PREDICTED",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false
+      },
+      {
+       "name": "3 Av/E 23 St",
+       "stopId": "us-ny-MTA-BusManhattan_401911",
+       "lat": 40.7387,
+       "lon": -73.983,
+       "vertexType": "TRANSIT",
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T23:44:00Z",
+       "scheduledArrival": "2026-11-03T23:43:00Z",
+       "arrivalTimestampReason": "PREDICTED",
+       "departure": "2026-11-03T23:44:00Z",
+       "scheduledDeparture": "2026-11-03T23:43:00Z",
+       "departureTimestampReason": "PREDICTED",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false
+      },
+      {
+       "name": "3 Av/E 28 St",
+       "stopId": "us-ny-MTA-BusManhattan_401913",
+       "lat": 40.7419,
+       "lon": -73.9807,
+       "vertexType": "TRANSIT",
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T23:46:00Z",
+       "scheduledArrival": "2026-11-03T23:45:00Z",
+       "arrivalTimestampReason": "PREDICTED",
+       "departure": "2026-11-03T23:46:00Z",
+       "scheduledDeparture": "2026-11-03T23:45:00Z",
+       "departureTimestampReason": "PREDICTED",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false
+      },
+      {
+       "name": "3 Av/E 34 St",
+       "stopId": "us-ny-MTA-BusManhattan_401916",
+       "lat": 40.7454,
+       "lon": -73.9781,
+       "vertexType": "TRANSIT",
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T23:49:00Z",
+       "scheduledArrival": "2026-11-03T23:48:00Z",
+       "arrivalTimestampReason": "PREDICTED",
+       "departure": "2026-11-03T23:49:00Z",
+       "scheduledDeparture": "2026-11-03T23:48:00Z",
+       "departureTimestampReason": "PREDICTED",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false
+      },
+      {
+       "name": "3 Av/E 39 St",
+       "stopId": "us-ny-MTA-BusManhattan_401918",
+       "lat": 40.7482,
+       "lon": -73.9761,
+       "vertexType": "TRANSIT",
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T23:51:00Z",
+       "scheduledArrival": "2026-11-03T23:50:00Z",
+       "arrivalTimestampReason": "PREDICTED",
+       "departure": "2026-11-03T23:51:00Z",
+       "scheduledDeparture": "2026-11-03T23:50:00Z",
+       "departureTimestampReason": "PREDICTED",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false
+      }
+     ],
+     "legGeometry": {
+      "points": "osculAv`yblCoaDooBw`EwnC_gEwnCwyEoaD_nD_|Bw|Aw|A",
+      "precision": 6,
+      "length": 7
+     }
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "3 Av/E 42 St",
+      "stopId": "us-ny-MTA-BusManhattan_401920",
+      "lat": 40.7497,
+      "lon": -73.9746,
+      "vertexType": "TRANSIT",
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T23:53:00Z",
+      "scheduledArrival": "2026-11-03T23:52:00Z",
+      "arrivalTimestampReason": "PREDICTED",
+      "departure": "2026-11-03T23:53:00Z",
+      "scheduledDeparture": "2026-11-03T23:52:00Z",
+      "departureTimestampReason": "PREDICTED",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false
+     },
+     "to": {
+      "name": "END",
+      "lat": 40.7527,
+      "lon": -73.9772,
+      "vertexType": "NORMAL"
+     },
+     "duration": 300,
+     "startTime": "2026-11-03T23:53:00Z",
+     "endTime": "2026-11-03T23:58:00Z",
+     "scheduledStartTime": "2026-11-03T23:53:00Z",
+     "scheduledEndTime": "2026-11-03T23:58:00Z",
+     "realTime": false,
+     "scheduled": true,
+     "distance": 390,
+     "legGeometry": {
+      "points": "ggdvlAns`blCgiB~iAgpAnvA",
+      "precision": 6,
+      "length": 3
+     },
+     "steps": [
+      {
+       "relativeDirection": "DEPART",
+       "distance": 30,
+       "fromLevel": 0,
+       "toLevel": 0,
+       "polyline": {
+        "points": "",
+        "precision": 6,
+        "length": 0
+       },
+       "streetName": "3rd Avenue",
+       "exit": "",
+       "stayOn": false,
+       "area": false
+      },
+      {
+       "relativeDirection": "LEFT",
+       "distance": 330,
+       "fromLevel": 0,
+       "toLevel": 0,
+       "polyline": {
+        "points": "",
+        "precision": 6,
+        "length": 0
+       },
+       "streetName": "East 42nd Street",
+       "exit": "",
+       "stayOn": false,
+       "area": false
+      },
+      {
+       "relativeDirection": "RIGHT",
+       "distance": 30,
+       "fromLevel": 0,
+       "toLevel": 0,
+       "polyline": {
+        "points": "",
+        "precision": 6,
+        "length": 0
+       },
+       "streetName": "Park Avenue",
+       "exit": "",
+       "stayOn": false,
+       "area": false
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

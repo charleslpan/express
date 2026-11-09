@@ -3,7 +3,8 @@ import SwiftUI
 import TransitKit
 
 /// A journey drawn on the map: each leg a line in its colour, walking legs dashed. The map fits itself to each new
-/// route, keeping it clear of the controls at the top and the home sheet at the bottom.
+/// route, keeping it clear of the controls at the top and the home sheet at the bottom, and to the segments it focuses
+/// on, such as a leg tapped in the journey's plan.
 struct MapRoute: Identifiable, Equatable {
     /// One leg of the route.
     struct Segment: Identifiable, Equatable {
@@ -18,6 +19,8 @@ struct MapRoute: Identifiable, Equatable {
     /// leaves the map where it is.
     var id: String
     var segments: [Segment]
+    /// The segments the map zooms to, by id; empty for the whole route. A change moves the map to fit them.
+    var focusedSegmentIDs: [String] = []
 }
 
 /// Draws a ``MapRoute`` on a `GMSMapView` for ``MapView``: its legs as polylines, and the camera fitted to each new
@@ -30,6 +33,7 @@ final class MapRouteOverlay {
     func show(_ route: MapRoute?, on mapView: GMSMapView, animated: Bool) {
         guard route != self.route else { return }
         let isNew = route?.id != self.route?.id
+        let isRefocused = route?.focusedSegmentIDs != self.route?.focusedSegmentIDs
         self.route = route
         lines.forEach { $0.map = nil }
         lines = (route?.segments ?? []).map { segment in
@@ -54,14 +58,17 @@ final class MapRouteOverlay {
             line.map = mapView
             return line
         }
-        if let route, isNew {
+        if let route, isNew || isRefocused {
             fit(route, on: mapView, animated: animated)
         }
     }
 
-    /// Moves the map so the whole route shows between the controls at the top and the sheet at half height.
+    /// Moves the map so the route's focused segments (or, with none, the whole route) show between the controls at
+    /// the top and the sheet at half height.
     private func fit(_ route: MapRoute, on mapView: GMSMapView, animated: Bool) {
-        let bounds = route.segments.flatMap(\.coordinates).reduce(GMSCoordinateBounds()) { bounds, coordinate in
+        let focused = route.segments.filter { route.focusedSegmentIDs.contains($0.id) }
+        let segments = focused.isEmpty ? route.segments : focused
+        let bounds = segments.flatMap(\.coordinates).reduce(GMSCoordinateBounds()) { bounds, coordinate in
             bounds.includingCoordinate(CLLocationCoordinate2D(coordinate))
         }
         guard bounds.isValid else { return }

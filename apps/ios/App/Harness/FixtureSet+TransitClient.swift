@@ -13,12 +13,13 @@ extension FixtureSet {
     /// routes' labels and colours (`Fixtures/map-routes-midtown.json`: the feed's for the 14 St SBS routes,
     /// illustrative for the rest). The bus-only sets run no trains. The trip view's
     /// requests follow the set's network too: a trip by its id (`Fixtures/trip-<tripId>.json`, such as the uptown 6
-    /// Nearby lists, `fixture-6-0-4`). Journeys plan from Union Square to Grand Central Terminal
-    /// (`Fixtures/plan-nyc-evening.json`: the 4, the 6 running late, the Q and the shuttle, the M101, and a walk),
-    /// except in `no-journeys`, which finds none. Line status (`/api/alerts`) answers every requested line with no
-    /// alerts, but in `nyc-alerts`, which answers from `Fixtures/line-status-nyc-alerts.json` (the MTA's alerts
-    /// recorded
-    /// that evening, with the set's own) and adds `Fixtures/nearby-alerts.json` to the departures.
+    /// Nearby lists, `fixture-6-0-4`), and the trips the journeys ride (`fixture-trip-6` and the rest, which journey
+    /// detail refreshes from; `nyc-evening-cancelled` cancels the 6, from `trip-fixture-trip-6-cancelled.json`).
+    /// Journeys plan from Union Square to Grand Central Terminal (`Fixtures/plan-nyc-evening.json`: the 4, the 6
+    /// running late, the Q and the shuttle, the M101, and a walk), except in `no-journeys`, which finds none.
+    /// Line status (`/api/alerts`) answers every requested line with no alerts, but in `nyc-alerts`, which answers from
+    /// `Fixtures/line-status-nyc-alerts.json` (the MTA's alerts recorded that evening, with the set's own) and adds
+    /// `Fixtures/nearby-alerts.json` to the departures.
     var transitClient: TransitClient {
         let fixtures = self
         return TransitClient(transport: StubTransport { request in
@@ -41,7 +42,7 @@ extension FixtureSet {
                 try await Task.sleep(for: .seconds(24 * 60 * 60))
                 throw CancellationError()
             case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .noKey,
-                 .noJourneys, .nycAlerts:
+                 .noJourneys, .nycEveningCancelled, .nycAlerts:
                 return try Self.response(to: request, fixtures: fixtures)
             }
         })
@@ -64,7 +65,11 @@ extension FixtureSet {
             }
             return noDepartures
         case "/api/v6/trip":
-            return try fixture("trip-\(request.query["tripId"] ?? "")")
+            let tripId = request.query["tripId"] ?? ""
+            if fixtures == .nycEveningCancelled, let cancelled = try? fixture("trip-\(tripId)-cancelled") {
+                return cancelled
+            }
+            return try fixture("trip-\(tripId)")
         case "/api/alerts":
             return try lineStatus(lines: request.query["lines"] ?? "", fixtures: fixtures)
         default:
@@ -140,6 +145,26 @@ extension FixtureSet {
     private static let noDepartures = Data("""
     {"stopTimes": [], "place": {"name": "", "lat": 0, "lon": 0}, "previousPageCursor": "", "nextPageCursor": ""}
     """.utf8)
+
+    /// A journey the screenshot harness opens in detail, by its id: one the plan offers
+    /// (`Fixtures/plan-nyc-evening.json`), or one only the harness opens (`Fixtures/journeys-detail.json`: the L and
+    /// the M101 with a transfer at 3 Av, `fixture-l-m101`).
+    static func journey(id: String) -> Itinerary? {
+        struct Journeys: Decodable {
+            var itineraries: [Itinerary]
+        }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        for name in ["plan-nyc-evening", "journeys-detail"] {
+            guard let data = try? fixture(name), let journeys = try? decoder.decode(Journeys.self, from: data) else {
+                continue
+            }
+            if let journey = journeys.itineraries.first(where: { $0.id == id }) {
+                return journey
+            }
+        }
+        return nil
+    }
 
     private static func fixture(_ name: String) throws -> Data {
         guard let url = Bundle.main.url(forResource: name, withExtension: "json") else {

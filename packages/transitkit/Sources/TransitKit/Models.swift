@@ -10,6 +10,9 @@ public typealias Place = Components.Schemas.Place
 /// A way of travelling: a transit mode (`.subway`, `.bus`, `.regionalRail`, …) or a street mode (`.walk`, `.bike`, …).
 public typealias TransitMode = Components.Schemas.Mode
 
+/// One turn-by-turn step of a walk: a direction, a street, and a distance.
+public typealias StepInstruction = Components.Schemas.StepInstruction
+
 /// A Google-encoded polyline, with the precision MOTIS encoded it at.
 public typealias EncodedPolyline = Components.Schemas.EncodedPolyline
 

@@ -27,7 +27,7 @@ struct FixturePlaceSearchService: PlaceSearchService {
     private func respond() async throws {
         switch fixtures {
         case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .noJourneys,
-             .nycAlerts:
+             .nycEveningCancelled, .nycAlerts:
             return
         case .slowNetwork:
             try await Task.sleep(for: .seconds(3600))
