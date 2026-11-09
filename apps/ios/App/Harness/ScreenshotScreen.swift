@@ -239,7 +239,7 @@ enum ScreenshotScreen: String, CaseIterable {
             }
             router.showJourneys(query)
             router.homeDetent = homeDetent
-        } else if let journey = self.journey(launchedWith: fixtures) {
+        } else if let journey = journey(launchedWith: fixtures) {
             let place = FixturePlaceSearchService.places[0]
             router.showPlace(place)
             router.showJourneys(JourneyQuery(to: .place(place)))
