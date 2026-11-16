@@ -67,14 +67,31 @@ describe("planPrune", () => {
   });
 });
 
-function mockApi(images: Image[], options: { project?: unknown; failList?: boolean; failDelete?: string } = {}) {
+interface MockOptions {
+  project?: unknown;
+  failList?: boolean;
+  failDelete?: string;
+  /** Status of `GET /v1/vcr/repository`; 200 answers with the `motis` repository. */
+  repositories?: number;
+}
+
+function mockApi(images: Image[], options: MockOptions = {}) {
   const deleted: string[] = [];
   const fetch = vi.fn(async (input: URL | string | Request, init?: RequestInit) => {
     const url = new URL(input.toString());
     expect(url.searchParams.get("teamId")).toBe("team_test");
     expect(new Headers(init?.headers).get("authorization")).toBe("Bearer tok");
-    if (url.pathname === "/v9/projects/prj_test") {
-      return Response.json(options.project ?? { targets: { production: { id: "sha_img0", createdAt: T0 } } });
+    // The function may be given the project's name; the VCR calls must use the id the project answers with.
+    if (url.pathname === "/v9/projects/express") {
+      return Response.json(
+        options.project ?? { id: "prj_test", name: "express", targets: { production: { id: "sha_img0", createdAt: T0 } } },
+      );
+    }
+    if (url.pathname === "/v1/vcr/repository" && init?.method === "GET") {
+      expect(url.searchParams.get("projectId")).toBe("prj_test");
+      const status = options.repositories ?? 200;
+      if (status !== 200) return new Response("nope", { status });
+      return Response.json({ repositories: [{ id: "repo_x", name: "motis" }] });
     }
     if (url.pathname === "/v1/vcr/repository/motis/images" && init?.method === "GET") {
       if (options.failList) return new Response("nope", { status: 500 });
@@ -97,7 +114,7 @@ function mockApi(images: Image[], options: { project?: unknown; failList?: boole
   const deps: PruneDeps = {
     token: "tok",
     teamId: "team_test",
-    projectId: "prj_test",
+    projectId: "express",
     deploymentId: "dpl_x",
     commitSha: undefined,
     fetch,
@@ -136,6 +153,19 @@ describe("pruneImages", () => {
     const failing = mockApi(daily, { failList: true });
     await expect(pruneImages(failing.deps)).rejects.toThrow("answered 500");
     expect(failing.deleted).toEqual([]);
+  });
+
+  it("logs the project id used and the registry's status when listing fails", async () => {
+    const seen = mockApi(daily, { failList: true });
+    await expect(pruneImages(seen.deps)).rejects.toThrow("answered 500");
+    expect(seen.log.warn).toHaveBeenCalledWith(
+      "prune: listing motis images failed; projectId prj_test (express), given express; " +
+        "GET /v1/vcr/repository answered 200 with motis",
+    );
+    const unseen = mockApi(daily, { failList: true, repositories: 404 });
+    await expect(pruneImages(unseen.deps)).rejects.toThrow("answered 500");
+    expect(unseen.log.warn).toHaveBeenCalledWith(expect.stringMatching(/GET \/v1\/vcr\/repository answered 404$/));
+    expect(JSON.stringify(unseen.log.warn.mock.calls)).not.toContain("tok");
   });
 });
 
