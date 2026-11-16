@@ -27,6 +27,15 @@ export interface Production {
   createdAt: number;
 }
 
+/**
+ * The project as its own record names it: the VCR calls take this `prj_` id
+ * rather than whatever id or name the function was given.
+ */
+interface Project {
+  id: string;
+  name: string | undefined;
+}
+
 export interface Plan {
   keep: Image[];
   remove: Image[];
@@ -90,8 +99,10 @@ async function api<T>(deps: PruneDeps, method: string, path: string, query: Reco
   return (await res.json().catch(() => null)) as T;
 }
 
-async function productionOf(deps: PruneDeps): Promise<Production> {
+async function productionOf(deps: PruneDeps): Promise<{ project: Project; production: Production }> {
   const project = await api<{
+    id?: string;
+    name?: string;
     targets?: { production?: { id?: string; createdAt?: number; meta?: { githubCommitSha?: string } } };
   }>(
     deps,
@@ -103,14 +114,17 @@ async function productionOf(deps: PruneDeps): Promise<Production> {
   const ids = [target.id, deps.deploymentId];
   const shas = [target.meta?.githubCommitSha, deps.commitSha];
   const tags = [...ids, ...shas, ...shas.map((sha) => sha?.slice(0, 12))].filter((tag): tag is string => !!tag);
-  return { tags: [...new Set(tags)], createdAt: target.createdAt };
+  return {
+    project: { id: project.id ?? deps.projectId, name: project.name },
+    production: { tags: [...new Set(tags)], createdAt: target.createdAt },
+  };
 }
 
-async function listImages(deps: PruneDeps): Promise<Image[]> {
+async function listImages(deps: PruneDeps, projectId: string): Promise<Image[]> {
   const images: Image[] = [];
   let cursor: string | undefined;
   for (let page = 0; page < MAX_PAGES; page++) {
-    const query: Record<string, string> = { projectId: deps.projectId, limit: "100" };
+    const query: Record<string, string> = { projectId, limit: "100" };
     if (cursor) query.cursor = cursor;
     const body = await api<{ images?: Image[]; nextCursor?: string }>(
       deps,
@@ -125,17 +139,46 @@ async function listImages(deps: PruneDeps): Promise<Image[]> {
   throw new Error(`more than ${MAX_PAGES} pages of images`);
 }
 
+/**
+ * Says which project the VCR calls named and whether the token sees the
+ * project's registry at all (`GET /v1/vcr/repository`), for when listing the
+ * images fails. Never includes the token.
+ */
+async function describeAccess(deps: PruneDeps, project: Project): Promise<string> {
+  const used =
+    `projectId ${project.id}` +
+    (project.name ? ` (${project.name})` : "") +
+    (project.id === deps.projectId ? "" : `, given ${deps.projectId}`);
+  let registry: string;
+  try {
+    const body = await api<{ repositories?: { name?: string }[] }>(deps, "GET", "/v1/vcr/repository", {
+      projectId: project.id,
+    });
+    const names = (body?.repositories ?? []).map((repository) => repository.name ?? "?");
+    registry = `answered 200 with ${names.length ? names.join(", ") : "no repositories"}`;
+  } catch (error) {
+    registry = (error as Error).message.replace(/^GET \/v1\/vcr\/repository /, "");
+  }
+  return `listing ${REPOSITORY} images failed; ${used}; GET /v1/vcr/repository ${registry}`;
+}
+
 /** Deletes old `motis` images. Throws if it cannot tell what production uses. */
 export async function pruneImages(deps: PruneDeps): Promise<PruneResult> {
-  const production = await productionOf(deps);
-  const images = await listImages(deps);
+  const { project, production } = await productionOf(deps);
+  let images: Image[];
+  try {
+    images = await listImages(deps, project.id);
+  } catch (error) {
+    deps.log.warn(`prune: ${await describeAccess(deps, project)}`);
+    throw error;
+  }
   const { keep, remove } = planPrune(images, production);
   let deleted = 0;
   let failed = 0;
   for (const image of remove) {
     try {
       await api(deps, "DELETE", `/v1/vcr/repository/${REPOSITORY}/images/${encodeURIComponent(image.id)}`, {
-        projectId: deps.projectId,
+        projectId: project.id,
       });
       deleted++;
     } catch (error) {
