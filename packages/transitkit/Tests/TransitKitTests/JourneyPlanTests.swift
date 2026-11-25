@@ -83,14 +83,14 @@ struct JourneyPlanTests {
         #expect(plan.problem?.message == "The connection at Jay St-MetroTech is missed by 2 min on live times.")
     }
 
-    @Test func noWaitUnderHalfAMinute() throws {
+    @Test func nothingToSayForAWaitUnderHalfAMinute() throws {
         var itinerary = try FixtureTransport.firstItinerary("plan-red-hook-to-times-square")
         itinerary.legs[3].startTime = itinerary.legs[1].endTime
             .addingTimeInterval(TimeInterval(itinerary.legs[2].duration))
         let transfer = try #require(JourneyPlan(itinerary).transfers.first)
         #expect(transfer.waitSeconds == 0)
         #expect(transfer.status == .tight)
-        #expect(transfer.formattedWait == "No wait")
+        #expect(transfer.formattedWait == nil)
     }
 
     @Test func cancelledRideMakesTheJourneyImpossible() throws {
