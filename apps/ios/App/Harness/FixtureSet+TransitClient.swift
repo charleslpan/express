@@ -43,7 +43,7 @@ extension FixtureSet {
             case .slowNetwork:
                 try await Task.sleep(for: .seconds(24 * 60 * 60))
                 throw CancellationError()
-            case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .noKey,
+            case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .noKey,
                  .noJourneys, .nycEveningCancelled, .nycAlerts, .nycAlertsMixed:
                 return try Self.response(to: request, fixtures: fixtures)
             }

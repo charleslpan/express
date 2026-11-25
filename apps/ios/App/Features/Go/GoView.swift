@@ -140,10 +140,7 @@ struct GoView: View {
             if isOutsideServiceArea {
                 OutsideServiceAreaBanner()
             }
-            // One note at a time: the bus note covers trains too where both may not be real time.
-            if buses.mayNotBeRealTime {
-                LiveBusesNotice(includesTrains: trains.mayNotBeRealTime)
-            } else if trains.mayNotBeRealTime {
+            if trains.mayNotBeRealTime {
                 LiveTrainsNotice()
             }
             controls
