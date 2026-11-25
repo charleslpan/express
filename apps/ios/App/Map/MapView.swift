@@ -76,6 +76,9 @@ struct MapView: View {
     var onCameraIdle: (@MainActor (MapViewport) -> Void)?
     /// Called as the map starts to move, by a gesture or an animation.
     var onCameraMove: (@MainActor () -> Void)?
+    /// Called as the map starts to move because the user touched it (a pan, pinch, rotation, or double tap), and not
+    /// for the moves the app makes, so the caller can stop re-framing what the user has moved away from.
+    var onUserGesture: (@MainActor () -> Void)?
     /// Called with a vehicle's id when it's tapped.
     var onVehicleTap: (@MainActor (String) -> Void)?
 
@@ -93,6 +96,7 @@ struct MapView: View {
                 onTilesRendered: onTilesRendered,
                 onCameraIdle: onCameraIdle,
                 onCameraMove: onCameraMove,
+                onUserGesture: onUserGesture,
                 onVehicleTap: onVehicleTap
             )
             .accessibilityLabel("Map")
@@ -121,6 +125,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
     var onTilesRendered: (() -> Void)?
     var onCameraIdle: (@MainActor (MapViewport) -> Void)?
     var onCameraMove: (@MainActor () -> Void)?
+    var onUserGesture: (@MainActor () -> Void)?
     var onVehicleTap: (@MainActor (String) -> Void)?
 
     func makeCoordinator() -> Coordinator {
@@ -148,6 +153,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         coordinator.onTilesRendered = onTilesRendered
         coordinator.onCameraIdle = onCameraIdle
         coordinator.onCameraMove = onCameraMove
+        coordinator.onUserGesture = onUserGesture
         coordinator.onVehicleTap = onVehicleTap
 
         let colorScheme = context.environment.colorScheme
@@ -186,6 +192,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         var onTilesRendered: (() -> Void)?
         var onCameraIdle: (@MainActor (MapViewport) -> Void)?
         var onCameraMove: (@MainActor () -> Void)?
+        var onUserGesture: (@MainActor () -> Void)?
         var onVehicleTap: (@MainActor (String) -> Void)?
         private var polylines: [MapPolyline] = []
         private var markers: [MapMarker] = []
@@ -350,8 +357,11 @@ extension GoogleMapRepresentable.Coordinator: @preconcurrency GMSMapViewDelegate
         camera.wrappedValue = settled
     }
 
-    func mapView(_: GMSMapView, willMove _: Bool) {
+    func mapView(_: GMSMapView, willMove gesture: Bool) {
         onCameraMove?()
+        if gesture {
+            onUserGesture?()
+        }
     }
 
     func mapView(_: GMSMapView, didTap marker: GMSMarker) -> Bool {
@@ -363,6 +373,42 @@ extension GoogleMapRepresentable.Coordinator: @preconcurrency GMSMapViewDelegate
 
     func mapViewDidFinishTileRendering(_: GMSMapView) {
         onTilesRendered?()
+    }
+}
+
+extension MapCamera {
+    /// Where the map looks to show `coordinate` in the middle of the part of the map the home sheet leaves clear,
+    /// rather than in the middle of the whole map, which the sheet covers.
+    ///
+    /// The map is centred on the middle of its whole view, so a pin in the middle of a map with the sheet over its
+    /// lower part is under the sheet. Looking at a point below the pin by half the covered height puts the pin in the
+    /// middle of what's left: the camera shifts by `obscuredBottom / 2` points (`obscuredTop` pulls the other way).
+    /// Both are measured in points on screen, so the result is independent of the screen's size, the sheet's detent,
+    /// and Dynamic Type: callers pass what the sheet covers right now (``GoView``).
+    ///
+    /// The map isn't rotated by this: it looks north, the way picking a place does.
+    ///
+    /// - Parameters:
+    ///   - zoom: A Google zoom level; it sets how many metres a point on screen is.
+    ///   - obscuredBottom: How far up from the map's bottom edge the sheet reaches, in points; 0 for none.
+    ///   - obscuredTop: How far down from the map's top edge something covers it, in points; 0 for none.
+    static func framing(
+        _ coordinate: Coordinate,
+        zoom: Float,
+        obscuredBottom: CGFloat,
+        obscuredTop: CGFloat = 0
+    ) -> MapCamera {
+        let shift = max(obscuredBottom, 0) / 2 - max(obscuredTop, 0) / 2
+        guard shift != 0 else {
+            return MapCamera(center: coordinate, zoom: zoom)
+        }
+        // Web Mercator: Google's world is 256 points across at zoom 0 and doubles with every level. Screen-down is
+        // south, which is less Mercator y.
+        let pointsPerRadian = 256 * pow(2, Double(zoom)) / (2 * .pi)
+        let latitude = coordinate.latitude * .pi / 180
+        let y = log(tan(.pi / 4 + latitude / 2)) - Double(shift) / pointsPerRadian
+        let shifted = (2 * atan(exp(y)) - .pi / 2) * 180 / .pi
+        return MapCamera(center: Coordinate(latitude: shifted, longitude: coordinate.longitude), zoom: zoom)
     }
 }
 
