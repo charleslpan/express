@@ -5,8 +5,8 @@ import UIKit
 
 /// The map home, the app's one screen: the map full screen, centred on the user where they're in New York and on New
 /// York otherwise, with glass controls floating at the top (About, a compass while the map is rotated, and "Show my
-/// location"), a banner while the user is outside the area Express serves, and the ``HomeSheet`` over it all, which
-/// can't be dismissed and leaves the map usable up to half height.
+/// location"), and the ``HomeSheet`` over it all, which can't be dismissed and leaves the map usable up to half
+/// height.
 ///
 /// The home map shows no vehicles. The journey or trip the sheet is showing draws its own vehicle, and only that one
 /// (``AppRouter/mapVehicles``, ``SwiftUI/View/rideVehicles(owner:targets:)``).
@@ -116,16 +116,10 @@ struct GoView: View {
         }
     }
 
-    /// The banner (when it shows) across the top, with the button column under it at the trailing edge, so the
-    /// two never overlap at any text size.
+    /// The button column at the top, at the trailing edge.
     private var topControls: some View {
-        VStack(alignment: .trailing, spacing: Spacing.floatingInset) {
-            if isOutsideServiceArea {
-                OutsideServiceAreaBanner()
-            }
-            controls
-        }
-        .frame(maxWidth: .infinity, alignment: .trailing)
+        controls
+            .frame(maxWidth: .infinity, alignment: .trailing)
     }
 
     private var controls: some View {
@@ -160,12 +154,6 @@ struct GoView: View {
         return abs(bearing) > 0.5 && abs(bearing) < 359.5
     }
 
-    /// Whether the user is somewhere Express doesn't serve yet; false while their location is unknown.
-    private var isOutsideServiceArea: Bool {
-        guard location.authorization == .authorized, let fix = location.location else { return false }
-        return !ServiceArea.nyc.contains(fix)
-    }
-
     /// The picked place's pin, while there is one.
     private var placePin: MapMarker? {
         router.selectedPlace.map { MapMarker(id: $0.placeID, coordinate: $0.coordinate, title: $0.name, color: .red) }
@@ -177,7 +165,7 @@ struct GoView: View {
         camera = MapCamera(center: place.coordinate, zoom: 16)
     }
 
-    /// Moves the map to the user's first fix in New York; outside it the map stays on the city, under the banner.
+    /// Moves the map to the user's first fix in New York; outside it the map stays on the city.
     private func centerOnUserInNewYork(_ fix: Coordinate?) {
         guard !hasCenteredOnUser, let fix, ServiceArea.nyc.contains(fix) else { return }
         hasCenteredOnUser = true

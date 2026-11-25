@@ -8,7 +8,7 @@ final class ScreenshotTests: XCTestCase {
         continueAfterFailure = false
     }
 
-    // The map home (S2): the home sheet at each detent, and the banner outside New York.
+    // The map home (S2): the home sheet at each detent, and outside New York (no banner).
 
     func testHomePeek() {
         capture("home-peek", fixtures: "nyc-evening", settledWhen: "map.settled")
@@ -23,7 +23,9 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func testHomeOutsideNYC() {
-        capture("home-outside-nyc", fixtures: "nyc-evening", settledWhen: "map.settled")
+        capture("home-outside-nyc", fixtures: "nyc-evening", settledWhen: "map.settled") { app in
+            XCTAssertFalse(app.staticTexts["Express covers New York City for now."].exists)
+        }
     }
 
     // Nearby (N1) in the home sheet at Union Square: the peek's next trains, then more stops at half and full height.
@@ -52,7 +54,9 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func testNearbyOutsideNYC() {
-        capture("nearby-outside-nyc", fixtures: "nyc-evening", settledWhen: "nearby.outside-nyc")
+        capture("nearby-outside-nyc", fixtures: "nyc-evening", settledWhen: "home.search") { app in
+            XCTAssertFalse(app.staticTexts["Nearby Is for New York"].exists)
+        }
     }
 
     func testNearbyLoading() {

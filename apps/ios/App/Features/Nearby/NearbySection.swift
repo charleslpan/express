@@ -11,7 +11,7 @@ import UIKit
 ///
 /// The `next` part refreshes the model about every 30 seconds while it's on screen and the app is active, and pauses
 /// otherwise. It asks for the location only when the rider taps "Use My Location", and says so plainly when it can't
-/// show departures: the location is off, the rider is outside New York, the server can't be reached, or nothing is
+/// show departures: the location is off, the server can't be reached, or nothing is
 /// due.
 struct NearbySection: View {
     /// Which part of the section a view shows.
@@ -91,14 +91,8 @@ struct NearbySection: View {
                 }
             }
         case .outsideServiceArea:
-            NearbyMessage(
-                "Nearby Is for New York",
-                systemImage: "building.2",
-                message: """
-                Express shows departures across New York City's five boroughs. \
-                Once you're there, the next trains and buses near you will show here.
-                """
-            ) {}
+            // Express doesn't load departures outside the city, and says nothing about it.
+            EmptyView()
         case .locating, .loading:
             NearbyLoadingRows(label: state == .locating ? "Finding stops near you" : "Loading departures near you")
         case .empty:
