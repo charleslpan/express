@@ -182,7 +182,114 @@ struct JourneyOptionsTests {
 
     @Test func arrivingSortsByLatestDeparture() {
         let ids = JourneyOptions.sorted(Self.options, for: .arriveBy(Self.start.addingTimeInterval(2400))).map(\.id)
-        #expect(ids == ["late", "fast", "direct", "walky", "slow"])
+        // "fast" leaves at 5 minutes, but its change costs 5: it ties "slow" at 0, which has no change.
+        #expect(ids == ["late", "direct", "walky", "slow", "fast"])
+    }
+
+    // MARK: Ranking by penalised time
+
+    /// A journey whose rides last `rides` minutes each, with the walking between them.
+    static func journey(
+        _ id: String,
+        departsIn departure: Int = 0,
+        arrivesIn arrival: Int,
+        rides: [Int],
+        walking: Int = 300
+    ) -> JourneySummary {
+        var summary = summary(
+            id,
+            departsIn: departure,
+            arrivesIn: arrival,
+            transfers: rides.count - 1,
+            walking: walking
+        )
+        summary.segments = rides.enumerated().map { index, minutes in
+            JourneySegment(
+                id: "\(id)-\(index)",
+                kind: .ride(LineBullet(text: "\(id)\(index)", shape: .circle), .subway),
+                minutes: minutes
+            )
+        }
+        return summary
+    }
+
+    /// Times Square to Coney Island, as captured: two journeys with two changes (a one-minute train and a
+    /// three-minute bus among them) arrive a few minutes before the direct Q.
+    static let timesSquareToConeyIsland = [
+        journey("shuttle", arrivesIn: 49, rides: [12, 1, 20]),
+        journey("bus", arrivesIn: 50, rides: [10, 15, 3]),
+        journey("direct-q", arrivesIn: 56, rides: [52]),
+    ]
+
+    @Test func directRideBeatsTwoChangesThatArriveMinutesEarlier() {
+        // By raw arrival the changes win; with their cost the direct Q leads.
+        #expect(Self.timesSquareToConeyIsland.sorted { $0.arrival < $1.arrival }.map(\.id)
+            == ["shuttle", "bus", "direct-q"])
+        let ids = JourneyOptions.sorted(Self.timesSquareToConeyIsland, for: .now).map(\.id)
+        #expect(ids == ["direct-q", "bus", "shuttle"])
+        #expect(JourneyOptions.sorted(Self.timesSquareToConeyIsland, for: .departAt(Self.start)).map(\.id) == ids)
+    }
+
+    @Test func aRealSavingStillWinsOverAChange() {
+        let options = [
+            Self.journey("direct", arrivesIn: 60, rides: [60]),
+            Self.journey("transfer", arrivesIn: 45, rides: [20, 25]),
+        ]
+        // Fifteen minutes saved outweighs the five a change costs.
+        #expect(JourneyOptions.sorted(options, for: .now).map(\.id) == ["transfer", "direct"])
+        // Four minutes saved doesn't.
+        let close = [
+            Self.journey("direct", arrivesIn: 60, rides: [60]),
+            Self.journey("transfer", arrivesIn: 56, rides: [20, 36]),
+        ]
+        #expect(JourneyOptions.sorted(close, for: .now).map(\.id) == ["direct", "transfer"])
+    }
+
+    @Test func penaltyCountsChangesAndShortRidesButNotTheLastOrTheOnlyRide() {
+        let penalty = JourneyOptions.penaltySeconds(for:)
+        #expect(penalty(Self.journey("a", arrivesIn: 20, rides: [2])) == 0)
+        #expect(penalty(Self.journey("b", arrivesIn: 20, rides: [10, 10])) == 300)
+        // A short last ride costs only its change: a sensible short final hop isn't punished twice.
+        #expect(penalty(Self.journey("c", arrivesIn: 20, rides: [10, 1])) == 300)
+        // A short ride in the middle costs a change on each side and the hop itself; three minutes is still short.
+        #expect(penalty(Self.journey("d", arrivesIn: 20, rides: [10, 3, 10])) == 900)
+        #expect(penalty(Self.journey("e", arrivesIn: 20, rides: [10, 4, 10])) == 600)
+        // Without segments only the changes count.
+        #expect(penalty(Self.summary("f", departsIn: 0, arrivesIn: 20, transfers: 2)) == 600)
+    }
+
+    @Test func aShortFinalHopKeepsAReasonableRank() {
+        let options = [
+            Self.journey("direct", arrivesIn: 40, rides: [40]),
+            Self.journey("hop", arrivesIn: 33, rides: [30, 1]),
+        ]
+        // Seven minutes earlier, one change: the hop leads, since its last ride isn't charged as a short ride too.
+        #expect(JourneyOptions.sorted(options, for: .now).map(\.id) == ["hop", "direct"])
+    }
+
+    @Test func arrivingPenalisesDepartureEarlier() {
+        let options = [
+            Self.journey("changes", departsIn: 10, arrivesIn: 40, rides: [12, 1, 20]),
+            Self.journey("direct", departsIn: 5, arrivesIn: 40, rides: [35]),
+        ]
+        let ids = JourneyOptions.sorted(options, for: .arriveBy(Self.start.addingTimeInterval(2400))).map(\.id)
+        // Leaving at 10 with two changes and a short hop is worth leaving at -5; the direct ride's 5 wins.
+        #expect(ids == ["direct", "changes"])
+    }
+
+    @Test func equalScoresBreakDeterministically() {
+        let a = Self.journey("a", arrivesIn: 30, rides: [30])
+        let b = Self.journey("b", arrivesIn: 30, rides: [30])
+        #expect(JourneyOptions.sorted([b, a], for: .now).map(\.id) == ["a", "b"])
+        #expect(JourneyOptions.sorted([a, b], for: .now).map(\.id) == ["a", "b"])
+        // A change that ties a direct ride's penalised time still ranks after it.
+        let tied = [
+            Self.journey("change", arrivesIn: 25, rides: [10, 15]),
+            Self.journey("direct", arrivesIn: 30, rides: [30]),
+        ]
+        #expect(JourneyOptions.sorted(tied, for: .now).map(\.id) == ["direct", "change"])
+        // Nothing is dropped.
+        #expect(JourneyOptions.sorted(Self.timesSquareToConeyIsland, for: .now).count == 3)
     }
 
     @Test func optionsFromAPlan() async throws {

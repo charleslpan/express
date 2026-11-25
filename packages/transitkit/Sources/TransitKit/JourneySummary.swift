@@ -162,7 +162,7 @@ public struct JourneyOption: Sendable, Hashable, Identifiable {
 /// Turns a plan into the options a rider chooses between, in the order they'd choose.
 public enum JourneyOptions {
     /// The plan's itineraries and direct walks as options: departed ones dropped (for ``PlanRequest/Time/now``),
-    /// duplicates dropped, sorted with ``sorted(_:for:)``.
+    /// duplicates dropped, ranked with ``sorted(_:for:)``.
     public static func options(from response: PlanResponse, for time: PlanRequest.Time, now: Date) -> [JourneyOption] {
         var seen = Set<String>()
         let options = (response.itineraries + response.direct.filter { $0.legs.allSatisfy { $0.mode == .walk } })
@@ -177,23 +177,63 @@ public enum JourneyOptions {
         return order.compactMap { id in options.first { $0.id == id } }
     }
 
+    /// What each change of vehicle is worth, in seconds: five minutes.
+    ///
+    /// A change costs more than its walk and wait, which the times already count: a missed connection, a crowded
+    /// platform, and the chance a delay breaks the next leg. Five minutes is modest, so a change still pays for
+    /// itself when it saves a real ten minutes, yet two changes outweigh the six minutes a direct ride arrives later.
+    public static let transferPenaltySeconds = 300
+
+    /// What each short ride in a journey with changes is worth, in seconds: five minutes more.
+    ///
+    /// A ride of up to ``shortRideMinutes`` between changes is a hop (one express stop, a bus crossing a block) that
+    /// adds a platform change or a bus wait for little distance, and is the first leg to break when a train runs
+    /// late.
+    public static let shortRidePenaltySeconds = 300
+
+    /// The longest ride that counts as short, in whole minutes (segments are rounded to the nearest).
+    public static let shortRideMinutes = 3
+
+    /// How much worse a journey is than its times say, in seconds: ``transferPenaltySeconds`` for each change, plus
+    /// ``shortRidePenaltySeconds`` for each short ride in a journey with changes, the last ride excepted.
+    ///
+    /// A journey's only ride is never short in this sense, since nothing else would get the rider there. The last
+    /// ride is excepted because a short final hop is often the sensible way to finish (the stop is one station
+    /// past the express's), and its change is already priced by ``transferPenaltySeconds``; charging both would
+    /// bury it. Segments rather than legs, so a journey built without segments carries only its change cost.
+    public static func penaltySeconds(for summary: JourneySummary) -> Int {
+        let rides = summary.segments.filter { segment in
+            if case .ride = segment.kind { return true }
+            return false
+        }
+        let shortRides = summary.transfers > 0
+            ? rides.dropLast().filter { $0.minutes <= shortRideMinutes }.count
+            : 0
+        return summary.transfers * transferPenaltySeconds + shortRides * shortRidePenaltySeconds
+    }
+
     /// Summaries in the order a rider weighs them.
     ///
-    /// Leaving now or at a time: the earliest arrival first. Arriving by a time: the latest departure first, since
-    /// every option arrives in time and the latest leaves the rider the most of their day. Ties go to fewer
-    /// transfers, then less walking, then the shorter journey.
+    /// Leaving now or at a time: the earliest arrival first, each journey's arrival moved later by its
+    /// ``penaltySeconds(for:)`` (a change and a short hop cost more than the minutes they show). Arriving by a time:
+    /// the latest departure first, each moved earlier by the same penalty, since every option arrives in time and
+    /// the latest leaves the rider the most of their day. The penalty is a number of seconds added to or taken from
+    /// the real times, so a journey far enough ahead wins whatever its changes, and nothing is dropped. Ties go to
+    /// fewer transfers, then less walking, then the shorter journey, then the id, so the order never wavers.
     public static func sorted(_ summaries: [JourneySummary], for time: PlanRequest.Time) -> [JourneySummary] {
-        summaries.sorted { lhs, rhs in
+        let keyed = summaries.map { summary -> (summary: JourneySummary, key: TimeInterval) in
+            let penalty = TimeInterval(penaltySeconds(for: summary))
             switch time {
-            case .now, .departAt:
-                if lhs.arrival != rhs.arrival {
-                    return lhs.arrival < rhs.arrival
-                }
-            case .arriveBy:
-                if lhs.departure != rhs.departure {
-                    return lhs.departure > rhs.departure
-                }
+            case .now, .departAt: return (summary, summary.arrival.timeIntervalSinceReferenceDate + penalty)
+            // Negated, so the smallest key leads in both directions.
+            case .arriveBy: return (summary, -(summary.departure.timeIntervalSinceReferenceDate - penalty))
             }
+        }
+        return keyed.sorted { lhs, rhs in
+            if lhs.key != rhs.key {
+                return lhs.key < rhs.key
+            }
+            let (lhs, rhs) = (lhs.summary, rhs.summary)
             if lhs.transfers != rhs.transfers {
                 return lhs.transfers < rhs.transfers
             }
@@ -204,6 +244,6 @@ public enum JourneyOptions {
                 return lhs.durationSeconds < rhs.durationSeconds
             }
             return lhs.id < rhs.id
-        }
+        }.map(\.summary)
     }
 }
