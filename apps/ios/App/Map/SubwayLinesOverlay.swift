@@ -21,6 +21,9 @@ final class SubwayLinesOverlay {
     private let source: SubwayLines
     private var drawn: [Drawn] = []
     private var isVisible = false
+    private var wantsVisible = false
+    /// The color scheme last asked for, and the one the lines are colored for.
+    private var requestedScheme: ColorScheme = .light
     private var colorScheme: ColorScheme?
     private var widthStep: Int?
 
@@ -28,7 +31,7 @@ final class SubwayLinesOverlay {
         self.source = source
     }
 
-    /// The line widths in points for zoom `zoom`, by step: 0 is the city-wide view, 6 a block.
+    /// The line widths in points, by zoom step: 0 is the city-wide view, 6 a block.
     static let baseWidths: [CGFloat] = [1.5, 2, 2.5, 3.5, 4.5, 5.5, 6.5]
 
     /// Below this zoom (the region rather than the city) no lines show.
@@ -43,33 +46,44 @@ final class SubwayLinesOverlay {
 
     /// Shows or hides the lines, and styles them for the map's zoom and the color scheme.
     func update(visible: Bool, colorScheme: ColorScheme, on mapView: GMSMapView) {
-        guard visible else {
-            hide()
-            return
-        }
-        guard let step = Self.widthStep(atZoom: mapView.camera.zoom) else {
+        wantsVisible = visible
+        requestedScheme = colorScheme
+        apply(on: mapView)
+    }
+
+    /// The map settled at a new zoom: the lines' widths follow it.
+    func zoomDidSettle(on mapView: GMSMapView) {
+        apply(on: mapView)
+    }
+
+    private func apply(on mapView: GMSMapView) {
+        guard wantsVisible, let step = Self.widthStep(atZoom: mapView.camera.zoom) else {
             hide()
             return
         }
         if drawn.isEmpty {
             drawn = source.lines.map(make)
-            self.colorScheme = nil
-            widthStep = nil
         }
         if !isVisible {
             isVisible = true
-            drawn.forEach { line in
+            for line in drawn {
                 line.casing.map = mapView
-                line.stripes.forEach { $0.map = mapView }
+                for stripe in line.stripes {
+                    stripe.map = mapView
+                }
             }
         }
-        if self.colorScheme != colorScheme {
-            self.colorScheme = colorScheme
-            drawn.forEach { applyColors($0, colorScheme: colorScheme) }
+        if colorScheme != requestedScheme {
+            colorScheme = requestedScheme
+            for line in drawn {
+                applyColors(line, colorScheme: requestedScheme)
+            }
         }
         if widthStep != step {
             widthStep = step
-            drawn.forEach { applyWidths($0, base: Self.baseWidths[step]) }
+            for line in drawn {
+                applyWidths(line, base: Self.baseWidths[step])
+            }
         }
     }
 
@@ -77,9 +91,11 @@ final class SubwayLinesOverlay {
     private func hide() {
         guard isVisible else { return }
         isVisible = false
-        drawn.forEach { line in
+        for line in drawn {
             line.casing.map = nil
-            line.stripes.forEach { $0.map = nil }
+            for stripe in line.stripes {
+                stripe.map = nil
+            }
         }
     }
 
@@ -133,15 +149,12 @@ final class SubwayLinesOverlay {
 
     /// `color` moved `amount` (0...1) of the way toward `other`.
     private static func mixed(_ color: UIColor, with other: UIColor, _ amount: CGFloat) -> UIColor {
-        var (r1, g1, b1, a1) = (CGFloat(0), CGFloat(0), CGFloat(0), CGFloat(0))
-        var (r2, g2, b2, a2) = (CGFloat(0), CGFloat(0), CGFloat(0), CGFloat(0))
-        color.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
-        other.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
-        return UIColor(
-            red: r1 + (r2 - r1) * amount,
-            green: g1 + (g2 - g1) * amount,
-            blue: b1 + (b2 - b1) * amount,
-            alpha: 1
-        )
+        func components(_ color: UIColor) -> [CGFloat] {
+            var (red, green, blue, alpha) = (CGFloat(0), CGFloat(0), CGFloat(0), CGFloat(0))
+            color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+            return [red, green, blue]
+        }
+        let mixedComponents = zip(components(color), components(other)).map { $0 + ($1 - $0) * amount }
+        return UIColor(red: mixedComponents[0], green: mixedComponents[1], blue: mixedComponents[2], alpha: 1)
     }
 }

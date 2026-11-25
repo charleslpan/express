@@ -174,8 +174,8 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
             }
         }
         coordinator.show(polylines: polylines, on: mapView)
-        coordinator.showSubwayLines(
-            showsSubwayLines && route == nil && polylines.isEmpty,
+        coordinator.subwayLinesOverlay.update(
+            visible: showsSubwayLines && route == nil && polylines.isEmpty,
             colorScheme: colorScheme,
             on: mapView
         )
@@ -208,8 +208,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         private var pin: MapMarker?
         private var pinMarker: GMSMarker?
         private let routeOverlay = MapRouteOverlay()
-        private let subwayLinesOverlay = SubwayLinesOverlay()
-        private var subwayLinesVisible = false
+        let subwayLinesOverlay = SubwayLinesOverlay()
 
         init(camera: Binding<MapCamera>) {
             self.camera = camera
@@ -228,17 +227,6 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
                 polyline.map = mapView
                 return polyline
             }
-        }
-
-        func showSubwayLines(_ visible: Bool, colorScheme: ColorScheme, on mapView: GMSMapView) {
-            subwayLinesVisible = visible
-            subwayLinesOverlay.update(visible: visible, colorScheme: colorScheme, on: mapView)
-        }
-
-        /// The map settled at a new zoom: the lines' widths follow it.
-        func subwayLinesZoomDidSettle(on mapView: GMSMapView) {
-            guard subwayLinesVisible else { return }
-            subwayLinesOverlay.update(visible: subwayLinesVisible, colorScheme: colorScheme ?? .light, on: mapView)
         }
 
         func show(route: MapRoute?, on mapView: GMSMapView, animated: Bool) {
@@ -355,7 +343,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
 
 extension GoogleMapRepresentable.Coordinator: @preconcurrency GMSMapViewDelegate {
     func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
-        subwayLinesZoomDidSettle(on: mapView)
+        subwayLinesOverlay.zoomDidSettle(on: mapView)
         if let onCameraIdle {
             let region = GMSCoordinateBounds(region: mapView.projection.visibleRegion())
             let bounds = CoordinateBounds(
