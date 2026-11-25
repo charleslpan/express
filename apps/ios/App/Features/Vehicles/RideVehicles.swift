@@ -33,7 +33,7 @@ final class RideVehicles {
     /// How often Bus Time is asked again: its feed and our server's cache update every 30 seconds.
     static let busRefreshInterval: TimeInterval = 30
     /// How old a bus's own GPS fix may be before it isn't shown.
-    static let maximumFixAge: TimeInterval = 120
+    nonisolated static let maximumFixAge: TimeInterval = 120
 
     /// The vehicles to draw.
     private(set) var vehicles: [MapVehicle] = []
