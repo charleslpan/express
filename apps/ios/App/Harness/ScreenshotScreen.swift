@@ -212,17 +212,6 @@ enum ScreenshotScreen: String, CaseIterable {
         rawValue.hasPrefix("journey-")
     }
 
-    /// The journey a journey detail screen opens, by its id in the fixtures (``FixtureSet/journey(id:)``).
-    var journeyID: String? {
-        switch self {
-        case .journeySubway, .journeyCancelled, .journeyStale, .journeyStops, .journeyDepartures,
-             .journeyAlertOutside: "fixture-6"
-        case .journeyBus, .journeyAlertSkipped: "fixture-l-m101"
-        case .journeyTight, .journeyAlertSuspension: "fixture-q-s"
-        default: nil
-        }
-    }
-
     /// Puts the router where this screen starts: searching, showing a picked place or journeys to it, or with a stop
     /// or trip pushed. A journey comes from the launch's `fixtures` where they carry alerts.
     @MainActor
@@ -350,6 +339,17 @@ extension ScreenshotScreen {
             return fixtures
         }
         return rawValue.hasPrefix("journey-alert-") ? .nycAlerts : .nycEvening
+    }
+
+    /// The journey a journey detail screen opens, by its id in the fixtures (``FixtureSet/journey(id:)``).
+    var journeyID: String? {
+        switch self {
+        case .journeySubway, .journeyCancelled, .journeyStale, .journeyStops, .journeyDepartures,
+             .journeyAlertOutside: "fixture-6"
+        case .journeyBus, .journeyAlertSkipped: "fixture-l-m101"
+        case .journeyTight, .journeyAlertSuspension: "fixture-q-s"
+        default: nil
+        }
     }
 
     /// The route's other planned departures a journey detail screen opens with: the 6's next trip, beside the one open.

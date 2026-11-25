@@ -170,7 +170,11 @@ struct JourneyRouteGroupTests {
             to: .stop(id: "b")
         ))
         let itinerary = try #require(response.itineraries.first)
-        let options = JourneyOptions.options(from: response, for: .now, now: itinerary.startTime.addingTimeInterval(-600))
+        let options = JourneyOptions.options(
+            from: response,
+            for: .now,
+            now: itinerary.startTime.addingTimeInterval(-600)
+        )
         let groups = JourneyOptions.groups(of: options)
         #expect(groups.map(\.primary.id) == options.map(\.id))
     }
