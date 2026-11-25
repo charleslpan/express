@@ -55,20 +55,22 @@ public struct PolylinePath: Sendable, Hashable {
         let metresPerDegree = 111_320.0
         let longitudeScale = metresPerDegree * cos(target.latitude * .pi / 180)
         func local(_ coordinate: Coordinate) -> (x: Double, y: Double) {
-            ((coordinate.longitude - target.longitude) * longitudeScale,
-             (coordinate.latitude - target.latitude) * metresPerDegree)
+            (
+                (coordinate.longitude - target.longitude) * longitudeScale,
+                (coordinate.latitude - target.latitude) * metresPerDegree
+            )
         }
         var best: (fraction: Double, distance: Double)?
         for end in 1 ..< coordinates.count {
-            let a = local(coordinates[end - 1])
-            let b = local(coordinates[end])
-            let dx = b.x - a.x
-            let dy = b.y - a.y
-            let squared = dx * dx + dy * dy
-            let along = squared > 0 ? min(max(-(a.x * dx + a.y * dy) / squared, 0), 1) : 0
-            let x = a.x + along * dx
-            let y = a.y + along * dy
-            let distance = (x * x + y * y).squareRoot()
+            let origin = local(coordinates[end - 1])
+            let finish = local(coordinates[end])
+            let deltaX = finish.x - origin.x
+            let deltaY = finish.y - origin.y
+            let squared = deltaX * deltaX + deltaY * deltaY
+            let along = squared > 0 ? min(max(-(origin.x * deltaX + origin.y * deltaY) / squared, 0), 1) : 0
+            let pointX = origin.x + along * deltaX
+            let pointY = origin.y + along * deltaY
+            let distance = (pointX * pointX + pointY * pointY).squareRoot()
             if best.map({ distance < $0.distance }) ?? true {
                 let metres = distances[end - 1] + along * (distances[end] - distances[end - 1])
                 best = (metres / length, distance)

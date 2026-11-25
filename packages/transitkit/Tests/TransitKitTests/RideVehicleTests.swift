@@ -197,7 +197,7 @@ struct RideVehicleTests {
 }
 
 struct PolylineNearestTests {
-    // About 1.1 km north up a meridian, then about 0.85 km east along a parallel.
+    /// About 1.1 km north up a meridian, then about 0.85 km east along a parallel.
     let path = PolylinePath([
         Coordinate(latitude: 40.73, longitude: -73.99),
         Coordinate(latitude: 40.74, longitude: -73.99),
@@ -206,9 +206,9 @@ struct PolylineNearestTests {
 
     @Test func findsHowFarAlongAndHowFarOff() throws {
         let onPath = try #require(path.point(atFraction: 0.25)).coordinate
-        let on = try #require(path.nearest(to: onPath))
-        #expect(abs(on.fraction - 0.25) < 0.001)
-        #expect(on.distance < 1)
+        let exact = try #require(path.nearest(to: onPath))
+        #expect(abs(exact.fraction - 0.25) < 0.001)
+        #expect(exact.distance < 1)
 
         // 100 m west of the northbound stretch's middle.
         let beside = Coordinate(latitude: 40.735, longitude: -73.99 - 100 / (111_320 * cos(40.735 * .pi / 180)))

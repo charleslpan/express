@@ -19,7 +19,8 @@ extension EnvironmentValues {
 /// It refreshes the rides from their trips about every 30 seconds while it shows and the app is active, says when its
 /// times may not be real time, and says plainly when a ride is cancelled or a connection can no longer be made. The
 /// whole journey is drawn on the map, with the vehicle of each ride that's near and live (``RideVehicles``); tapping a
-/// step zooms the map to it, and tapping a ride's line opens its trip (``AppRouter/showTrip(_:)``). It draws no glass: the system sheet it sits in is the glass.
+/// step zooms the map to it, and tapping a ride's line opens its trip (``AppRouter/showTrip(_:)``). It draws no glass:
+/// the system sheet it sits in is the glass.
 struct JourneyDetailView: View {
     let route: JourneyDetailRoute
 
