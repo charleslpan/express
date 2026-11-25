@@ -24,6 +24,41 @@ final class HomeSheetDragTests: XCTestCase {
         assertNoSidewaysDrag("nearby-full", settledWhen: "nearby.loaded")
     }
 
+    /// The Saved section's rows swipe to unsave under the finger, but a sideways drag elsewhere on the sheet, or in its
+    /// margins, must not move the section or anything above it.
+    func testSavedSectionStaysPutOutsideItsRows() {
+        for ax5 in [false, true] {
+            let app = XCUIApplication()
+            app.launchArguments = ["-screenshot", "home-saved", "-fixtures", "nyc-evening", "-appearance", "light"]
+                + (ax5 ? ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"] : [])
+            app.launch()
+            XCTAssertTrue(app.descendants(matching: .any)["home.saved"].waitForExistence(timeout: 30))
+            let heading = app.descendants(matching: .any)["home.saved.heading"]
+            let window = app.windows.firstMatch
+            for _ in 0 ..< 10 {
+                guard heading.exists, !(heading.isHittable && heading.frame.minY < window.frame.midY) else { break }
+                let start = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.85))
+                let end = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
+                start.press(forDuration: 0.05, thenDragTo: end)
+            }
+            let section = app.descendants(matching: .any)["home.saved"]
+            let before = (heading.frame, section.frame)
+            attach(app, "saved-\(ax5 ? "ax5" : "default")-before")
+            for y in [0.12, 0.3, 0.5, 0.7, 0.9] {
+                let left = window.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: y))
+                let right = window.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: y))
+                for (name, from, to) in [("right", left, right), ("left", right, left)] {
+                    from.press(forDuration: 0.05, thenDragTo: to, withVelocity: .slow, thenHoldForDuration: 0.5)
+                    attach(app, "saved-\(ax5 ? "ax5" : "default")-\(name)-\(y)")
+                    XCTContext.runActivity(named: "\(ax5) \(name) \(y): heading \(heading.frame) section \(section.frame)") { _ in }
+                    XCTAssertEqual(heading.frame.minX, before.0.minX, accuracy: 1, "ax5 \(ax5): heading moved, dragged \(name) at \(y)")
+                    XCTAssertEqual(section.frame.minX, before.1.minX, accuracy: 1, "ax5 \(ax5): saved moved, dragged \(name) at \(y)")
+                }
+            }
+            app.terminate()
+        }
+    }
+
     private func assertNoSidewaysDrag(_ screen: String, settledWhen settled: String) {
         let variants: [(name: String, arguments: [String])] = [
             ("light", ["-appearance", "light"]),
