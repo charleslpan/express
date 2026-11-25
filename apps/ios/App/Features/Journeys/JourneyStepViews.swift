@@ -44,15 +44,12 @@ struct JourneyDetailSummary: View {
     }
 }
 
-/// A walk at the start or end of the journey: where to, how long, how far, and its turn-by-turn instructions folded
-/// away where MOTIS gives them.
+/// A walk at the start or end of the journey: where to, how long, and how far.
 struct JourneyWalkCard: View {
     let walk: JourneyWalk
     let leg: Leg
     /// The journey's end as the rider named it, for a walk to MOTIS's `END`.
     let destination: String?
-
-    @State private var showsDirections = false
 
     var body: some View {
         JourneyCard {
@@ -70,28 +67,6 @@ struct JourneyWalkCard: View {
                         .foregroundStyle(.textSecondary)
                 }
                 .accessibilityElement(children: .combine)
-            }
-            if !walk.instructions.isEmpty {
-                DisclosureGroup(isExpanded: $showsDirections) {
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        ForEach(walk.instructions) { instruction in
-                            AdaptiveStack(spacing: Spacing.xxs) {
-                                Text(instruction.text)
-                                    .foregroundStyle(.textPrimary)
-                                Spacer(minLength: 0)
-                                Text(instruction.formattedDistance)
-                                    .foregroundStyle(.textSecondary)
-                            }
-                            .typography(.secondary)
-                            .accessibilityElement(children: .combine)
-                        }
-                    }
-                    .padding(.top, Spacing.xs)
-                } label: {
-                    Text("Directions")
-                        .typography(.secondary)
-                }
-                .tint(Color.brand)
             }
         }
     }
