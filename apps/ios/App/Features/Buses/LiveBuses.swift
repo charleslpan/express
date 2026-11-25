@@ -23,9 +23,6 @@ final class LiveBuses {
 
     /// The buses to draw.
     private(set) var vehicles: [MapVehicle] = []
-    /// Whether the map should say positions may not be real time: buses show, and the feed, or the last fetch of
-    /// it, is more than a minute old.
-    private(set) var mayNotBeRealTime = false
 
     let visibility = VehicleVisibility(minimumZoom: 14, limit: 150)
     @ObservationIgnored private var positions: BusPositions?
@@ -38,7 +35,6 @@ final class LiveBuses {
     @ObservationIgnored private var shown: [String: Bus] = [:]
     @ObservationIgnored private var viewport: MapViewport?
     @ObservationIgnored private var fetchedArea: CoordinateBounds?
-    @ObservationIgnored private var fetchedAt: Date?
     @ObservationIgnored private var attemptedAt: Date?
     @ObservationIgnored private var fetch: Task<Void, Never>?
     @ObservationIgnored private var client: TransitClient?
@@ -57,7 +53,6 @@ final class LiveBuses {
             cancelFetch()
             positions = nil
             fetchedArea = nil
-            fetchedAt = nil
             update()
             return
         }
@@ -124,7 +119,6 @@ final class LiveBuses {
                 previous = positions.map { Dictionary($0.vehicles.map { ($0.id, $0) }) { first, _ in first } } ?? [:]
                 positions = fetched
                 fetchedArea = area
-                fetchedAt = start
             }
             update()
         }
@@ -147,7 +141,7 @@ final class LiveBuses {
         fetch = nil
     }
 
-    /// Picks the buses to show, and whether to say they may not be real time.
+    /// Picks the buses to show.
     private func update() {
         guard let viewport else { return }
         let visible = visibility.visible(positions?.vehicles ?? [], in: viewport.bounds, zoom: viewport.zoom)
@@ -161,15 +155,6 @@ final class LiveBuses {
         shown = Dictionary(visible.map { (MapVehicle.busID($0.id), $0) }) { first, _ in first }
         if vehicles != self.vehicles {
             self.vehicles = vehicles
-        }
-
-        let now = now()
-        let fetchIsOld = fetchedAt.map { now.timeIntervalSince($0) > RealtimeDataAge.realTimeLimit } ?? false
-        let feedIsOld = positions?.dataAge.mayNotBeRealTime(at: now) ?? false
-        let mayNotBeRealTime = visibility.showsVehicles(atZoom: viewport.zoom) && fetchedAt != nil
-            && (fetchIsOld || feedIsOld)
-        if mayNotBeRealTime != self.mayNotBeRealTime {
-            self.mayNotBeRealTime = mayNotBeRealTime
         }
     }
 }
