@@ -18,6 +18,13 @@ else
     echo "warning: GOOGLE_MAPS_IOS_API_KEY is not set: building without it, so map screens show \"Map unavailable\"."
 fi
 
+# TransitKit uses swift-openapi-generator's build tool plugin, which Xcode asks you to trust on first use. Xcode Cloud's
+# build is non-interactive and can't take xcodebuild's -skipPackagePluginValidation, so set the equivalent default on
+# this ephemeral worker (it lasts one build). The key's spelling ("Validatation") is Xcode's own. It covers package
+# plugins only, not macros (IDESkipMacroFingerprintValidation), which the app doesn't use.
+defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES
+echo "Trusted package build tool plugins for this Xcode Cloud build."
+
 tools=$(mktemp -d)
 trap 'rm -rf "$tools"' EXIT
 curl -fsSL --retry 3 -o "$tools/xcodegen.zip" \
