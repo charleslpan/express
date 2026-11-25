@@ -46,8 +46,8 @@ struct HomeSheet: View {
                                     .onChange(of: bottom) { _, bottom in updatePeek(bottom) }
                             }
                         }
-                        // Exactly as wide as the sheet, whatever a child asks for: the sections scroll up and down only,
-                        // and content wider than the sheet would give the scroll view a sideways extent to drag across.
+                        // Exactly as wide as the sheet, whatever a child asks for: the sections scroll up and down
+                        // only, and wider content would give the scroll view a sideways extent to drag across.
                         .containerRelativeFrame(.horizontal, alignment: .leading)
                         .padding(.top, Spacing.lg)
                     }
