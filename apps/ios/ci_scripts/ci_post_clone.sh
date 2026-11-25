@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Xcode Cloud's post-clone step (see AGENTS.md, TestFlight). Express.xcodeproj is generated and git-ignored, so
+# Xcode Cloud's post-clone step (see AGENTS.md, TestFlight). Express.xcodeproj is generated (its project file and
+# shared scheme are also committed so Xcode Cloud can list the scheme), so
 # generate it from apps/ios/project.yml with the XcodeGen that scripts/ci/ios.sh pins, before Xcode Cloud resolves
 # packages from the committed Package.resolved and archives. Write the git-ignored Config/Secrets.xcconfig from the
 # GOOGLE_MAPS_IOS_API_KEY secret environment variable when the workflow has one.
