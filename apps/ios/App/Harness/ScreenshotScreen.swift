@@ -9,7 +9,7 @@ enum ScreenshotScreen: String, CaseIterable {
     case homePeek = "home-peek"
     case homeHalf = "home-half"
     case homeFull = "home-full"
-    /// The map home while the user is outside New York, with the banner saying Express covers the city (S2).
+    /// The map home while the user is outside New York: no notice, the map stays on the city (S2).
     case homeOutsideNYC = "home-outside-nyc"
     /// The Nearby section in the home sheet at Union Square (N1): its peek (the nearest station's next trains), half,
     /// and full, with live and scheduled rows.

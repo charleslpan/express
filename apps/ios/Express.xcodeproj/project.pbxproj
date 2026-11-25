@@ -38,7 +38,6 @@
 		38D5E31BD9482FBDDA26DEB2 /* journeys-detail.json in Resources */ = {isa = PBXBuildFile; fileRef = 30984277E8A154DB425317ED /* journeys-detail.json */; };
 		3928867EEEBFD536FCE5878A /* LaunchConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF18FA2024F6E937B31F6CD /* LaunchConfiguration.swift */; };
 		3D113C6901D6958EF77C0F50 /* NearbyPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41D00411D38B442FE59CB9AE /* NearbyPresentation.swift */; };
-		411AF7FC1233B855FE735233 /* OutsideServiceAreaBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CA108EEE1A9F579A2589BC8 /* OutsideServiceAreaBanner.swift */; };
 		428D29D08DDC4DB73DAFF9F5 /* LocationDeniedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDCAEB19FC450B9E2BB5BF8C /* LocationDeniedView.swift */; };
 		451C060098DE7D21F0BC0A0D /* JourneyStepViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B2158C5B04E1EA01EE7CC1 /* JourneyStepViews.swift */; };
 		48D0279349205EC02739D5B7 /* AppRouter+Journeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3044CA22A5B1F7E7DD712D9E /* AppRouter+Journeys.swift */; };
@@ -214,7 +213,6 @@
 		957695D139A836380576EBB4 /* nearby-stoptimes-403906.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "nearby-stoptimes-403906.json"; sourceTree = "<group>"; };
 		966E1AEA217DC40D63B7632C /* trip-fixture-trip-l.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "trip-fixture-trip-l.json"; sourceTree = "<group>"; };
 		97A9C390CD7CBC0D33EB87F4 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
-		9CA108EEE1A9F579A2589BC8 /* OutsideServiceAreaBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutsideServiceAreaBanner.swift; sourceTree = "<group>"; };
 		9D02714211068FE475A4E264 /* journey-alerts-mixed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "journey-alerts-mixed.json"; sourceTree = "<group>"; };
 		9E597C209F67111566EDDB7A /* HomeWorkChips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeWorkChips.swift; sourceTree = "<group>"; };
 		9E80E8812E0FF9DA25CC0704 /* AlertSeverityFixtureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertSeverityFixtureTests.swift; sourceTree = "<group>"; };
@@ -302,7 +300,6 @@
 				5FF1689187B621FDEA243937 /* HomeSheet.swift */,
 				8FD9295C9B53C5C49279954B /* HomeSheetContent.swift */,
 				26CED5A1F341235E34E9A8E9 /* HomeSlotPlaceholders.swift */,
-				9CA108EEE1A9F579A2589BC8 /* OutsideServiceAreaBanner.swift */,
 			);
 			path = Go;
 			sourceTree = "<group>";
@@ -810,7 +807,6 @@
 				3D113C6901D6958EF77C0F50 /* NearbyPresentation.swift in Sources */,
 				C7B975C1C84CC986F14DB894 /* NearbySection.swift in Sources */,
 				E4D78493D72E62E6B661AFC9 /* NearbyStopView.swift in Sources */,
-				411AF7FC1233B855FE735233 /* OutsideServiceAreaBanner.swift in Sources */,
 				658559D4D0967D4969D3B642 /* PlaceCard.swift in Sources */,
 				4B429A099CA1874D246DA77F /* PlaceCardActions.swift in Sources */,
 				ECCD5B4B9F44DB01FC6159F5 /* PlaceDetailsCache.swift in Sources */,
