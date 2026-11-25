@@ -3,7 +3,7 @@ import Observation
 import TransitKit
 
 /// The journey detail screen's state: the itinerary tapped, kept live by fetching the trips its rides are on about
-/// every 30 seconds while ``run(client:now:)`` runs (``TransitClient/refreshRides(of:)``), with the server's realtime
+/// every 30 seconds while ``run(client:now:)`` runs (``TransitClient/rideTrips(of:)``), with the server's realtime
 /// data age.
 ///
 /// It follows the trips rather than planning again: a trip stays the same trip however the rider's location or the
@@ -16,6 +16,8 @@ final class JourneyDetailModel {
 
     private(set) var itinerary: Itinerary
     private(set) var plan: JourneyPlan
+    /// The rides' trips as the last refresh fetched them, by trip id: where each vehicle is, for the map.
+    private(set) var trips: [String: Itinerary] = [:]
     /// When the rides last came back from the server; nil before the first refresh.
     private(set) var refreshedAt: Date?
     /// How old the server's realtime feeds were at the last refresh; nil where unknown.
@@ -46,16 +48,19 @@ final class JourneyDetailModel {
     /// they're a minute old.
     func refresh(client: TransitClient, now: () -> Date) async {
         async let age = try? client.realtimeDataAge()
-        let refreshed: Itinerary?
+        let fetched: [String: Itinerary]?
         do throws(TransitError) {
-            refreshed = try await client.refreshRides(of: itinerary)
+            fetched = try await client.rideTrips(of: itinerary)
         } catch {
-            refreshed = nil
+            fetched = nil
         }
         let latestAge = await age
         guard !Task.isCancelled else { return }
         hasRefreshed = true
-        guard let refreshed else { return }
+        guard let fetched else { return }
+        // A journey on foot has no trips, and nothing to bring up to date.
+        let refreshed = fetched.isEmpty ? itinerary : itinerary.refreshed(withTrips: fetched)
+        trips = fetched
         if refreshed != itinerary {
             itinerary = refreshed
             plan = JourneyPlan(refreshed)

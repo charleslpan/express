@@ -45,6 +45,37 @@ public struct PolylinePath: Sendable, Hashable {
         )
         return (coordinate, stretch > 0 ? from.bearing(to: to) : nil)
     }
+
+    /// The point on the path nearest `target`: how far along it lies, as a fraction of the path's length (0 through
+    /// 1), and how far `target` is from it in metres; `nil` for a path with no length.
+    ///
+    /// Distances are measured on a flat plane around `target`, which is exact enough across a few kilometres.
+    public func nearest(to target: Coordinate) -> (fraction: Double, distance: Double)? {
+        guard coordinates.count >= 2, length > 0 else { return nil }
+        let metresPerDegree = 111_320.0
+        let longitudeScale = metresPerDegree * cos(target.latitude * .pi / 180)
+        func local(_ coordinate: Coordinate) -> (x: Double, y: Double) {
+            ((coordinate.longitude - target.longitude) * longitudeScale,
+             (coordinate.latitude - target.latitude) * metresPerDegree)
+        }
+        var best: (fraction: Double, distance: Double)?
+        for end in 1 ..< coordinates.count {
+            let a = local(coordinates[end - 1])
+            let b = local(coordinates[end])
+            let dx = b.x - a.x
+            let dy = b.y - a.y
+            let squared = dx * dx + dy * dy
+            let along = squared > 0 ? min(max(-(a.x * dx + a.y * dy) / squared, 0), 1) : 0
+            let x = a.x + along * dx
+            let y = a.y + along * dy
+            let distance = (x * x + y * y).squareRoot()
+            if best.map({ distance < $0.distance }) ?? true {
+                let metres = distances[end - 1] + along * (distances[end] - distances[end - 1])
+                best = (metres / length, distance)
+            }
+        }
+        return best
+    }
 }
 
 public extension Coordinate {

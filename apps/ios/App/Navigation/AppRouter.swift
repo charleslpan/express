@@ -49,6 +49,8 @@ final class AppRouter {
     var sheet: AppSheet?
     /// The trip drawn on the map while its trip view shows (``showOnMap(_:)``).
     var mapTrip: MapTrip?
+    /// The vehicles on the map, for the journey or trip being shown (``showVehicles(_:owner:)``); none on the home map.
+    var mapVehicleLayer: MapVehicleLayer?
 
     init(homeDetent: HomeSheetDetent = .peek, sheet: AppSheet? = nil) {
         self.homeDetent = homeDetent
