@@ -100,7 +100,7 @@ struct JourneyOptionRow: View {
 
     /// "7 min walk".
     private var details: String {
-        JourneyText.details(summary)
+        String(localized: "\(summary.formattedWalking) walk")
     }
 
     /// "Also at 6:52 PM · 6:58 PM · 7:05 PM", then how many more where there are several; nil without later trips.
