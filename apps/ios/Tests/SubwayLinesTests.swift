@@ -3,6 +3,7 @@ import Testing
 import TransitKit
 @testable import Express
 
+@MainActor
 struct SubwayLinesTests {
     @Test func decodesTheGeneratorsJSON() throws {
         let json = """
