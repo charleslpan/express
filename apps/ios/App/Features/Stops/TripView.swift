@@ -5,7 +5,8 @@ import TransitKit
 /// One vehicle's trip, pushed in the home sheet (``AppRouter/showTrip(_:)``): its line and headsign, where the
 /// vehicle is now, then every stop it calls at with live arrival times and delays, the stops already passed greyed
 /// out, and the vehicle drawn between the two it runs between. The trip's track shows on the map above, in the line's
-/// colour, for as long as the view does (``AppRouter/showOnMap(_:)``).
+/// colour, for as long as the view does (``AppRouter/showOnMap(_:)``), with this trip's vehicle on it where it's
+/// running live (``RideVehicles``).
 ///
 /// The subway has no GPS, so the vehicle's place comes from its live times, as the map's trains do. It refreshes
 /// about every 30 seconds while it shows and the app is active, and says plainly when the trip has ended, can't be
@@ -47,6 +48,7 @@ struct TripView: View {
                 router.showOnMap(trip)
             }
         }
+        .rideVehicles(owner: "trip|\(route.tripId)", targets: vehicleTargets)
         .onDisappear {
             router.hideOnMap(tripId: route.tripId)
         }
@@ -131,6 +133,15 @@ struct TripView: View {
         else { return nil }
         let color = trip.tripLeg?.lineBullet?.color.map { LineColor($0).color } ?? LineColor.unknownLine.color
         return MapTrip(line: MapPolyline(id: route.tripId, coordinates: path, color: color), focus: focus)
+    }
+
+    /// The trip's own vehicle for the map: its bus by trip id (or, failing that, by route, direction, and place), or
+    /// its train placed from live times. Nothing for a trip that has ended or isn't running on live data.
+    private var vehicleTargets: [RideVehicles.Target] {
+        guard case let .loaded(trip, fetchedAt, dataAge) = model.content, let ride = TrackedRide(trip: trip) else {
+            return []
+        }
+        return [RideVehicles.Target(ride: ride, trip: trip, fetchedAt: fetchedAt, dataAge: dataAge)]
     }
 
     /// Refreshing runs while the app is active and the About sheet doesn't cover the trip.

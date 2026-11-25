@@ -3,7 +3,7 @@ import Observation
 import TransitKit
 
 /// The journey detail screen's state: the itinerary tapped, kept live by fetching the trips its rides are on about
-/// every 30 seconds while ``run(client:now:)`` runs (``TransitClient/refreshRides(of:)``), with the server's realtime
+/// every 30 seconds while ``run(client:now:)`` runs (``TransitClient/rideTrips(of:)``), with the server's realtime
 /// data age.
 ///
 /// A route has several departures: the one open, the others the planner offered, and, for a ride with no changes, the
@@ -23,6 +23,8 @@ final class JourneyDetailModel {
 
     private(set) var itinerary: Itinerary
     private(set) var plan: JourneyPlan
+    /// The rides' trips as the last refresh fetched them, by trip id: where each vehicle is, for the map.
+    private(set) var trips: [String: Itinerary] = [:]
     /// Every departure of the route on offer, soonest first, the open one among them. Each is a whole journey that
     /// works: planned by MOTIS, or the same ride on another trip checked against that trip.
     private(set) var departures: [Itinerary]
@@ -110,16 +112,19 @@ final class JourneyDetailModel {
         async let age = try? client.realtimeDataAge()
         // The departure open as the refresh starts: the rider may pick another before it comes back.
         let target = itinerary
-        let refreshed: Itinerary?
+        let fetched: [String: Itinerary]?
         do throws(TransitError) {
-            refreshed = try await client.refreshRides(of: target)
+            fetched = try await client.rideTrips(of: target)
         } catch {
-            refreshed = nil
+            fetched = nil
         }
         let latestAge = await age
         guard !Task.isCancelled else { return }
         hasRefreshed = true
-        guard let refreshed else { return }
+        guard let fetched else { return }
+        // A journey on foot has no trips, and nothing to bring up to date.
+        let refreshed = fetched.isEmpty ? target : target.refreshed(withTrips: fetched)
+        trips = fetched
         if refreshed != target {
             if let index = departures.firstIndex(where: { $0.id == refreshed.id }) {
                 departures[index] = refreshed
