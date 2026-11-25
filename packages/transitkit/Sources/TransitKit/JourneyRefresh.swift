@@ -76,34 +76,7 @@ public extension TransitClient {
     /// A trip that can't be fetched keeps its ride as it was; it throws only where every trip fails, with the first
     /// failure. A journey on foot comes back as it is.
     func refreshRides(of itinerary: Itinerary) async throws(TransitError) -> Itinerary {
-        let tripIds = Array(Set(itinerary.transitLegs.compactMap(\.tripId)))
-        guard !tripIds.isEmpty else { return itinerary }
-        let results = await withTaskGroup(of: (String, Result<Itinerary, TransitError>).self) { group in
-            for id in tripIds {
-                group.addTask {
-                    do throws(TransitError) {
-                        return try await (id, .success(trip(id: id)))
-                    } catch {
-                        return (id, .failure(error))
-                    }
-                }
-            }
-            var results: [String: Result<Itinerary, TransitError>] = [:]
-            for await (id, result) in group {
-                results[id] = result
-            }
-            return results
-        }
-        let trips = results.compactMapValues { try? $0.get() }
-        if trips.isEmpty, let failure = tripIds.lazy.compactMap({ id -> TransitError? in
-            if case let .failure(error) = results[id] {
-                error
-            } else {
-                nil
-            }
-        }).first {
-            throw failure
-        }
-        return itinerary.refreshed(withTrips: trips)
+        guard !itinerary.transitLegs.isEmpty else { return itinerary }
+        return try await itinerary.refreshed(withTrips: rideTrips(of: itinerary))
     }
 }

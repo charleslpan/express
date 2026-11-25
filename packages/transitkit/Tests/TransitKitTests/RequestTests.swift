@@ -17,6 +17,8 @@ struct RequestTests {
             time: .arriveBy(arrival),
             transitModes: [.subway, .bus],
             numberOfItineraries: 3,
+            maxPreTransitTime: 1200,
+            maxPostTransitTime: 600,
             pageCursor: "LATER|1793800200"
         ))
 
@@ -31,6 +33,8 @@ struct RequestTests {
         #expect(query["arriveBy"] == "true")
         #expect(query["transitModes"] == "SUBWAY,BUS")
         #expect(query["numItineraries"] == "3")
+        #expect(query["maxPreTransitTime"] == "1200")
+        #expect(query["maxPostTransitTime"] == "600")
         #expect(query["pageCursor"] == "LATER|1793800200")
     }
 

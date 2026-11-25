@@ -23,9 +23,24 @@ struct JourneyQueryTests {
         #expect(request.time == .now)
         #expect(request.transitModes == [.subway, .bus, .regionalRail])
         #expect(request.numberOfItineraries == 5)
+        #expect(request.maxPreTransitTime == 1800)
+        #expect(request.maxPostTransitTime == 1800)
         #expect(request.pageCursor == nil)
         #expect(request.query.time == nil)
         #expect(request.query.arriveBy == nil)
+    }
+
+    @Test func widensTheWalksToAndFromTransitOnTheWire() async throws {
+        // MOTIS reads both limits in seconds and defaults to 900; its cap on Express's server is 3600.
+        #expect(JourneyQuery.maxWalkToTransitTime == 1800)
+        let transport = try FixtureTransport(fixture: "plan-union-square-to-williamsburg")
+        let request = try JourneyQuery(to: .place(Self.grandCentral)).planRequest(currentLocation: Self.unionSquare)
+        _ = try await TransitClient(transport: transport).plan(request)
+        let query = try #require(transport.requests.first).queryItems
+        #expect(query["maxPreTransitTime"] == "1800")
+        #expect(query["maxPostTransitTime"] == "1800")
+        #expect(query["transitModes"] == "SUBWAY,BUS,REGIONAL_RAIL")
+        #expect(query["numItineraries"] == "5")
     }
 
     @Test func departAt() throws {

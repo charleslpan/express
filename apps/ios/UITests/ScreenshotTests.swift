@@ -8,7 +8,7 @@ final class ScreenshotTests: XCTestCase {
         continueAfterFailure = false
     }
 
-    // The map home (S2): the home sheet at each detent, and the banner outside New York.
+    // The map home (S2): the home sheet at each detent, and outside New York (no banner).
 
     func testHomePeek() {
         capture("home-peek", fixtures: "nyc-evening", settledWhen: "map.settled")
@@ -23,7 +23,9 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func testHomeOutsideNYC() {
-        capture("home-outside-nyc", fixtures: "nyc-evening", settledWhen: "map.settled")
+        capture("home-outside-nyc", fixtures: "nyc-evening", settledWhen: "map.settled") { app in
+            XCTAssertFalse(app.staticTexts["Express covers New York City for now."].exists)
+        }
     }
 
     // Nearby (N1) in the home sheet at Union Square: the peek's next trains, then more stops at half and full height.
@@ -52,7 +54,9 @@ final class ScreenshotTests: XCTestCase {
     }
 
     func testNearbyOutsideNYC() {
-        capture("nearby-outside-nyc", fixtures: "nyc-evening", settledWhen: "nearby.outside-nyc")
+        capture("nearby-outside-nyc", fixtures: "nyc-evening", settledWhen: "home.search") { app in
+            XCTAssertFalse(app.staticTexts["Nearby Is for New York"].exists)
+        }
     }
 
     func testNearbyLoading() {
@@ -172,36 +176,10 @@ final class ScreenshotTests: XCTestCase {
         capture("map-glass", fixtures: "nyc-evening", settledWhen: "map.settled")
     }
 
-    // Live subway trains (V1): over Midtown, hidden when zoomed out, and with the notice when live data is stale.
+    // The home map over Midtown, where trains and buses run: no vehicles on it, whatever is running.
 
-    func testTrains() {
-        capture("trains", fixtures: "nyc-evening", settledWhen: "map.settled")
-    }
-
-    func testTrainsZoomedOut() {
-        capture("trains-zoomed-out", fixtures: "nyc-evening", settledWhen: "map.settled")
-    }
-
-    func testTrainsStale() {
-        capture("trains", fixtures: "nyc-evening-stale", settledWhen: "trains.notice")
-    }
-
-    // Live buses (V2): alone, with trains, hidden when zoomed out, and with the notice when Bus Time's feed is stale.
-
-    func testBuses() {
-        capture("buses", fixtures: "nyc-evening-buses", settledWhen: "map.settled")
-    }
-
-    func testBusesWithTrains() {
-        capture("buses", fixtures: "nyc-evening", settledWhen: "map.settled")
-    }
-
-    func testBusesZoomedOut() {
-        capture("buses-zoomed-out", fixtures: "nyc-evening", settledWhen: "map.settled")
-    }
-
-    func testBusesStale() {
-        capture("buses", fixtures: "nyc-evening-buses-stale", settledWhen: "buses.notice")
+    func testHomeMap() {
+        capture("home-map", fixtures: "nyc-evening", settledWhen: "map.settled")
     }
 
     // Stop detail and trip view (N2), pushed in the home sheet: Union Square's board at half and full height, then

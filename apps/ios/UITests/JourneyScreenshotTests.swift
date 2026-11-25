@@ -30,6 +30,21 @@ extension ScreenshotTests {
         capture("journey-stops", fixtures: "nyc-evening", settledWhen: "journey.loaded")
     }
 
+    /// A route's next departures beside its plan: the 6's, two planned and two found from the boarding stop. Waits
+    /// for the fourth to show, so the screenshot has the found ones.
+    func testJourneyDepartures() {
+        capture(
+            "journey-departures",
+            fixtures: "nyc-evening",
+            settledWhen: "journey.loaded",
+            "journey.departures"
+        ) { app in
+            let departures = app.descendants(matching: .any).matching(identifier: "journey.departure")
+            let fourth = departures.element(boundBy: 3)
+            XCTAssertTrue(fourth.waitForExistence(timeout: 15), "The found departures never showed")
+        }
+    }
+
     // Alerts on journeys (A4): the options with a red and an amber flag, the shuttle's suspension on its ride, the L
     // skipping the boarding stop, and the 6, whose alerts in the feed fall outside the ride and show nothing.
     // `@objc`, as in `AlertScreenshotTests.swift`, keeps them visible to XCTest.
