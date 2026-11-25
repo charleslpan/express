@@ -35,6 +35,7 @@ struct GoView: View {
             camera: $camera,
             showsUserLocation: location.isLive && location.authorization == .authorized,
             polylines: router.mapTrip.map { [$0.line] } ?? [],
+            showsSubwayLines: true,
             pin: placePin,
             route: router.selectedJourney.map { MapRoute(journey: $0, focusedLegs: router.focusedJourneyLegs) },
             vehicles: trains.vehicles + buses.vehicles,
