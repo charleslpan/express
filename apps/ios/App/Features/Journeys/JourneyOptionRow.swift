@@ -4,7 +4,8 @@ import TransitKit
 
 /// One journey option: how long it takes, when it leaves and arrives, its legs on a segment bar, its walking, and
 /// when the first ride leaves, live where realtime data stands behind it. The route's later trips (the same way there
-/// on the next trains) follow as "Also at" times. The selected option (the one on the map) is tinted, and an option with an alert on one of its legs is flagged. VoiceOver reads it as one button.
+/// on the next trains) follow as "Also at" times. The selected option (the one on the map) is tinted,
+/// and an option with an alert on one of its legs is flagged. VoiceOver reads it as one button.
 struct JourneyOptionRow: View {
     /// How many later departures the row names before it says how many more there are.
     static let visibleLater = 3
