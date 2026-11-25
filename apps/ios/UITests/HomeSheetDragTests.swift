@@ -41,16 +41,23 @@ final class HomeSheetDragTests: XCTestCase {
             let before = search.frame
             attach(app, "\(screen)-\(variant.name)-0-before")
 
-            // Drag right, then left, from a few heights in the sheet, holding at the end so a bounce would show.
+            // Drag right and left along the sheet, each drag starting and ending in the 16 pt margins so a button
+            // under the finger can't take it as a tap, holding at the end so a bounce would show.
+            let identifiers = ["home.search", "alerts.chip", "home.places", settled]
             for y in [0.55, 0.7, 0.85] {
-                let start = window.coordinate(withNormalizedOffset: CGVector(dx: 0.2, dy: y))
-                let end = window.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: y))
-                start.press(forDuration: 0.05, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.5)
-                attach(app, "\(screen)-\(variant.name)-1-dragged-right-\(y)")
-                XCTAssertEqual(search.frame.minX, before.minX, accuracy: 1, "\(screen) \(variant.name): dragged right at \(y)")
-                end.press(forDuration: 0.05, thenDragTo: start, withVelocity: .slow, thenHoldForDuration: 0.5)
-                attach(app, "\(screen)-\(variant.name)-2-dragged-left-\(y)")
-                XCTAssertEqual(search.frame.minX, before.minX, accuracy: 1, "\(screen) \(variant.name): dragged left at \(y)")
+                let left = window.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: y))
+                let right = window.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: y))
+                for (name, from, to) in [("right", left, right), ("left", right, left)] {
+                    from.press(forDuration: 0.05, thenDragTo: to, withVelocity: .slow, thenHoldForDuration: 0.5)
+                    attach(app, "\(screen)-\(variant.name)-\(name)-\(y)")
+                    XCTAssertEqual(search.frame.minX, before.minX, accuracy: 1, "\(screen) \(variant.name): dragged \(name) at \(y)")
+                    for identifier in identifiers {
+                        let element = app.descendants(matching: .any)[identifier]
+                        guard element.exists else { continue }
+                        XCTAssertGreaterThanOrEqual(element.frame.minX, 0, "\(identifier) starts off screen")
+                        XCTAssertLessThanOrEqual(element.frame.maxX, window.frame.width + 0.5, "\(identifier) runs off screen")
+                    }
+                }
             }
             app.terminate()
         }
