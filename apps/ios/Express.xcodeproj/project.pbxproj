@@ -123,7 +123,6 @@
 		F3988AC13CA59B9D9912B078 /* RecentPlacesList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13EF028239E2A45755983344 /* RecentPlacesList.swift */; };
 		F620F9D53A93276D334FBE86 /* AppRouter+Trains.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6672C2CB52E0D50D99638724 /* AppRouter+Trains.swift */; };
 		F6BFF9DFA18578D21FEE82C5 /* trip-fixture-trip-6-cancelled.json in Resources */ = {isa = PBXBuildFile; fileRef = 6477A5D369A2366E80373A4F /* trip-fixture-trip-6-cancelled.json */; };
-		FC3C91A8497D64313A6980A8 /* LiveBusesNotice.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7833A5678176F55FD8CA4E1 /* LiveBusesNotice.swift */; };
 		FDD040B40FC2BAD50B05B84A /* AlertPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7C7C555790DF92A3EA7365 /* AlertPresentation.swift */; };
 		FE40BA99B60E506C6781EEFD /* VehicleMarkerImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2DC4A7562C9BA5E78B56E2 /* VehicleMarkerImage.swift */; };
 /* End PBXBuildFile section */
@@ -236,7 +235,6 @@
 		C160F55146126C2E12563DF5 /* TripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripView.swift; sourceTree = "<group>"; };
 		C3B64AEE5F81BADF9C319DFA /* GooglePlaceSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GooglePlaceSearchService.swift; sourceTree = "<group>"; };
 		C6C2BA3D4F1FAB1C2A8A52CA /* MapGlassScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapGlassScreen.swift; sourceTree = "<group>"; };
-		C7833A5678176F55FD8CA4E1 /* LiveBusesNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveBusesNotice.swift; sourceTree = "<group>"; };
 		CD181CE8A6E271A02B5C2F5C /* StopModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopModel.swift; sourceTree = "<group>"; };
 		D7021827115B67D5812F8BA3 /* ExpressApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpressApp.swift; sourceTree = "<group>"; };
 		D92CA91B45D761871AB99708 /* plan-nyc-evening.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "plan-nyc-evening.json"; sourceTree = "<group>"; };
@@ -421,7 +419,6 @@
 			children = (
 				19964C67F10DBD323A156B93 /* AppRouter+Buses.swift */,
 				F421B204B9C7822B286B1C38 /* LiveBuses.swift */,
-				C7833A5678176F55FD8CA4E1 /* LiveBusesNotice.swift */,
 			);
 			path = Buses;
 			sourceTree = "<group>";
@@ -794,7 +791,6 @@
 				A27D8AA646DCCE9799A6293C /* LineStatusModel.swift in Sources */,
 				5829698DAB624C8500B50E14 /* LineStatusView.swift in Sources */,
 				17533F3C9D2A183E3777344A /* LiveBuses.swift in Sources */,
-				FC3C91A8497D64313A6980A8 /* LiveBusesNotice.swift in Sources */,
 				50F6812DA2126DB610885D12 /* LiveTrains.swift in Sources */,
 				C5B3D89700022F75095C413E /* LiveTrainsNotice.swift in Sources */,
 				428D29D08DDC4DB73DAFF9F5 /* LocationDeniedView.swift in Sources */,
