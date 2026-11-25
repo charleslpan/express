@@ -1,3 +1,4 @@
+import SwiftUI
 import TransitKit
 
 extension AppRouter {
@@ -7,6 +8,12 @@ extension AppRouter {
         isSearchingPlaces = false
         selectedPlace = place
         homeDetent = .half
+    }
+
+    /// Whether the place card alone fills the home sheet: a place is picked, with no search or journeys over it. The
+    /// sheet then has one detent, the card's own height (``placeCardHeight``), so nothing is cut off by a drag.
+    var isShowingPlaceCard: Bool {
+        selectedPlace != nil && !isSearchingPlaces && homePath.isEmpty
     }
 
     /// Closes the place card and takes its pin off the map, returning the sheet to its sections.

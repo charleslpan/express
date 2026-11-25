@@ -2,8 +2,8 @@ import GlassUI
 import SwiftUI
 import TransitKit
 
-/// The place card's saved-place actions: a Save toggle, and a menu that sets the place as Home or Work (or takes
-/// it off). ``PlaceCard`` puts them in its actions row; they draw nothing where there's no ``PlaceStore``.
+/// The place card's saved-place action: a Save toggle. ``PlaceCard`` puts it in its actions row; it draws nothing where
+/// there's no ``PlaceStore``. Home and Work are set from their own chips and ``ChoosePlaceView``, not from the card.
 struct PlaceCardActions: View {
     let place: PlaceDetails
 
@@ -12,7 +12,6 @@ struct PlaceCardActions: View {
     var body: some View {
         if let store {
             saveToggle(store)
-            slotMenu(store)
         }
     }
 
@@ -38,32 +37,6 @@ struct PlaceCardActions: View {
         .accessibilityHint(isSaved ? "Removes the place from your saved places" : "Adds the place to your saved places")
         .accessibilityIdentifier("place.save")
     }
-
-    private func slotMenu(_ store: PlaceStore) -> some View {
-        let current = store.slot(of: place.placeID)
-        return Menu {
-            ForEach(PlaceSlot.allCases) { slot in
-                if slot == current {
-                    Button(slot.removeTitle, systemImage: slot.systemImage, role: .destructive) {
-                        store.clear(slot)
-                    }
-                } else {
-                    Button(slot.setTitle, systemImage: slot.systemImage) {
-                        store.set(slot, to: place)
-                    }
-                }
-            }
-        } label: {
-            Label(current?.title ?? "Home or Work", systemImage: current?.filledSystemImage ?? "house")
-                .typography(.button)
-        }
-        .buttonStyle(.bordered)
-        .buttonBorderShape(.capsule)
-        .controlSize(.large)
-        .accessibilityLabel("Home or Work")
-        .accessibilityValue(current.map { Text($0.title) } ?? Text("Not set"))
-        .accessibilityIdentifier("place.slots")
-    }
 }
 
 extension PlaceSlot {
@@ -71,13 +44,6 @@ extension PlaceSlot {
         switch self {
         case .home: "Home"
         case .work: "Work"
-        }
-    }
-
-    var setTitle: LocalizedStringKey {
-        switch self {
-        case .home: "Set as Home"
-        case .work: "Set as Work"
         }
     }
 

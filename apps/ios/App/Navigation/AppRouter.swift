@@ -40,6 +40,10 @@ final class AppRouter {
     /// The place picked from search, pinned on the map with its card in the home sheet (``showPlace(_:)``). Journeys
     /// and saved places start from it. Held in memory only: Express persists nothing of a place but its ID.
     var selectedPlace: PlaceDetails?
+    /// How tall the place card is when it fits its content, as the card measured it (the whole sheet, bottom safe area
+    /// included); nil until it has. While ``isShowingPlaceCard`` this is the home sheet's height, so the map's visible
+    /// area is the screen above it.
+    var placeCardHeight: CGFloat?
     /// The journey option drawn on the map, picked from the journey options (``showJourneyDetail(_:)``).
     var selectedJourney: Itinerary?
     /// The selected journey's legs the map zooms to, by their place in its itinerary; empty for the whole journey

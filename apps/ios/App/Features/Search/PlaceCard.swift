@@ -5,10 +5,25 @@ import TransitKit
 /// The picked place in the home sheet, while its pin is on the map: its name and address, and a button that closes
 /// it. It draws no glass of its own: the system sheet it sits in is the glass (no glass on glass).
 ///
-/// Journeys (J1) and saved places (P1) add their buttons ("Directions", "Save") in the actions row under the name.
+/// The actions row has "Directions" (J1) and "Save" (P1). Home and Work are set from their own chips, not here.
+///
+/// The card fits its content: it measures its height, with the bottom safe area, into `height`, and the home sheet
+/// uses that as its one detent while the card is showing (``AppRouter/isShowingPlaceCard``), so there's no empty
+/// space under the buttons and no drag that cuts one off. Where the content is taller than the screen, as at the
+/// largest text sizes, it scrolls.
 struct PlaceCard: View {
     let place: PlaceDetails
+    @Binding var height: CGFloat?
     let onClose: () -> Void
+
+    @State private var contentHeight: CGFloat = 0
+    @State private var bottomInset: CGFloat = 0
+
+    init(place: PlaceDetails, height: Binding<CGFloat?> = .constant(nil), onClose: @escaping () -> Void) {
+        self.place = place
+        _height = height
+        self.onClose = onClose
+    }
 
     var body: some View {
         ScrollView {
@@ -34,7 +49,7 @@ struct PlaceCard: View {
                         .controlSize(.large)
                         .accessibilityIdentifier("place.close")
                 }
-                // The actions row: Directions (J1), then the Save toggle and Home or Work menu (P1).
+                // The actions row: Directions (J1), then the Save toggle (P1).
                 AdaptiveStack(spacing: Spacing.xs) {
                     DirectionsButton(place: place)
                     PlaceCardActions(place: place)
@@ -42,8 +57,16 @@ struct PlaceCard: View {
             }
             .padding(.horizontal, Spacing.md)
             .padding(.top, Spacing.lg)
-            .padding(.bottom, Spacing.md)
+            .padding(.bottom, Spacing.lg)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+        }
+        .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = $0 }
+        .onChange(of: contentHeight + bottomInset, initial: true) { _, total in
+            // Whole points, so layout rounding doesn't move the sheet.
+            if total > 0 {
+                height = total.rounded(.up)
+            }
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("place.card")

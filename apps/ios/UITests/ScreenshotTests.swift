@@ -111,11 +111,31 @@ final class ScreenshotTests: XCTestCase {
         capture("place-saved", fixtures: "nyc-evening", settledWhen: "map.settled")
     }
 
-    func testPlaceHomeWork() {
-        capture("place-home-work", fixtures: "nyc-evening", settledWhen: "map.settled") { app in
-            app.buttons["place.slots"].tap()
-            let menuOpened = app.buttons["Set as Home"].waitForExistence(timeout: 10)
-            XCTAssertTrue(menuOpened, "The Home or Work menu never opened")
+    /// The card is the sheet's one detent, sized to its content: pulling it down leaves every action whole.
+    func testPlaceCardStaysWhole() {
+        // At the largest text the card is taller than the screen and scrolls, so only whole-screen sizes are checked.
+        for variant in [Variant.light, .dark] {
+            let app = XCUIApplication()
+            app.launchArguments = ["-screenshot", "search-place", "-fixtures", "nyc-evening"] + variant.arguments
+            app.launch()
+            let card = app.descendants(matching: .any)["place.card"]
+            XCTAssertTrue(card.waitForExistence(timeout: 15), "The place card never appeared")
+            XCTAssertTrue(app.descendants(matching: .any)["map.settled"].waitForExistence(timeout: 30))
+            card.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.05))
+                .press(forDuration: 0.1, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.98)))
+
+            let window = app.windows.firstMatch.frame
+            for identifier in ["place.close", "place.directions", "place.save"] {
+                let button = app.buttons[identifier]
+                XCTAssertTrue(button.waitForExistence(timeout: 10), "\(identifier) is missing")
+                XCTAssertTrue(window.contains(button.frame), "\(identifier) is cut off after a drag: \(button.frame)")
+            }
+
+            let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+            attachment.name = "place-dragged-nyc-evening-\(variant.rawValue)"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+            app.terminate()
         }
     }
 
