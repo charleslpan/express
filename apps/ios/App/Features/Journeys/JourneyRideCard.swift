@@ -126,7 +126,7 @@ struct JourneyRideCard: View {
     }
 }
 
-/// One stop on a ride: its time, its name, and how the time stands live ("2 min late", "On time"), with the platform
+/// One stop on a ride: its time, its name, and how the time stands live ("On time", "Cancelled"), with the platform
 /// or track where the feed gives one.
 struct JourneyStopRow: View {
     enum Role {
@@ -167,12 +167,12 @@ struct JourneyStopRow: View {
         stop.status(realtimeIsStale: realtimeIsStale)
     }
 
-    /// The live status and track, such as "2 min late · Track 2": nothing for a stop passed on time or on the
-    /// timetable alone, so the stops between stay quiet.
+    /// The live status and track, such as "On time · Track 2": nothing for a stop passed on time, early, late (the
+    /// adjusted time says so), or on the timetable alone, so the stops between stay quiet.
     private var note: String? {
         var parts: [String] = []
         switch status {
-        case .scheduled: break
+        case .scheduled, .late, .early: break
         case .onTime: if role != .pass {
                 parts.append(status.text)
             }
