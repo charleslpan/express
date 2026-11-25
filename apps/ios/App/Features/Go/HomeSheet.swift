@@ -46,12 +46,8 @@ struct HomeSheet: View {
                                     .onChange(of: bottom) { _, bottom in updatePeek(bottom) }
                             }
                         }
-                        // Exactly as wide as the sheet, whatever a child asks for: the sections scroll up and down
-                        // only, and wider content would give the scroll view a sideways extent to drag across.
-                        .containerRelativeFrame(.horizontal, alignment: .leading)
                         .padding(.top, Spacing.lg)
                     }
-                    .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
                     // Search and a place card bring their own heights; back on the sections, the peek is measured
                     // again.
                     .onDisappear { updatePeek(nil) }
