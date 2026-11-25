@@ -138,8 +138,8 @@ struct JourneyOptionsView: View {
             progress("Finding your location…", id: "journeys.locating")
         case .loading:
             progress("Finding journeys…", id: "journeys.loading")
-        case let .options(options):
-            optionsList(options)
+        case .options:
+            optionsList(planner.groups)
         case .noJourneys:
             JourneyStates.noJourneys {
                 editing = .time
@@ -160,7 +160,7 @@ struct JourneyOptionsView: View {
         }
     }
 
-    private func optionsList(_ options: [JourneyOption]) -> some View {
+    private func optionsList(_ groups: [JourneyRouteGroup]) -> some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
             // Checked every 10 seconds, so the notice comes up a minute after the last good refresh.
             TimelineView(.periodic(from: .now, by: 10)) { _ in
@@ -169,15 +169,16 @@ struct JourneyOptionsView: View {
                     if mayNotBeRealTime {
                         MayNotBeRealTimeNotice()
                     }
-                    ForEach(options) { option in
+                    ForEach(groups) { group in
                         JourneyOptionRow(
-                            summary: option.summary,
+                            summary: group.primary.summary,
+                            later: group.others.map(\.summary),
                             now: environment.now,
-                            isSelected: router.selectedJourney?.id == option.id,
+                            isSelected: group.options.contains { $0.id == router.selectedJourney?.id },
                             mayNotBeRealTime: mayNotBeRealTime,
-                            alertFlag: option.itinerary.alertFlag
+                            alertFlag: group.primary.itinerary.alertFlag
                         ) {
-                            router.showJourneyDetail(option.itinerary, to: destinationName)
+                            open(group)
                         }
                     }
                 }
@@ -190,6 +191,22 @@ struct JourneyOptionsView: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("journeys.list")
+    }
+
+    /// Opens a route's plan, for its first departure, with the others to pick between and, for a ride with no changes
+    /// leaving now or at a time, a look for more.
+    private func open(_ group: JourneyRouteGroup) {
+        var findsMore = group.pattern?.isDirect == true
+        if case .arriveBy = planner.query.time {
+            // Arriving by a time, later trips may arrive too late: only the planner's own are known to fit.
+            findsMore = false
+        }
+        router.showJourneyDetail(
+            group.primary.itinerary,
+            to: destinationName,
+            alternatives: group.others.map(\.itinerary),
+            findsMoreDepartures: findsMore
+        )
     }
 
     /// The journey's end as the rider named it, for its plan's last walk.
@@ -224,8 +241,8 @@ struct JourneyOptionsView: View {
     private func select() {
         if let seed, !isSeeded, !planner.options.isEmpty {
             isSeeded = true
-            let index = min(seed.selectedOption, planner.options.count - 1)
-            router.selectedJourney = planner.options[index].itinerary
+            let groups = planner.groups
+            router.selectedJourney = groups[min(seed.selectedOption, groups.count - 1)].primary.itinerary
             return
         }
         router.selectedJourney = planner.selection(keeping: router.selectedJourney)

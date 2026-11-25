@@ -73,6 +73,9 @@ enum ScreenshotScreen: String, CaseIterable {
     case journeyCancelled = "journey-cancelled"
     case journeyStale = "journey-stale"
     case journeyStops = "journey-stops"
+    /// A route's departures side by side: the 6 with the next trips beside it, two planned and two found from its
+    /// boarding stop.
+    case journeyDepartures = "journey-departures"
     /// Alerts on journeys (A4), in `nyc-alerts`: the options with a red flag (the 42 St Shuttle suspended) and an amber
     /// one (the 4 delayed), and journeys step by step with the shuttle's suspension on its ride, the L skipping the
     /// stop the rider boards at, and the 6 with alerts in the feed outside the ride's time, which show nothing.
@@ -140,8 +143,8 @@ enum ScreenshotScreen: String, CaseIterable {
              .tripError, .journeysPeek, .journeysHalf, .journeysFull, .journeysRoute, .journeysArriveBy,
              .journeysLoading, .journeysNoResults, .journeysOutsideNYC, .journeysLocationOff, .journeysError,
              .journeysStale, .journeySubway, .journeyBus, .journeyTight, .journeyCancelled, .journeyStale,
-             .journeyStops, .alertsNearby, .alertsChip, .alertDetail, .lineStatus, .stopAlerts, .journeysAlerts,
-             .journeyAlertSuspension, .journeyAlertSkipped, .journeyAlertOutside:
+             .journeyStops, .journeyDepartures, .alertsNearby, .alertsChip, .alertDetail, .lineStatus, .stopAlerts,
+             .journeysAlerts, .journeyAlertSuspension, .journeyAlertSkipped, .journeyAlertOutside:
             RootView()
         case .mapGlass: MapGlassScreen()
         case .homeMap: GoView(camera: MapCamera(center: Self.midtown, zoom: 14.5))
@@ -202,16 +205,6 @@ enum ScreenshotScreen: String, CaseIterable {
         rawValue.hasPrefix("journey-")
     }
 
-    /// The journey a journey detail screen opens, by its id in the fixtures (``FixtureSet/journey(id:)``).
-    var journeyID: String? {
-        switch self {
-        case .journeySubway, .journeyCancelled, .journeyStale, .journeyStops, .journeyAlertOutside: "fixture-6"
-        case .journeyBus, .journeyAlertSkipped: "fixture-l-m101"
-        case .journeyTight, .journeyAlertSuspension: "fixture-q-s"
-        default: nil
-        }
-    }
-
     /// Puts the router where this screen starts: searching, showing a picked place or journeys to it, or with a stop
     /// or trip pushed. A journey comes from the launch's `fixtures` where they carry alerts.
     @MainActor
@@ -236,7 +229,12 @@ enum ScreenshotScreen: String, CaseIterable {
             let place = FixturePlaceSearchService.places[0]
             router.showPlace(place)
             router.showJourneys(JourneyQuery(to: .place(place)))
-            router.showJourneyDetail(journey, to: place.name)
+            router.showJourneyDetail(
+                journey,
+                to: place.name,
+                alternatives: journeyAlternatives,
+                findsMoreDepartures: self == .journeyDepartures
+            )
             router.homeDetent = homeDetent
         }
         let unionSquare = StopRoute(stopId: "us-ny-MTA-NYCSubway_635", name: "14 St-Union Sq", isSubway: true)
@@ -334,6 +332,22 @@ extension ScreenshotScreen {
             return fixtures
         }
         return rawValue.hasPrefix("journey-alert-") ? .nycAlerts : .nycEvening
+    }
+
+    /// The journey a journey detail screen opens, by its id in the fixtures (``FixtureSet/journey(id:)``).
+    var journeyID: String? {
+        switch self {
+        case .journeySubway, .journeyCancelled, .journeyStale, .journeyStops, .journeyDepartures,
+             .journeyAlertOutside: "fixture-6"
+        case .journeyBus, .journeyAlertSkipped: "fixture-l-m101"
+        case .journeyTight, .journeyAlertSuspension: "fixture-q-s"
+        default: nil
+        }
+    }
+
+    /// The route's other planned departures a journey detail screen opens with: the 6's next trip, beside the one open.
+    var journeyAlternatives: [Itinerary] {
+        self == .journeyDepartures ? [FixtureSet.journey(id: "fixture-6-b")].compactMap(\.self) : []
     }
 
     /// The journey a journey detail screen opens, from ``journeyFixtures(launchedWith:)``; `nil` for other screens.

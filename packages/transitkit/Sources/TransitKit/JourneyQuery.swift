@@ -37,6 +37,14 @@ public struct JourneyQuery: Sendable, Hashable {
     /// How many itineraries to ask MOTIS for: a sensible choice without a long list.
     public static let numberOfItineraries = 5
 
+    /// The longest walk, in seconds, from the start to the first stop and from the last stop to the end.
+    ///
+    /// MOTIS's default is 15 minutes, and at that limit it often leaves out a subway station 3 to 8 minutes away on
+    /// foot, so a rider gets a one-stop bus where they would walk. 30 minutes found a subway-only option within
+    /// 5 minutes of the fastest on 7 of 14 test trips, against 3 of 14, and kept the bus options. Express's server
+    /// allows up to 3600; this only widens which stops are candidates, and ranking decides what a rider sees.
+    public static let maxWalkToTransitTime = 1800
+
     public var from: JourneyEndpoint
     public var to: JourneyEndpoint
     public var time: PlanRequest.Time
@@ -79,7 +87,9 @@ public struct JourneyQuery: Sendable, Hashable {
             to: .coordinate(end),
             time: time,
             transitModes: Self.transitModes,
-            numberOfItineraries: Self.numberOfItineraries
+            numberOfItineraries: Self.numberOfItineraries,
+            maxPreTransitTime: Self.maxWalkToTransitTime,
+            maxPostTransitTime: Self.maxWalkToTransitTime
         )
     }
 

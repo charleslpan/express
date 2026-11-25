@@ -34,7 +34,11 @@ struct JourneyDetailView: View {
 
     init(route: JourneyDetailRoute) {
         self.route = route
-        _model = State(initialValue: JourneyDetailModel(itinerary: route.itinerary))
+        _model = State(initialValue: JourneyDetailModel(
+            itinerary: route.itinerary,
+            alternatives: route.alternatives,
+            findsMoreDepartures: route.findsMoreDepartures
+        ))
     }
 
     var body: some View {
@@ -58,10 +62,11 @@ struct JourneyDetailView: View {
             guard scenePhase == .active, router.sheet == nil else { return }
             await model.run(client: client) { [environment] in environment.now }
         }
-        .rideVehicles(owner: "journey|\(route.itinerary.id)", targets: vehicleTargets)
-        .onChange(of: model.itinerary) { _, itinerary in
-            // The map follows the latest times; the same id leaves it where the rider put it.
-            if router.selectedJourney?.id == itinerary.id {
+        .rideVehicles(owner: "journey|\(model.itinerary.id)", targets: vehicleTargets)
+        .onChange(of: model.itinerary) { previous, itinerary in
+            // The map follows the latest times and the departure picked; the same id leaves it where the rider put
+            // it.
+            if previous.id != itinerary.id || router.selectedJourney?.id == itinerary.id {
                 router.selectedJourney = itinerary
             }
         }
@@ -126,6 +131,17 @@ struct JourneyDetailView: View {
                 .accessibilityAction(named: "Show Whole Journey on Map") {
                     router.showJourneyLegs([])
                 }
+            let departures = model.upcomingDepartures(at: environment.now)
+            if departures.count > 1 {
+                JourneyDeparturesStrip(
+                    departures: departures,
+                    selectedID: model.itinerary.id,
+                    now: environment.now,
+                    mayNotBeRealTime: mayNotBeRealTime
+                ) { id in
+                    select(id)
+                }
+            }
             if let problem = model.plan.problem {
                 JourneyProblemNotice(problem: problem) {
                     router.closeJourneyDetail()
@@ -166,6 +182,15 @@ struct JourneyDetailView: View {
         case let .transfer(transfer):
             JourneyTransferRow(transfer: transfer)
                 .modifier(MapFocus(legs: step.legIndices))
+        }
+    }
+
+    /// Opens another departure of the route: its plan and map, with its live times fetched at once.
+    private func select(_ id: String) {
+        model.select(id)
+        router.showJourneyLegs([])
+        Task { [environment] in
+            await model.refresh(client: client) { environment.now }
         }
     }
 

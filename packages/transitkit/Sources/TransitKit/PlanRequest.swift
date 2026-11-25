@@ -33,6 +33,12 @@ public struct PlanRequest: Sendable, Hashable {
     public var transitModes: [TransitMode]?
     /// The minimum number of itineraries to compute; `nil` for the server's default (5).
     public var numberOfItineraries: Int?
+    /// The longest first walk to a stop, in seconds; `nil` for the server's default (900, 15 minutes).
+    /// MOTIS silently caps it at its `street_routing_max_prepost_transit_seconds` (3600 on Express's server).
+    public var maxPreTransitTime: Int?
+    /// The longest last walk from a stop, in seconds; `nil` for the server's default (900, 15 minutes).
+    /// MOTIS silently caps it like ``maxPreTransitTime``.
+    public var maxPostTransitTime: Int?
     /// A cursor from an earlier ``PlanResponse`` (``PlanResponse/laterPageCursor`` or
     /// ``PlanResponse/earlierPageCursor``) to fetch that page; keep the rest of the request unchanged.
     public var pageCursor: String?
@@ -43,6 +49,8 @@ public struct PlanRequest: Sendable, Hashable {
         time: Time = .now,
         transitModes: [TransitMode]? = nil,
         numberOfItineraries: Int? = nil,
+        maxPreTransitTime: Int? = nil,
+        maxPostTransitTime: Int? = nil,
         pageCursor: String? = nil
     ) {
         self.from = from
@@ -50,6 +58,8 @@ public struct PlanRequest: Sendable, Hashable {
         self.time = time
         self.transitModes = transitModes
         self.numberOfItineraries = numberOfItineraries
+        self.maxPreTransitTime = maxPreTransitTime
+        self.maxPostTransitTime = maxPostTransitTime
         self.pageCursor = pageCursor
     }
 
@@ -74,6 +84,8 @@ public struct PlanRequest: Sendable, Hashable {
         }
         query.transitModes = transitModes
         query.numItineraries = numberOfItineraries
+        query.maxPreTransitTime = maxPreTransitTime
+        query.maxPostTransitTime = maxPostTransitTime
         query.pageCursor = pageCursor
         return query
     }
