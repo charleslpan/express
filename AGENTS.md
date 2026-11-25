@@ -107,7 +107,9 @@ API key, certificate, profile, or GitHub secret. GitHub CI builds for the simula
 - **Post-clone:** Xcode Cloud runs `apps/ios/ci_scripts/ci_post_clone.sh` (it must stay next to `project.yml`, where
   the generated `Express.xcodeproj` lives). It writes `apps/ios/Config/Secrets.xcconfig` from the
   `GOOGLE_MAPS_IOS_API_KEY` environment variable (or warns and builds without it), downloads the XcodeGen that
-  `scripts/ci/ios.sh` pins, and generates the project.
+  `scripts/ci/ios.sh` pins, and generates the project. It also runs `defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES` (Xcode's own
+  spelling), the Xcode Cloud equivalent of `-skipPackagePluginValidation`, so TransitKit's OpenAPIGenerator plugin is trusted in
+  the non-interactive build; the default lives on the ephemeral worker only.
 - **Package.resolved:** Xcode Cloud won't resolve Swift packages itself, so
   `apps/ios/Express.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved` is committed (a `.gitignore`
   exception; the rest of the project stays ignored). The `ios` job resolves packages after generating the project and
