@@ -69,6 +69,43 @@ final class HomeSheetDragTests: XCTestCase {
         }
     }
 
+    /// Popping back to the home sheet's root (an edge swipe or a drag across the content) leaves the root where it
+    /// was: starting at the left edge, nothing is stuck part way across.
+    func testRootStaysPutAfterPoppingBack() {
+        for ax5 in [false, true] {
+            let app = XCUIApplication()
+            app.launchArguments = ["-screenshot", "stop-half", "-fixtures", "nyc-evening", "-appearance", "light"]
+                + (ax5 ? ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"] : [])
+            app.launch()
+            XCTAssertTrue(app.descendants(matching: .any)["screenshot.stop-half"].waitForExistence(timeout: 15))
+            sleep(3)
+            let tag = ax5 ? "ax5" : "default"
+            let window = app.windows.firstMatch
+            attach(app, "pop-\(tag)-0-stop")
+            XCTContext.runActivity(named: "\(tag) before: \(app.debugDescription)") { _ in }
+            let edge = window.coordinate(withNormalizedOffset: CGVector(dx: 0.0, dy: 0.7))
+            let far = window.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.7))
+            edge.press(forDuration: 0.05, thenDragTo: far, withVelocity: .slow, thenHoldForDuration: 1)
+            attach(app, "pop-\(tag)-1-after-edge-swipe")
+            XCTContext.runActivity(named: "\(tag) after swipe: \(app.debugDescription)") { _ in }
+            sleep(1)
+            let search = app.descendants(matching: .any)["home.search"]
+            if search.waitForExistence(timeout: 5) {
+                XCTAssertEqual(search.frame.minX, 16, accuracy: 1, "\(tag): root content shifted after popping back")
+                for dy in [0.4, 0.6, 0.8] {
+                    let from = window.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: dy))
+                    let to = window.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: dy))
+                    from.press(forDuration: 0.05, thenDragTo: to, withVelocity: .slow, thenHoldForDuration: 1)
+                    attach(app, "pop-\(tag)-2-root-drag-\(dy)")
+                    XCTAssertEqual(search.frame.minX, 16, accuracy: 1, "\(tag): root content dragged sideways at \(dy)")
+                }
+            } else {
+                XCTFail("\(tag): the swipe back never reached the root")
+            }
+            app.terminate()
+        }
+    }
+
     private func assertNoSidewaysDrag(_ screen: String, settledWhen settled: String) {
         let variants: [(name: String, arguments: [String])] = [
             ("light", ["-appearance", "light"]),
