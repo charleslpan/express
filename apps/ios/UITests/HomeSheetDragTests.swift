@@ -32,8 +32,16 @@ final class HomeSheetDragTests: XCTestCase {
             XCTAssertTrue(app.descendants(matching: .any)["screenshot.\(screen)"].waitForExistence(timeout: 15))
             let search = app.descendants(matching: .any)["home.search"]
             XCTAssertTrue(search.waitForExistence(timeout: 20), "\(screen) \(variant.name): no search field")
+            // The sheet has finished settling at its detent once the field stops moving.
+            var before = search.frame
+            for _ in 0 ..< 20 {
+                Thread.sleep(forTimeInterval: 0.3)
+                let now = search.frame
+                if now == before { break }
+                before = now
+            }
             let window = app.windows.firstMatch
-            let before = search.frame
+            XCTContext.runActivity(named: "\(screen) \(variant.name): search starts at \(before)") { _ in }
             let watched = ["home.search", "alerts.chip", "home.places"].map { app.descendants(matching: .any)[$0] }
 
             for y in [0.55, 0.7, 0.85] {
