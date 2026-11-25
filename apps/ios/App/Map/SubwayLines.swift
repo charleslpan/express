@@ -35,7 +35,7 @@ struct SubwayLines: Equatable, Sendable {
 
     /// Reads the JSON the generator writes: a `precision` and `lines` of `colors` and an encoded `path`.
     init(data: Data) throws {
-        let document = try JSONDecoder().decode(Document.self, from: data)
+        let document = try JSONDecoder().decode(SubwayLinesDocument.self, from: data)
         lines = document.lines.map { entry in
             Line(
                 colors: entry.colors,
@@ -43,14 +43,14 @@ struct SubwayLines: Equatable, Sendable {
             )
         }
     }
+}
 
-    private struct Document: Decodable {
-        var precision: Int
-        var lines: [Entry]
+private struct SubwayLinesDocument: Decodable {
+    var precision: Int
+    var lines: [Entry]
 
-        struct Entry: Decodable {
-            var colors: [String]
-            var path: String
-        }
+    struct Entry: Decodable {
+        var colors: [String]
+        var path: String
     }
 }
