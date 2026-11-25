@@ -6,10 +6,14 @@ struct JourneyOptionsRoute: Hashable {
 }
 
 /// The journey detail screen's place in the home sheet's navigation stack: the journey option tapped, and the name of
-/// where it ends, for the last walk (MOTIS names the journey's own ends `START` and `END`).
+/// where it ends, for the last walk (MOTIS names the journey's own ends `START` and `END`). `alternatives` are the
+/// route's other planned departures, which the plan offers beside the tapped one; `findsMoreDepartures` says whether
+/// to look for more of them (a ride with no changes, leaving now or at a time).
 struct JourneyDetailRoute: Hashable {
     var itinerary: Itinerary
     var destination: String?
+    var alternatives: [Itinerary] = []
+    var findsMoreDepartures = false
 }
 
 extension AppRouter {
@@ -37,11 +41,22 @@ extension AppRouter {
     }
 
     /// Shows one journey option step by step, which the rider tapped: draws it on the map and pushes its plan onto
-    /// ``AppRouter/homePath`` (``JourneyDetailView``), raising the sheet to half height where it's lower.
-    func showJourneyDetail(_ itinerary: Itinerary, to destination: String? = nil) {
+    /// ``AppRouter/homePath`` (``JourneyDetailView``), raising the sheet to half height where it's lower. The route's
+    /// other departures go with it (`alternatives`), to pick between in the plan.
+    func showJourneyDetail(
+        _ itinerary: Itinerary,
+        to destination: String? = nil,
+        alternatives: [Itinerary] = [],
+        findsMoreDepartures: Bool = false
+    ) {
         selectedJourney = itinerary
         focusedJourneyLegs = []
-        homePath.append(JourneyDetailRoute(itinerary: itinerary, destination: destination))
+        homePath.append(JourneyDetailRoute(
+            itinerary: itinerary,
+            destination: destination,
+            alternatives: alternatives,
+            findsMoreDepartures: findsMoreDepartures
+        ))
         if homeDetent == .peek {
             homeDetent = .half
         }

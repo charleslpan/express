@@ -822,6 +822,322 @@
      }
     }
    ]
+  },
+  {
+   "id": "fixture-6-b",
+   "duration": 780,
+   "startTime": "2026-11-03T23:44:00Z",
+   "endTime": "2026-11-03T23:57:00Z",
+   "transfers": 0,
+   "legs": [
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "START",
+      "lat": 40.7359,
+      "lon": -73.9906,
+      "vertexType": "NORMAL",
+      "departure": "2026-11-03T23:44:00Z"
+     },
+     "to": {
+      "name": "14 St-Union Sq",
+      "lat": 40.7349,
+      "lon": -73.9899,
+      "vertexType": "TRANSIT",
+      "stopId": "us-ny-MTA-NYCSubway_635N",
+      "arrival": "2026-11-03T23:46:00Z",
+      "scheduledArrival": "2026-11-03T23:46:00Z"
+     },
+     "duration": 120,
+     "startTime": "2026-11-03T23:44:00Z",
+     "endTime": "2026-11-03T23:46:00Z",
+     "scheduledStartTime": "2026-11-03T23:44:00Z",
+     "scheduledEndTime": "2026-11-03T23:46:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 140,
+     "legGeometry": {
+      "points": "whiulAn{_clCf^_Xf^wQ",
+      "precision": 6,
+      "length": 3
+     }
+    },
+    {
+     "mode": "SUBWAY",
+     "from": {
+      "name": "14 St-Union Sq",
+      "stopId": "us-ny-MTA-NYCSubway_635N",
+      "lat": 40.734673,
+      "lon": -73.989951,
+      "vertexType": "TRANSIT",
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T23:46:00Z",
+      "scheduledArrival": "2026-11-03T23:44:00Z",
+      "arrivalTimestampReason": "PREDICTED",
+      "departure": "2026-11-03T23:46:00Z",
+      "scheduledDeparture": "2026-11-03T23:44:00Z",
+      "departureTimestampReason": "PREDICTED",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false
+     },
+     "to": {
+      "name": "Grand Central-42 St",
+      "stopId": "us-ny-MTA-NYCSubway_631N",
+      "lat": 40.751776,
+      "lon": -73.976848,
+      "vertexType": "TRANSIT",
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T23:54:00Z",
+      "scheduledArrival": "2026-11-03T23:52:00Z",
+      "arrivalTimestampReason": "PREDICTED",
+      "departure": "2026-11-03T23:54:00Z",
+      "scheduledDeparture": "2026-11-03T23:52:00Z",
+      "departureTimestampReason": "PREDICTED",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false
+     },
+     "duration": 480,
+     "startTime": "2026-11-03T23:46:00Z",
+     "endTime": "2026-11-03T23:54:00Z",
+     "scheduledStartTime": "2026-11-03T23:44:00Z",
+     "scheduledEndTime": "2026-11-03T23:52:00Z",
+     "realTime": true,
+     "scheduled": true,
+     "headsign": "Pelham Bay Park",
+     "routeId": "us-ny-MTA-NYCSubway_6",
+     "routeColor": "00933c",
+     "routeTextColor": "ffffff",
+     "routeShortName": "6",
+     "displayName": "6",
+     "tripId": "fixture-trip-6-b",
+     "agencyName": "MTA New York City Transit",
+     "cancelled": false,
+     "intermediateStops": [
+      {
+       "name": "23 St-Baruch College",
+       "stopId": "us-ny-MTA-NYCSubway_634N",
+       "lat": 40.739864,
+       "lon": -73.986599,
+       "vertexType": "TRANSIT",
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T23:48:00Z",
+       "scheduledArrival": "2026-11-03T23:46:00Z",
+       "arrivalTimestampReason": "PREDICTED",
+       "departure": "2026-11-03T23:48:00Z",
+       "scheduledDeparture": "2026-11-03T23:46:00Z",
+       "departureTimestampReason": "PREDICTED",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false
+      },
+      {
+       "name": "28 St",
+       "stopId": "us-ny-MTA-NYCSubway_633N",
+       "lat": 40.74307,
+       "lon": -73.984264,
+       "vertexType": "TRANSIT",
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T23:50:00Z",
+       "scheduledArrival": "2026-11-03T23:48:00Z",
+       "arrivalTimestampReason": "PREDICTED",
+       "departure": "2026-11-03T23:50:00Z",
+       "scheduledDeparture": "2026-11-03T23:48:00Z",
+       "departureTimestampReason": "PREDICTED",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false
+      },
+      {
+       "name": "33 St",
+       "stopId": "us-ny-MTA-NYCSubway_632N",
+       "lat": 40.746081,
+       "lon": -73.982076,
+       "vertexType": "TRANSIT",
+       "tz": "America/New_York",
+       "arrival": "2026-11-03T23:51:00Z",
+       "scheduledArrival": "2026-11-03T23:49:00Z",
+       "arrivalTimestampReason": "PREDICTED",
+       "departure": "2026-11-03T23:51:00Z",
+       "scheduledDeparture": "2026-11-03T23:49:00Z",
+       "departureTimestampReason": "PREDICTED",
+       "pickupType": "NORMAL",
+       "dropoffType": "NORMAL",
+       "cancelled": false
+      }
+     ],
+     "legGeometry": {
+      "points": "gjgulAvo~blCgqHosEgmEwnCozDohCw`Eg{CoaDwgD",
+      "precision": 6,
+      "length": 6
+     }
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "Grand Central-42 St",
+      "lat": 40.7518,
+      "lon": -73.9768,
+      "vertexType": "TRANSIT",
+      "stopId": "us-ny-MTA-NYCSubway_631N",
+      "departure": "2026-11-03T23:54:00Z",
+      "scheduledDeparture": "2026-11-03T23:54:00Z"
+     },
+     "to": {
+      "name": "END",
+      "lat": 40.7527,
+      "lon": -73.9772,
+      "vertexType": "NORMAL",
+      "arrival": "2026-11-03T23:57:00Z"
+     },
+     "duration": 180,
+     "startTime": "2026-11-03T23:54:00Z",
+     "endTime": "2026-11-03T23:57:00Z",
+     "scheduledStartTime": "2026-11-03T23:54:00Z",
+     "scheduledEndTime": "2026-11-03T23:57:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 120,
+     "legGeometry": {
+      "points": "ojhvlA~|dblCg^vQ_XfE",
+      "precision": 6,
+      "length": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "fixture-4-b",
+   "duration": 660,
+   "startTime": "2026-11-03T23:39:00Z",
+   "endTime": "2026-11-03T23:50:00Z",
+   "transfers": 0,
+   "legs": [
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "START",
+      "lat": 40.7359,
+      "lon": -73.9906,
+      "vertexType": "NORMAL",
+      "departure": "2026-11-03T23:39:00Z"
+     },
+     "to": {
+      "name": "14 St-Union Sq",
+      "lat": 40.7349,
+      "lon": -73.9899,
+      "vertexType": "TRANSIT",
+      "stopId": "us-ny-MTA-NYCSubway_635N",
+      "arrival": "2026-11-03T23:41:00Z",
+      "scheduledArrival": "2026-11-03T23:41:00Z"
+     },
+     "duration": 120,
+     "startTime": "2026-11-03T23:39:00Z",
+     "endTime": "2026-11-03T23:41:00Z",
+     "scheduledStartTime": "2026-11-03T23:39:00Z",
+     "scheduledEndTime": "2026-11-03T23:41:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 140,
+     "legGeometry": {
+      "points": "whiulAn{_clCf^_Xf^wQ",
+      "precision": 6,
+      "length": 3
+     }
+    },
+    {
+     "mode": "SUBWAY",
+     "from": {
+      "name": "14 St-Union Sq",
+      "stopId": "us-ny-MTA-NYCSubway_635N",
+      "lat": 40.734673,
+      "lon": -73.989951,
+      "vertexType": "TRANSIT",
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T23:41:00Z",
+      "scheduledArrival": "2026-11-03T23:41:00Z",
+      "arrivalTimestampReason": "PREDICTED",
+      "departure": "2026-11-03T23:41:00Z",
+      "scheduledDeparture": "2026-11-03T23:41:00Z",
+      "departureTimestampReason": "PREDICTED",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false
+     },
+     "to": {
+      "name": "Grand Central-42 St",
+      "stopId": "us-ny-MTA-NYCSubway_631N",
+      "lat": 40.751776,
+      "lon": -73.976848,
+      "vertexType": "TRANSIT",
+      "tz": "America/New_York",
+      "arrival": "2026-11-03T23:47:00Z",
+      "scheduledArrival": "2026-11-03T23:47:00Z",
+      "arrivalTimestampReason": "PREDICTED",
+      "departure": "2026-11-03T23:47:00Z",
+      "scheduledDeparture": "2026-11-03T23:47:00Z",
+      "departureTimestampReason": "PREDICTED",
+      "pickupType": "NORMAL",
+      "dropoffType": "NORMAL",
+      "cancelled": false
+     },
+     "duration": 360,
+     "startTime": "2026-11-03T23:41:00Z",
+     "endTime": "2026-11-03T23:47:00Z",
+     "scheduledStartTime": "2026-11-03T23:41:00Z",
+     "scheduledEndTime": "2026-11-03T23:47:00Z",
+     "realTime": true,
+     "scheduled": true,
+     "headsign": "Woodlawn",
+     "routeId": "us-ny-MTA-NYCSubway_4",
+     "routeColor": "00933c",
+     "routeTextColor": "ffffff",
+     "routeShortName": "4",
+     "displayName": "4",
+     "tripId": "fixture-trip-4-b",
+     "agencyName": "MTA New York City Transit",
+     "cancelled": false,
+     "intermediateStops": [],
+     "legGeometry": {
+      "points": "gjgulAvo~blCgqHosEgmEwnCozDohCw`Eg{CoaDwgD",
+      "precision": 6,
+      "length": 6
+     }
+    },
+    {
+     "mode": "WALK",
+     "from": {
+      "name": "Grand Central-42 St",
+      "lat": 40.7518,
+      "lon": -73.9768,
+      "vertexType": "TRANSIT",
+      "stopId": "us-ny-MTA-NYCSubway_631N",
+      "departure": "2026-11-03T23:47:00Z",
+      "scheduledDeparture": "2026-11-03T23:47:00Z"
+     },
+     "to": {
+      "name": "END",
+      "lat": 40.7527,
+      "lon": -73.9772,
+      "vertexType": "NORMAL",
+      "arrival": "2026-11-03T23:50:00Z"
+     },
+     "duration": 180,
+     "startTime": "2026-11-03T23:47:00Z",
+     "endTime": "2026-11-03T23:50:00Z",
+     "scheduledStartTime": "2026-11-03T23:47:00Z",
+     "scheduledEndTime": "2026-11-03T23:50:00Z",
+     "realTime": false,
+     "scheduled": false,
+     "distance": 120,
+     "legGeometry": {
+      "points": "ojhvlA~|dblCg^vQ_XfE",
+      "precision": 6,
+      "length": 3
+     }
+    }
+   ]
   }
  ],
  "previousPageCursor": "",
