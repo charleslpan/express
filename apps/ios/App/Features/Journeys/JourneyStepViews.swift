@@ -6,7 +6,7 @@ import TransitKit
 // journey no longer works. Each is a plain fill rather than glass, since the plan sits in the sheet's glass.
 
 /// The journey at a glance, at the top of its plan: when it leaves and arrives, how long it takes, its legs on a
-/// segment bar, and its walking and transfers.
+/// segment bar, and its walking.
 struct JourneyDetailSummary: View {
     let summary: JourneySummary
 
@@ -243,16 +243,9 @@ struct JourneyCard<Content: View>: View {
 
 /// Words the plan shares between its pieces.
 enum JourneyText {
-    /// "7 min walk · 1 transfer".
+    /// "7 min walk". The transfer count is not shown; the steps name each transfer.
     static func details(_ summary: JourneySummary) -> String {
-        let walk = String(localized: "\(summary.formattedWalking) walk")
-        guard !summary.isWalkOnly else { return walk }
-        let transfers = switch summary.transfers {
-        case 0: String(localized: "no transfers")
-        case 1: String(localized: "1 transfer")
-        default: String(localized: "\(summary.transfers) transfers")
-        }
-        return "\(walk) · \(transfers)"
+        String(localized: "\(summary.formattedWalking) walk")
     }
 
     /// The colour a stop's status reads in: green on time or early, amber late, red cancelled, else secondary.
