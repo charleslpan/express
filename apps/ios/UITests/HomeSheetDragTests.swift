@@ -106,6 +106,32 @@ final class HomeSheetDragTests: XCTestCase {
         }
     }
 
+    /// Turning the phone sideways and back leaves the sheet's content where it was.
+    func testContentStaysPutAfterRotating() {
+        for screen in ["nearby-outside-nyc", "home-full"] {
+            let app = XCUIApplication()
+            app.launchArguments = ["-screenshot", screen, "-fixtures", "nyc-evening", "-appearance", "light"]
+            app.launch()
+            XCTAssertTrue(app.descendants(matching: .any)["screenshot.\(screen)"].waitForExistence(timeout: 15))
+            let search = app.descendants(matching: .any)["home.search"]
+            XCTAssertTrue(search.waitForExistence(timeout: 20))
+            let before = search.frame
+            let device = XCUIDevice.shared
+            defer { device.orientation = .portrait }
+            for orientation in [UIDeviceOrientation.landscapeLeft, .portrait, .landscapeRight, .portraitUpsideDown, .portrait] {
+                device.orientation = orientation
+                sleep(2)
+                attach(app, "rotate-\(screen)-\(orientation.rawValue)")
+                XCTContext.runActivity(named: "\(screen) \(orientation.rawValue): search \(search.exists ? "\(search.frame)" : "missing")") { _ in }
+                if orientation == .portrait {
+                    XCTAssertEqual(search.frame.minX, before.minX, accuracy: 1, "\(screen): content shifted after rotating")
+                    XCTAssertEqual(search.frame.width, before.width, accuracy: 1, "\(screen): content resized after rotating")
+                }
+            }
+            app.terminate()
+        }
+    }
+
     private func assertNoSidewaysDrag(_ screen: String, settledWhen settled: String) {
         let variants: [(name: String, arguments: [String])] = [
             ("light", ["-appearance", "light"]),
