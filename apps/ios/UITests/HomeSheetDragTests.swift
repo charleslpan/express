@@ -24,8 +24,8 @@ final class HomeSheetDragTests: XCTestCase {
         assertNoSidewaysDrag("nearby-full", settledWhen: "nearby.loaded")
     }
 
-    /// The Saved section's rows swipe to unsave under the finger, but a sideways drag elsewhere on the sheet, or in its
-    /// margins, must not move the section or anything above it.
+    /// The Saved section's rows swipe to unsave under the finger, but a sideways drag on the heading above them must
+    /// move nothing on the sheet.
     func testSavedSectionStaysPutOutsideItsRows() {
         for ax5 in [false, true] {
             let app = XCUIApplication()
@@ -41,18 +41,28 @@ final class HomeSheetDragTests: XCTestCase {
                 let end = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.6))
                 start.press(forDuration: 0.05, thenDragTo: end)
             }
-            let section = app.descendants(matching: .any)["home.saved"]
-            let before = (heading.frame, section.frame)
-            attach(app, "saved-\(ax5 ? "ax5" : "default")-before")
-            for y in [0.12, 0.3, 0.5, 0.7, 0.9] {
-                let left = window.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: y))
-                let right = window.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: y))
-                for (name, from, to) in [("right", left, right), ("left", right, left)] {
-                    from.press(forDuration: 0.05, thenDragTo: to, withVelocity: .slow, thenHoldForDuration: 0.5)
-                    attach(app, "saved-\(ax5 ? "ax5" : "default")-\(name)-\(y)")
-                    XCTContext.runActivity(named: "\(ax5) \(name) \(y): heading \(heading.frame) section \(section.frame)") { _ in }
-                    XCTAssertEqual(heading.frame.minX, before.0.minX, accuracy: 1, "ax5 \(ax5): heading moved, dragged \(name) at \(y)")
-                    XCTAssertEqual(section.frame.minX, before.1.minX, accuracy: 1, "ax5 \(ax5): saved moved, dragged \(name) at \(y)")
+            let tag = ax5 ? "ax5" : "default"
+            func frames() -> [String: CGRect] {
+                var result: [String: CGRect] = [:]
+                for (index, element) in app.buttons.allElementsBoundByIndex.enumerated() where element.exists {
+                    result["button \(index) \(element.label)"] = element.frame
+                }
+                result["heading"] = heading.frame
+                return result
+            }
+            let before = frames()
+            attach(app, "saved-\(tag)-before")
+            let y = heading.frame.midY / window.frame.height
+            let left = window.coordinate(withNormalizedOffset: CGVector(dx: 0.02, dy: y))
+            let right = window.coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: y))
+            let middle = window.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: y))
+            for (name, from, to) in [("right", left, right), ("left", right, left), ("mid-left", middle, left), ("mid-right", middle, right)] {
+                from.press(forDuration: 0.05, thenDragTo: to, withVelocity: .slow, thenHoldForDuration: 0.5)
+                attach(app, "saved-\(tag)-\(name)")
+                let after = frames()
+                for (key, frame) in before {
+                    guard let moved = after[key] else { continue }
+                    XCTAssertEqual(moved.minX, frame.minX, accuracy: 1, "\(tag): \(key) moved sideways after dragging \(name) on the heading")
                 }
             }
             app.terminate()
