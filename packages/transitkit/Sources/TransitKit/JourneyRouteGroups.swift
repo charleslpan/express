@@ -94,8 +94,16 @@ extension JourneyOption {
 public extension JourneyOptions {
     /// Collapses ranked options into one group per route, keeping the order: a group takes the place of its best
     /// option, so the list ranks exactly as it did and only repeats fold away. Options with no route pattern each
-    /// stand alone.
-    static func groups(of options: [JourneyOption]) -> [JourneyRouteGroup] {
+    /// stand alone. Only the first ``maxGroups`` groups are kept, after grouping, so a kept group has every one of its
+    /// departures.
+    static func groups(of options: [JourneyOption], limit: Int = maxGroups) -> [JourneyRouteGroup] {
+        Array(allGroups(of: options).prefix(limit))
+    }
+
+    /// How many route groups the options list shows.
+    static let maxGroups = 5
+
+    private static func allGroups(of options: [JourneyOption]) -> [JourneyRouteGroup] {
         var groups: [JourneyRouteGroup] = []
         var indexByID: [String: Int] = [:]
         for option in options {
