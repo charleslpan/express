@@ -10,7 +10,7 @@ A Turborepo monorepo over pnpm workspaces: deployables in `apps/`, shared code i
 | Path | What lives there |
 | --- | --- |
 | `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `pnpm-lock.yaml` | The workspace root: pnpm 10 (pinned in `packageManager`), Turborepo 2 tasks (`build`, `test`, `lint`, `typecheck`). Every workspace has a `package.json` whose scripts Turborepo runs. |
-| `apps/ios/` | The iOS app: `project.yml` (XcodeGen spec for `Express.xcodeproj`, which is generated and git-ignored: edit `project.yml`, never the `.xcodeproj`) `App/` (app target: entry point, root view, assets), and `ci_scripts/` (Xcode Cloud's post-clone step; see [TestFlight](#testflight)). |
+| `apps/ios/` | The iOS app: `project.yml` (XcodeGen spec for `Express.xcodeproj`, which is generated: edit `project.yml`, never the `.xcodeproj`. Only `project.pbxproj` and the shared `Express.xcscheme` are tracked, for Xcode Cloud; run `make generate` and commit them after changing `project.yml`) `App/` (app target: entry point, root view, assets), and `ci_scripts/` (Xcode Cloud's post-clone step; see [TestFlight](#testflight)). |
 | `apps/ios/App/Features/<Feature>/` | One folder per feature (views, view models, feature-local helpers). Features don't reach into each other's folders; share code through the packages. |
 | `apps/ios/App/Navigation/`, `apps/ios/App/Location/` | The app shell's shared state: `AppRouter` (`@Observable`: the home sheet's detent, its `NavigationPath`, place search, and the sheet on top) and `LocationService` (When In Use permission, asked only when needed, and live updates), both injected with `.environment(_:)`. There's no tab bar: `RootView` is the map home (`Features/Go`), Apple Maps style, with a system sheet over it that can't be dismissed (peek, half, full) holding search, Home/Work, and the Nearby and Saved sections. Features fill the sheet's slots in `HomeSheetContent`, keeping their views in their own folders. A feature navigates by calling a router method, which it adds in an extension in its own folder (such as `showJourneys(to:)`), never by wiring navigation into views. |
 | `apps/ios/App/Map/` | `MapView`, the one Google map every map screen uses (`GMSMapView` wrapped for SwiftUI), its JSON map styles, and the SDK key setup. |
@@ -75,7 +75,7 @@ What each job runs:
 | `changes` | `ubuntu-latest` | none | Reads `ci-config.env` and evaluates `ci-filters.yml`. |
 | `swift` | `SWIFT_IMAGE` container | `ci-swift` | `scripts/ci/lint.sh` (pinned SwiftFormat `--lint` and SwiftLint `--strict`), then TransitKit's `swift test` (directly: the container has no Node). |
 | `server` | `ubuntu-latest` | `ci-server` | `scripts/ci/node.sh` (pinned pnpm via Corepack, `pnpm install --frozen-lockfile`, then `pnpm turbo run lint typecheck build test` over every non-Swift workspace), then the API checks (`scripts/ci/server.sh`, owned by the server tasks). |
-| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj`, fails if the committed `Package.resolved` doesn't match the resolved packages (see [TestFlight](#testflight)), runs the `Express` scheme's tests on the newest standard iPhone Pro simulator (see [Screenshot harness](#screenshot-harness)), writes `build/Express.xcresult`. |
+| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj` and fails if the tracked `project.pbxproj` or `Express.xcscheme` differ from the generated ones, fails if the committed `Package.resolved` doesn't match the resolved packages (see [TestFlight](#testflight)), runs the `Express` scheme's tests on the newest standard iPhone Pro simulator (see [Screenshot harness](#screenshot-harness)), writes `build/Express.xcresult`. |
 | `testflight` (own workflow) | `IOS_RUNNER` | `testflight` | Dormant: `scripts/ci/testflight.sh` skips with a notice without the App Store Connect secrets, which aren't set; Xcode Cloud ships TestFlight builds instead (see [TestFlight](#testflight)). Not part of `ci-ok`. |
 | `ci-ok` | `ubuntu-latest` | none | `re-actors/alls-green` over every job: failed or cancelled fails it, skipped is fine. |
 
@@ -98,6 +98,12 @@ Xcode Cloud builds every push to `main` and uploads it to TestFlight. Apple sign
 `DEVELOPMENT_TEAM` `FZ47TN3469`, set on the app target in `project.yml`) and uploads, so there is no App Store Connect
 API key, certificate, profile, or GitHub secret. GitHub CI builds for the simulator unsigned (`CODE_SIGNING_ALLOWED=NO`).
 
+- **Tracked project and scheme:** Xcode Cloud's workflow editor (and App Store Connect's Archive scheme list) reads
+  schemes from the committed project, before post-clone runs. A git-ignored project has no shared scheme in the
+  repository, so Xcode says "The scheme 'Express' may only exist locally" and the list is empty. So
+  `apps/ios/Express.xcodeproj/project.pbxproj` and `xcshareddata/xcschemes/Express.xcscheme` are committed (`.gitignore`
+  exceptions; the output is deterministic and has no absolute paths). After changing `project.yml`, run `make generate`
+  and commit them; the `ios` job fails on drift. Post-clone still regenerates the project, overwriting them identically.
 - **Post-clone:** Xcode Cloud runs `apps/ios/ci_scripts/ci_post_clone.sh` (it must stay next to `project.yml`, where
   the generated `Express.xcodeproj` lives). It writes `apps/ios/Config/Secrets.xcconfig` from the
   `GOOGLE_MAPS_IOS_API_KEY` environment variable (or warns and builds without it), downloads the XcodeGen that

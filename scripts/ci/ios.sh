@@ -57,6 +57,18 @@ curl -fsSL --retry 3 -o "$zip" \
 echo "$XCODEGEN_SHA256  $zip" | shasum -a 256 -c -
 rm -rf build/tools/xcodegen && unzip -q -o "$zip" -d build/tools
 build/tools/xcodegen/bin/xcodegen generate --spec apps/ios/project.yml
+# Xcode Cloud lists the Archive action's schemes from the committed project, before post-clone generates anything, so
+# project.pbxproj and the shared Express scheme are tracked. They must match what project.yml generates: in CI a drift
+# fails the job; on a Mac the regenerated files are left for you to commit.
+generated=(apps/ios/Express.xcodeproj/project.pbxproj apps/ios/Express.xcodeproj/xcshareddata/xcschemes/Express.xcscheme)
+if [[ -n $(git status --porcelain -- "${generated[@]}") ]]; then
+    git --no-pager diff --stat -- "${generated[@]}" || true
+    if [[ -n ${CI:-} ]]; then
+        echo "::error::The committed Xcode project or Express scheme is out of date with apps/ios/project.yml: run \`make generate\` and commit ${generated[*]}."
+        exit 1
+    fi
+    echo "Regenerated the tracked Xcode project files: commit ${generated[*]}."
+fi
 echo "::endgroup::"
 
 echo "::group::Swift packages"

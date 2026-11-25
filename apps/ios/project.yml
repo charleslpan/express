@@ -1,5 +1,6 @@
 # XcodeGen 2.46.0 spec. Run `xcodegen generate` to create Express.xcodeproj,
-# which is git-ignored: edit this file, never the generated project.
+# which is generated: edit this file, never the generated project. Commit the regenerated
+# project.pbxproj and shared Express.xcscheme (Xcode Cloud needs them; CI fails on drift).
 name: Express
 
 options:
