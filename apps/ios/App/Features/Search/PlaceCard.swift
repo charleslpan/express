@@ -7,17 +7,15 @@ import TransitKit
 ///
 /// The actions row has "Directions" (J1) and "Save" (P1). Home and Work are set from their own chips, not here.
 ///
-/// The card fits its content: it measures its height, with the bottom safe area, into `height`, and the home sheet
-/// uses that as its one detent while the card is showing (``AppRouter/isShowingPlaceCard``), so there's no empty
-/// space under the buttons and no drag that cuts one off. Where the content is taller than the screen, as at the
-/// largest text sizes, it scrolls.
+/// The card fits its content: it measures its content height into `height`, and the home sheet uses that as its one
+/// detent while the card is showing (``AppRouter/isShowingPlaceCard``), so there's no empty space under the buttons
+/// and no drag that cuts one off. A `.height` detent excludes the bottom safe area, which the sheet adds below it (the
+/// CI screenshots showed a gap of exactly that inset when the card counted it too). Where the content is taller than
+/// the screen, as at the largest text sizes, it scrolls.
 struct PlaceCard: View {
     let place: PlaceDetails
     @Binding var height: CGFloat?
     let onClose: () -> Void
-
-    @State private var contentHeight: CGFloat = 0
-    @State private var bottomInset: CGFloat = 0
 
     init(place: PlaceDetails, height: Binding<CGFloat?> = .constant(nil), onClose: @escaping () -> Void) {
         self.place = place
@@ -59,13 +57,11 @@ struct PlaceCard: View {
             .padding(.top, Spacing.lg)
             .padding(.bottom, Spacing.lg)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
-        }
-        .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = $0 }
-        .onChange(of: contentHeight + bottomInset, initial: true) { _, total in
-            // Whole points, so layout rounding doesn't move the sheet.
-            if total > 0 {
-                height = total.rounded(.up)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height.rounded(.up) } action: { contentHeight in
+                // Whole points, so layout rounding doesn't move the sheet.
+                if contentHeight > 0 {
+                    height = contentHeight
+                }
             }
         }
         .accessibilityElement(children: .contain)

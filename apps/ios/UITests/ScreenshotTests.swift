@@ -126,7 +126,8 @@ final class ScreenshotTests: XCTestCase {
 
             let window = app.windows.firstMatch.frame
             for identifier in ["place.close", "place.directions", "place.save"] {
-                let button = app.buttons[identifier]
+                // Save is a toggle button, so look the element up by identifier alone.
+                let button = app.descendants(matching: .any)[identifier]
                 XCTAssertTrue(button.waitForExistence(timeout: 10), "\(identifier) is missing")
                 XCTAssertTrue(window.contains(button.frame), "\(identifier) is cut off after a drag: \(button.frame)")
             }
