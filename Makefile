@@ -1,4 +1,4 @@
-.PHONY: help install generate format lint test ci-swift ci-server ci-ios ci-ios-snapshots testflight
+.PHONY: help install generate format lint test ci-swift ci-server ci-ios ci-ios-test ci-ios-snapshots testflight
 
 help:
 	@echo "make install   Install the pnpm workspace (pnpm install)"
@@ -6,7 +6,7 @@ help:
 	@echo "make format    Apply SwiftFormat and SwiftLint autocorrections"
 	@echo "make lint      Check formatting and lint without changing files"
 	@echo "make test      Run every workspace's tests with Turborepo (Swift and Xcode skip where missing)"
-	@echo "make ci-*      What each CI job runs (ci-swift, ci-server, ci-ios); make testflight uploads a build"
+	@echo "make ci-*      What each CI job runs (ci-swift, ci-server, ci-ios, a compile only; ci-ios-test and ci-ios-snapshots run on demand); make testflight uploads a build"
 
 install:
 	pnpm install
@@ -35,7 +35,11 @@ ci-server:
 	scripts/ci/node.sh
 	scripts/ci/server.sh
 
+# Compile only (generic iOS Simulator destination, no runtime needed); unit tests and screenshots run on demand.
 ci-ios:
+	scripts/ci/ios.sh build
+
+ci-ios-test:
 	scripts/ci/ios.sh test
 
 # The full Express scheme plus the screenshot sweeps (ExpressUITests, GlassUI and TransitKit package tests); not in CI.
