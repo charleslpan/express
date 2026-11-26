@@ -97,7 +97,8 @@ struct JourneyDeparturesStrip: View {
     }
 
     /// What the status adds to the time: that it is cancelled or may not be real time. Nothing for
-    /// a time on schedule, on the timetable alone, or early or late (the adjusted time says so), so the strip stays quiet.
+    /// a time on schedule, on the timetable alone, or early or late (the adjusted time says so), so the strip stays
+    /// quiet.
     private func note(for status: DepartureStatus) -> String? {
         switch status {
         case .scheduled, .onTime, .late, .early: nil
