@@ -185,7 +185,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
             colorScheme: colorScheme,
             on: mapView
         )
-        coordinator.show(route: route, on: mapView, animated: animated)
+        coordinator.routeOverlay.show(route, on: mapView, animated: animated)
         coordinator.show(markers: markers, on: mapView)
         coordinator.show(pin: pin, on: mapView)
         let moveDuration = context.transaction.disablesAnimations || !UIView.areAnimationsEnabled
@@ -214,7 +214,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         private var vehicleMarkers: [String: (bullet: GMSMarker, arrow: GMSMarker)] = [:]
         private var pin: MapMarker?
         private var pinMarker: GMSMarker?
-        private let routeOverlay = MapRouteOverlay()
+        let routeOverlay = MapRouteOverlay()
         let subwayLinesOverlay = SubwayLinesOverlay()
 
         init(camera: Binding<MapCamera>) {
@@ -234,10 +234,6 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
                 polyline.map = mapView
                 return polyline
             }
-        }
-
-        func show(route: MapRoute?, on mapView: GMSMapView, animated: Bool) {
-            routeOverlay.show(route, on: mapView, animated: animated)
         }
 
         func show(markers: [MapMarker], on mapView: GMSMapView) {
@@ -270,14 +266,12 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
             let traits = mapView.traitCollection.modifyingTraits {
                 $0.userInterfaceStyle = colorScheme == .dark ? .dark : .light
             }
-
             let current = Set(vehicles.map(\.id))
             for (id, markers) in vehicleMarkers where !current.contains(id) {
                 markers.bullet.map = nil
                 markers.arrow.map = nil
                 vehicleMarkers[id] = nil
             }
-
             CATransaction.begin()
             CATransaction.setAnimationDuration(moveDuration)
             CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .linear))
