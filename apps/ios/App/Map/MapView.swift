@@ -61,6 +61,9 @@ struct MapView: View {
     /// Whether to show the blue user-location dot. The app must already have location permission.
     var showsUserLocation = false
     var polylines: [MapPolyline] = []
+    /// Whether to draw the subway's lines (``SubwayLines``) under everything else. They hide while a ``route`` or
+    /// ``polylines`` show, so a selected journey, route or trip reads clearly.
+    var showsSubwayLines = false
     var markers: [MapMarker] = []
     /// The one place the user picked, such as a search result: drawn above every other marker.
     var pin: MapMarker?
@@ -85,6 +88,7 @@ struct MapView: View {
                 camera: $camera,
                 showsUserLocation: showsUserLocation,
                 polylines: polylines,
+                showsSubwayLines: showsSubwayLines,
                 markers: markers,
                 pin: pin,
                 route: route,
@@ -113,6 +117,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
     @Binding var camera: MapCamera
     var showsUserLocation: Bool
     var polylines: [MapPolyline]
+    var showsSubwayLines: Bool
     var markers: [MapMarker]
     var pin: MapMarker?
     var route: MapRoute?
@@ -169,6 +174,11 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
             }
         }
         coordinator.show(polylines: polylines, on: mapView)
+        coordinator.subwayLinesOverlay.update(
+            visible: showsSubwayLines && route == nil && polylines.isEmpty,
+            colorScheme: colorScheme,
+            on: mapView
+        )
         coordinator.show(route: route, on: mapView, animated: animated)
         coordinator.show(markers: markers, on: mapView)
         coordinator.show(pin: pin, on: mapView)
@@ -198,6 +208,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         private var pin: MapMarker?
         private var pinMarker: GMSMarker?
         private let routeOverlay = MapRouteOverlay()
+        let subwayLinesOverlay = SubwayLinesOverlay()
 
         init(camera: Binding<MapCamera>) {
             self.camera = camera
@@ -332,6 +343,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
 
 extension GoogleMapRepresentable.Coordinator: @preconcurrency GMSMapViewDelegate {
     func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
+        subwayLinesOverlay.zoomDidSettle(on: mapView)
         if let onCameraIdle {
             let region = GMSCoordinateBounds(region: mapView.projection.visibleRegion())
             let bounds = CoordinateBounds(
