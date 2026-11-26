@@ -216,14 +216,14 @@ public struct JourneyTransfer: Sendable, Hashable, Identifiable {
         from != to
     }
 
-    /// The wait for display: "3 min wait", "No wait", or, for a missed transfer, "Missed by 2 min". English until the
-    /// app localizes.
-    public var formattedWait: String {
+    /// The wait for display: "3 min wait" or, for a missed transfer, "Missed by 2 min"; `nil` under half a minute,
+    /// where there's nothing to say. English until the app localizes.
+    public var formattedWait: String? {
         let wait = waitSeconds
         if wait < 0 {
             return "Missed by \(DurationFormat.string(seconds: -wait))"
         }
-        return wait < 30 ? "No wait" : "\(DurationFormat.string(seconds: wait)) wait"
+        return wait < 30 ? nil : "\(DurationFormat.string(seconds: wait)) wait"
     }
 
     /// The walk for display, such as "2 min walk"; `nil` for a change on the same platform.

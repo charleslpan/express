@@ -98,9 +98,11 @@ struct JourneyTransferRow: View {
                 Text(title)
                     .typography(.bodyEmphasized)
                     .foregroundStyle(.textPrimary)
-                Text(details)
-                    .typography(.secondary)
-                    .foregroundStyle(.textSecondary)
+                if let details {
+                    Text(details)
+                        .typography(.secondary)
+                        .foregroundStyle(.textSecondary)
+                }
                 if let warning {
                     Text(warning)
                         .typography(.captionEmphasized)
@@ -124,9 +126,10 @@ struct JourneyTransferRow: View {
             : String(localized: "Transfer at \(transfer.to)")
     }
 
-    /// "2 min walk · 1 min wait".
-    private var details: String {
-        [transfer.formattedWalk, transfer.formattedWait].compactMap(\.self).joined(separator: " · ")
+    /// "2 min walk · 1 min wait"; `nil` where there's neither a walk nor a wait to mention.
+    private var details: String? {
+        let parts = [transfer.formattedWalk, transfer.formattedWait].compactMap(\.self)
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
     private var warning: String? {
