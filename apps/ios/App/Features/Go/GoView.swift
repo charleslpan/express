@@ -23,6 +23,17 @@ struct GoView: View {
     @State private var hasCenteredOnUser = false
     /// How tall the sheet's peek is, as the sheet measured it; nil for the search field alone.
     @State private var peekHeight: CGFloat?
+    /// The map's frame on screen, and the top edge of the home sheet as it was last measured (both in window
+    /// coordinates), which together say how much of the map the sheet covers.
+    @State private var mapFrame: CGRect = .zero
+    @State private var sheetTop: CGFloat?
+    /// How far up from the map's bottom edge the sheet reached the last time it held still.
+    @State private var obscuredBottom: CGFloat = 0
+    /// Whether the map keeps the picked place's pin in the clear part of the map as the sheet's size settles: from
+    /// picking the place until the user moves the map, or journeys or a trip take the camera.
+    @State private var framesPlace = false
+    /// Counts down the quiet time after the sheet last moved; it ends by taking the sheet's top edge as settled.
+    @State private var settleTask: Task<Void, Never>?
     @Namespace private var glass
 
     /// - Parameter camera: Where the map first looks; New York unless the screenshot harness asks for somewhere else.
@@ -40,9 +51,14 @@ struct GoView: View {
             route: router.selectedJourney.map { MapRoute(journey: $0, focusedLegs: router.focusedJourneyLegs) },
             vehicles: router.mapVehicles,
             vehicleMoveDuration: RideVehicles.tick / .seconds(1),
-            onTilesRendered: { tilesRendered = true }
+            onTilesRendered: { tilesRendered = true },
+            onUserGesture: { framesPlace = false }
         )
         .ignoresSafeArea()
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+            mapFrame = frame
+            scheduleSettle()
+        }
         // The controls sit at the top, clear of the sheet at its peek.
         .overlay(alignment: .top) {
             topControls
@@ -65,6 +81,8 @@ struct GoView: View {
         .onChange(of: router.selectedPlace) { _, place in
             if let place {
                 center(on: place)
+            } else {
+                framesPlace = false
             }
         }
         // A trip opened in the sheet: look at its vehicle, above the sheet, as its line appears.
@@ -88,6 +106,13 @@ struct GoView: View {
 
     private var homeSheet: some View {
         HomeSheet(peekHeight: $peekHeight)
+            // The sheet's real top edge, whatever its detent or its content's height (the place card fits its
+            // text, which Dynamic Type changes); it moves through every height on its way, so it's only used once
+            // it holds still (``sheetSettled()``).
+            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
+                sheetTop = top
+                scheduleSettle()
+            }
             .presentationDetents(
                 Set(HomeSheetDetent.allCases.map { $0.presentationDetent(peekHeight: peekHeight) }),
                 selection: detent
@@ -146,7 +171,8 @@ struct GoView: View {
         }
         // The screenshot harness waits for the map's tiles before it captures.
         .accessibilityElement(children: .contain)
-        .accessibilityIdentifier(tilesRendered ? "map.settled" : "map.loading")
+        // ... and for the map to have framed a picked place in the clear part of the map.
+        .accessibilityIdentifier(tilesRendered && settleTask == nil ? "map.settled" : "map.loading")
     }
 
     /// Whether the map is turned away from north, when the compass shows (as in Apple Maps).
@@ -160,10 +186,48 @@ struct GoView: View {
         router.selectedPlace.map { MapMarker(id: $0.placeID, coordinate: $0.coordinate, title: $0.name, color: .red) }
     }
 
-    /// Centres the map on a picked place, close enough to see the streets around it.
+    /// How long the sheet must hold still before the map takes its size as settled: past the sheet's slide between
+    /// detents and its card's first measurement.
+    private static let settleDelay = Duration.milliseconds(250)
+    /// The least of the map that must stay clear for the map to frame a pin in it; with the sheet pulled higher the
+    /// pin is under it whatever the map does.
+    private static let minimumClearHeight: CGFloat = 160
+
+    /// Looks at a picked place, close enough to see the streets around it, with its pin in the middle of the part of
+    /// the map the sheet leaves clear. The sheet is still sliding or measuring its card at this point, so this frames
+    /// for where it last settled, and ``sheetSettled()`` frames again for where it ends up.
     private func center(on place: PlaceDetails) {
         hasCenteredOnUser = true
-        camera = MapCamera(center: place.coordinate, zoom: 16)
+        framesPlace = true
+        camera = .framing(place.coordinate, zoom: Self.placeZoom, obscuredBottom: obscuredBottom)
+        scheduleSettle()
+    }
+
+    private static let placeZoom: Float = 16
+
+    /// Waits for the sheet (and the map's own size) to hold still before ``sheetSettled()``, starting over whenever
+    /// either moves.
+    private func scheduleSettle() {
+        settleTask?.cancel()
+        settleTask = Task { @MainActor in
+            try? await Task.sleep(for: Self.settleDelay)
+            guard !Task.isCancelled else { return }
+            sheetSettled()
+        }
+    }
+
+    /// The sheet's top edge holds still: records how much of the map it covers and, while a picked place is framed,
+    /// frames its pin in what's left. Leaves the camera alone once the user has moved the map, while journeys or a
+    /// trip have it, and where the sheet covers nearly all of the map.
+    private func sheetSettled() {
+        settleTask = nil
+        guard let sheetTop, mapFrame.height > 0 else { return }
+        obscuredBottom = min(max(mapFrame.maxY - sheetTop, 0), mapFrame.height)
+        guard framesPlace, let place = router.selectedPlace,
+              router.homePath.isEmpty, router.selectedJourney == nil, router.mapTrip == nil,
+              mapFrame.height - obscuredBottom >= Self.minimumClearHeight
+        else { return }
+        camera = .framing(place.coordinate, zoom: Self.placeZoom, obscuredBottom: obscuredBottom)
     }
 
     /// Moves the map to the user's first fix in New York; outside it the map stays on the city.

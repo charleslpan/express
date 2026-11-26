@@ -79,6 +79,9 @@ struct MapView: View {
     var onCameraIdle: (@MainActor (MapViewport) -> Void)?
     /// Called as the map starts to move, by a gesture or an animation.
     var onCameraMove: (@MainActor () -> Void)?
+    /// Called as the map starts to move because the user touched it (a pan, pinch, rotation, or double tap), and not
+    /// for the moves the app makes, so the caller can stop re-framing what the user has moved away from.
+    var onUserGesture: (@MainActor () -> Void)?
     /// Called with a vehicle's id when it's tapped.
     var onVehicleTap: (@MainActor (String) -> Void)?
 
@@ -97,6 +100,7 @@ struct MapView: View {
                 onTilesRendered: onTilesRendered,
                 onCameraIdle: onCameraIdle,
                 onCameraMove: onCameraMove,
+                onUserGesture: onUserGesture,
                 onVehicleTap: onVehicleTap
             )
             .accessibilityLabel("Map")
@@ -126,6 +130,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
     var onTilesRendered: (() -> Void)?
     var onCameraIdle: (@MainActor (MapViewport) -> Void)?
     var onCameraMove: (@MainActor () -> Void)?
+    var onUserGesture: (@MainActor () -> Void)?
     var onVehicleTap: (@MainActor (String) -> Void)?
 
     func makeCoordinator() -> Coordinator {
@@ -153,6 +158,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         coordinator.onTilesRendered = onTilesRendered
         coordinator.onCameraIdle = onCameraIdle
         coordinator.onCameraMove = onCameraMove
+        coordinator.onUserGesture = onUserGesture
         coordinator.onVehicleTap = onVehicleTap
 
         let colorScheme = context.environment.colorScheme
@@ -196,6 +202,7 @@ private struct GoogleMapRepresentable: UIViewRepresentable {
         var onTilesRendered: (() -> Void)?
         var onCameraIdle: (@MainActor (MapViewport) -> Void)?
         var onCameraMove: (@MainActor () -> Void)?
+        var onUserGesture: (@MainActor () -> Void)?
         var onVehicleTap: (@MainActor (String) -> Void)?
         private var polylines: [MapPolyline] = []
         private var markers: [MapMarker] = []
@@ -362,8 +369,11 @@ extension GoogleMapRepresentable.Coordinator: @preconcurrency GMSMapViewDelegate
         camera.wrappedValue = settled
     }
 
-    func mapView(_: GMSMapView, willMove _: Bool) {
+    func mapView(_: GMSMapView, willMove gesture: Bool) {
         onCameraMove?()
+        if gesture {
+            onUserGesture?()
+        }
     }
 
     func mapView(_: GMSMapView, didTap marker: GMSMarker) -> Bool {
