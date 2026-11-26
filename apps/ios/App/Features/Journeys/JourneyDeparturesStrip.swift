@@ -96,11 +96,12 @@ struct JourneyDeparturesStrip: View {
         )
     }
 
-    /// What the status adds to the time: "3 min late", "2 min early", or that it may not be real time. Nothing for
-    /// a time on schedule or on the timetable alone, so the strip stays quiet.
+    /// What the status adds to the time: that it is cancelled or may not be real time. Nothing for
+    /// a time on schedule, on the timetable alone, or early or late (the adjusted time says so), so the strip stays
+    /// quiet.
     private func note(for status: DepartureStatus) -> String? {
         switch status {
-        case .scheduled, .onTime: nil
+        case .scheduled, .onTime, .late, .early: nil
         default: status.text
         }
     }
