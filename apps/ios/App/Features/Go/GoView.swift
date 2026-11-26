@@ -114,7 +114,7 @@ struct GoView: View {
                 scheduleSettle()
             }
             .presentationDetents(detents, selection: detent)
-            .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+            .presentationBackgroundInteraction(backgroundInteraction)
             .presentationDragIndicator(.visible)
             .interactiveDismissDisabled()
             // The map is covered by the sheet, so an alert from the map's buttons presents from the sheet.
@@ -128,6 +128,12 @@ struct GoView: View {
             } message: {
                 Text("Turn on Location Services for Express in Settings to see where you are on the map.")
             }
+    }
+
+    /// The map stays live behind the sheet. The threshold must be one of the sheet's detents, and the place card's
+    /// only detent is its measured height, not `.medium`, so there the whole presentation is interactive.
+    private var backgroundInteraction: PresentationBackgroundInteraction {
+        router.isShowingPlaceCard ? .enabled : .enabled(upThrough: .medium)
     }
 
     /// The sheet's detents: the three of the home sheet, or while the place card alone is showing, one that fits it.
