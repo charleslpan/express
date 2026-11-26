@@ -24,6 +24,10 @@ timetable:
   adjust_footpaths: true
   link_stop_distance: 100
   max_footpath_length: 15
+  # Locally tested on stock v2.11.4: 0 restored Herald D17N's coordinates and
+  # direct subway options and cut one-stop bus hops. Accepted tradeoff: short
+  # street/platform walks lose about 1-2.5 min of modeled station access.
+  max_matching_distance: 0
   default_transfer_time: 2
   datasets:
     us-ny-MTA-NYCSubway:
