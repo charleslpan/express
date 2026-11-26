@@ -228,3 +228,51 @@ private struct StubLookup: PlaceLookupService {
         place
     }
 }
+
+// MARK: - Framing a pin above the sheet
+
+struct MapFramingTests {
+    private let pin = Coordinate(latitude: 40.7484, longitude: -73.9857)
+
+    /// How many points below the map's centre the pin sits when the map looks at `camera` (Web Mercator, Google's
+    /// 256-point world at zoom 0), the inverse of the shift `framing` makes.
+    private func pointsBelowCentre(of coordinate: Coordinate, in camera: MapCamera) -> Double {
+        func mercatorY(_ latitude: Double) -> Double {
+            log(tan(.pi / 4 + latitude * .pi / 360))
+        }
+        let pointsPerRadian = 256 * pow(2, Double(camera.zoom)) / (2 * .pi)
+        return (mercatorY(camera.center.latitude) - mercatorY(coordinate.latitude)) * pointsPerRadian
+    }
+
+    @Test func nothingCoveredCentresOnThePin() {
+        let camera = MapCamera.framing(pin, zoom: 16, obscuredBottom: 0)
+        #expect(camera.center == pin)
+        #expect(camera.zoom == 16)
+        #expect(camera.bearing == 0)
+    }
+
+    @Test func aCoveredBottomPutsThePinHalfThatHeightAboveTheMapsCentre() {
+        for covered: CGFloat in [120, 426, 600] {
+            let camera = MapCamera.framing(pin, zoom: 16, obscuredBottom: covered)
+            // The pin sits `covered / 2` points above the centre: the centre of what's left clear.
+            #expect(abs(pointsBelowCentre(of: pin, in: camera) + Double(covered) / 2) < 0.01)
+            // The camera looks south of the pin, so the pin is higher on screen than the map's centre.
+            #expect(camera.center.latitude < pin.latitude)
+            #expect(camera.center.longitude == pin.longitude)
+        }
+    }
+
+    @Test func aCoveredTopPullsTheOtherWay() {
+        let camera = MapCamera.framing(pin, zoom: 16, obscuredBottom: 300, obscuredTop: 100)
+        #expect(abs(pointsBelowCentre(of: pin, in: camera) + 100) < 0.01)
+        let top = MapCamera.framing(pin, zoom: 16, obscuredBottom: 0, obscuredTop: 100)
+        #expect(top.center.latitude > pin.latitude)
+    }
+
+    @Test func theShiftIsTheSameNumberOfPointsAtAnyZoom() {
+        for zoom: Float in [12, 14.5, 18] {
+            let camera = MapCamera.framing(pin, zoom: zoom, obscuredBottom: 400)
+            #expect(abs(pointsBelowCentre(of: pin, in: camera) + 200) < 0.01)
+        }
+    }
+}
