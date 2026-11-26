@@ -216,8 +216,8 @@ public struct JourneyTransfer: Sendable, Hashable, Identifiable {
         from != to
     }
 
-    /// The wait for display: "3 min wait" or, for a missed transfer, "Missed by 2 min"; `nil` under half a minute, where
-    /// there's nothing worth saying. English until the app localizes.
+    /// The wait for display: "3 min wait" or, for a missed transfer, "Missed by 2 min"; `nil` under half a minute,
+    /// where there's nothing to say. English until the app localizes.
     public var formattedWait: String? {
         let wait = waitSeconds
         if wait < 0 {
