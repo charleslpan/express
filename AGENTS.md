@@ -75,7 +75,7 @@ What each job runs:
 | `changes` | `ubuntu-latest` | none | Reads `ci-config.env` and evaluates `ci-filters.yml`. |
 | `swift` | `SWIFT_IMAGE` container | `ci-swift` | `scripts/ci/lint.sh` (pinned SwiftFormat `--lint` and SwiftLint `--strict`), then TransitKit's `swift test` (directly: the container has no Node). |
 | `server` | `ubuntu-latest` | `ci-server` | `scripts/ci/node.sh` (pinned pnpm via Corepack, `pnpm install --frozen-lockfile`, then `pnpm turbo run lint typecheck build test` over every non-Swift workspace), then the API checks (`scripts/ci/server.sh`, owned by the server tasks). |
-| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj` and fails if the tracked `project.pbxproj` or `Express.xcscheme` differ from the generated ones, fails if the committed `Package.resolved` doesn't match the resolved packages (see [TestFlight](#testflight)), runs only the app's unit tests (`-only-testing:ExpressTests`: no screenshot sweeps) on the newest standard iPhone Pro simulator, writes `build/Express.xcresult`. `make ci-ios-snapshots` (`ios.sh snapshots`) runs the full scheme with the screenshot harness; it is not in CI. |
+| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh build`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj` and fails if the tracked `project.pbxproj` or `Express.xcscheme` differ from the generated ones, fails if the committed `Package.resolved` doesn't match the resolved packages (see [TestFlight](#testflight)), only compiles the app and its test targets (`build-for-testing` for the generic iOS Simulator destination: no simulator is picked, downloaded, or booted), writes `build/Express.xcresult`. `make ci-ios-test` (`ios.sh test`) runs the app's unit tests (`-only-testing:ExpressTests`) on the newest standard iPhone Pro simulator, and `make ci-ios-snapshots` (`ios.sh snapshots`) runs the full scheme with the screenshot harness; both run on demand, not in CI. |
 | `testflight` (own workflow) | `IOS_RUNNER` | `testflight` | Dormant: `scripts/ci/testflight.sh` skips with a notice without the App Store Connect secrets, which aren't set; Xcode Cloud ships TestFlight builds instead (see [TestFlight](#testflight)). Not part of `ci-ok`. |
 | `ci-ok` | `ubuntu-latest` | none | `re-actors/alls-green` over every job: failed or cancelled fails it, skipped is fine. |
 
@@ -166,7 +166,7 @@ The app reads these launch arguments (`apps/ios/App/Harness/`):
 3. Add a test to `UITests/ScreenshotTests.swift` that calls `capture("<screen>", fixtures: "<set>")`. Name a
    screen and its fixtures in lowercase with hyphens. Each test writes `<screen>-<fixtures>-<variant>.png`.
 
-**Look at the screenshots** after `make ci-ios-snapshots` (PNGs in `build/screenshots/`; CI no longer produces them).
+**Look at the screenshots** after `make ci-ios-snapshots` (PNGs in `build/screenshots/`; CI does not produce them).
 
 The PNGs are exported even when a test fails. Xcode Cloud and CI don't take screenshots; to have CI do it, point
 `make ci-ios` at `ios.sh snapshots` (the workflow uploads `build/screenshots/**` and `build/*.xcresult` either way).

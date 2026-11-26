@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # The `ios` CI job (macOS runner, IOS_RUNNER in .github/ci-config.env): select Xcode, install the pinned XcodeGen,
-# generate apps/ios/Express.xcodeproj, and run tests on an iOS simulator.
-# Modes: `test` (default, what CI runs) runs only the app's unit tests (ExpressTests); `snapshots` runs the whole
-# Express scheme, including the ExpressUITests screenshot harness, fixes the status bar, and exports the PNGs to
-# build/screenshots/ (via scripts/ci/screenshots.sh); `build` only builds. Every mode writes build/Express.xcresult;
+# generate apps/ios/Express.xcodeproj, and compile the app and its tests.
+# Modes: `build` (what CI runs, `make ci-ios`) only compiles the app and every test target (build-for-testing) for the
+# generic iOS Simulator destination, so it never picks, downloads, or boots a simulator runtime; `test` runs only the
+# app's unit tests (ExpressTests) on a simulator; `snapshots` runs the whole Express scheme, including the
+# ExpressUITests screenshot harness, fixes the status bar, and exports the PNGs to build/screenshots/ (via
+# scripts/ci/screenshots.sh). `test` and `snapshots` run on demand. Every mode writes build/Express.xcresult;
 # the workflow uploads build/ results in the ios-<attempt> artifact.
 # Usage: ios.sh [test|snapshots|build] (default test). Outside CI it keeps the selected Xcode instead of switching to
 # XCODE_VERSION, so `pnpm turbo run test` works on a Mac without sudo.
@@ -91,28 +93,31 @@ if ! scripts/ci/package-resolved.py "${check_args[@]}"; then
     exit 1
 fi
 
-echo "::group::Simulator"
-# The newest standard iPhone Pro on the newest iOS runtime that runs one, at or above the app's deployment target, so
-# screenshots show the phone most people hold (wide devices such as the iPhone Duo put the status bar and tab bar down
-# the side). pick-simulator.py logs each runtime and why it chose what it did, creates the device where needed, and in
-# CI downloads the iOS platform as a last resort; it warns where it has to fall back to another iPhone.
-min_ios=$(sed -nE 's/^ *iOS: "?([0-9.]+)"?/\1/p' apps/ios/project.yml | head -n 1)
-pick_args=("${min_ios:-27.0}")
-[[ -n ${CI:-} ]] && pick_args+=(--download)
-IFS=$'\t' read -r udid runtime name < <(scripts/ci/pick-simulator.py "${pick_args[@]}") || true
-if [[ -z ${udid:-} ]]; then
-    echo "::error::No iPhone simulator to test on (see the runtimes above)" && xcrun simctl list runtimes
-    exit 1
+udid=
+if [[ $MODE != build ]]; then
+    echo "::group::Simulator"
+    # The newest standard iPhone Pro on the newest iOS runtime that runs one, at or above the app's deployment target, so
+    # screenshots show the phone most people hold (wide devices such as the iPhone Duo put the status bar and tab bar down
+    # the side). pick-simulator.py logs each runtime and why it chose what it did, creates the device where needed, and in
+    # CI downloads the iOS platform as a last resort; it warns where it has to fall back to another iPhone.
+    min_ios=$(sed -nE 's/^ *iOS: "?([0-9.]+)"?/\1/p' apps/ios/project.yml | head -n 1)
+    pick_args=("${min_ios:-27.0}")
+    [[ -n ${CI:-} ]] && pick_args+=(--download)
+    IFS=$'\t' read -r udid runtime name < <(scripts/ci/pick-simulator.py "${pick_args[@]}") || true
+    if [[ -z ${udid:-} ]]; then
+        echo "::error::No iPhone simulator to test on (see the runtimes above)" && xcrun simctl list runtimes
+        exit 1
+    fi
+    echo "Simulator: $name on $runtime, $udid"
+    if [[ $MODE == snapshots ]]; then
+        # Boot it now to give screenshots a fixed status bar (9:41, full signal and battery).
+        xcrun simctl bootstatus "$udid" -b >/dev/null
+        xcrun simctl status_bar "$udid" override --time 9:41 --dataNetwork wifi --wifiMode active --wifiBars 3 \
+            --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100 ||
+            echo "::warning::Couldn't override the simulator's status bar"
+    fi
+    echo "::endgroup::"
 fi
-echo "Simulator: $name on $runtime, $udid"
-if [[ $MODE == snapshots ]]; then
-    # Boot it now to give screenshots a fixed status bar (9:41, full signal and battery).
-    xcrun simctl bootstatus "$udid" -b >/dev/null
-    xcrun simctl status_bar "$udid" override --time 9:41 --dataNetwork wifi --wifiMode active --wifiBars 3 \
-        --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100 ||
-        echo "::warning::Couldn't override the simulator's status bar"
-fi
-echo "::endgroup::"
 
 rm -rf build/Express.xcresult build/screenshots
 # -quiet keeps the log to warnings, errors, and test failures; the .xcresult artifact has everything.
@@ -121,7 +126,12 @@ rm -rf build/Express.xcresult build/screenshots
 status=0
 xcb_mode=$MODE
 extra=()
-if [[ $MODE == test ]]; then
+destination="id=$udid"
+if [[ $MODE == build ]]; then
+    # Compile only: no simulator runtime is needed for the generic destination.
+    xcb_mode=build-for-testing
+    destination="generic/platform=iOS Simulator"
+elif [[ $MODE == test ]]; then
     extra=(-only-testing:ExpressTests)
 elif [[ $MODE == snapshots ]]; then
     xcb_mode=test
@@ -131,7 +141,7 @@ xcodebuild "$xcb_mode" \
     -quiet \
     -project apps/ios/Express.xcodeproj \
     -scheme Express \
-    -destination "id=$udid" \
+    -destination "$destination" \
     -derivedDataPath build/DerivedData \
     -resultBundlePath build/Express.xcresult \
     -skipPackagePluginValidation \
