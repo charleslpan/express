@@ -95,7 +95,6 @@ struct AlertsDestinationView: View {
 
     var body: some View {
         switch destination {
-        case let .lineStatus(nearbyBuses): LineStatusView(nearbyBuses: nearbyBuses)
         case let .alerts(alerts, line): AlertDetailView(alerts: alerts, line: line)
         }
     }

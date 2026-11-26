@@ -2,17 +2,16 @@ import GlassUI
 import SwiftUI
 
 /// What the home sheet shows over the map: the search field at the top, as in Apple Maps, then the nearest station's
-/// next departures (N1), which show at the sheet's peek, then the service alert chip (A3) and Home and Work (P2),
+/// next departures (N1), which show at the sheet's peek, then Home and Work (P2),
 /// which show at half height, then the rest of Nearby (N1) and the Saved section (P2), which come into view as the
 /// sheet is pulled up.
 ///
 /// It knows nothing of the sheet it sits in: it draws no glass (the system sheet brings it) and doesn't scroll; the
 /// sheet's ``HomeSheet`` does that. The search field comes first, so it's what shows at the sheet's peek, with what
 /// a slot marks with ``View/homeSheetPeekBoundary(_:)`` under it.
-struct HomeSheetContent<Departures: View, Alert: View, Places: View, Nearby: View, Saved: View>: View {
+struct HomeSheetContent<Departures: View, Places: View, Nearby: View, Saved: View>: View {
     private let onSearch: () -> Void
     private let departures: Departures
-    private let alert: Alert
     private let places: Places
     private let nearby: Nearby
     private let saved: Saved
@@ -25,7 +24,6 @@ struct HomeSheetContent<Departures: View, Alert: View, Places: View, Nearby: Vie
         isPeeking: Bool = false,
         onSearch: @escaping () -> Void,
         @ViewBuilder departures: () -> Departures,
-        @ViewBuilder alert: () -> Alert,
         @ViewBuilder places: () -> Places,
         @ViewBuilder nearby: () -> Nearby,
         @ViewBuilder saved: () -> Saved
@@ -33,7 +31,6 @@ struct HomeSheetContent<Departures: View, Alert: View, Places: View, Nearby: Vie
         self.isPeeking = isPeeking
         self.onSearch = onSearch
         self.departures = departures()
-        self.alert = alert()
         self.places = places()
         self.nearby = nearby()
         self.saved = saved()
@@ -47,7 +44,6 @@ struct HomeSheetContent<Departures: View, Alert: View, Places: View, Nearby: Vie
                 .dynamicTypeSize(...DynamicTypeSize.accessibility2)
             departures
             Group {
-                alert
                 places
                 nearby
                 saved
@@ -62,7 +58,7 @@ struct HomeSheetContent<Departures: View, Alert: View, Places: View, Nearby: Vie
     }
 }
 
-extension HomeSheetContent where Departures == NearbySection, Alert == AlertChip,
+extension HomeSheetContent where Departures == NearbySection,
     Places == HomeWorkChips, Nearby == NearbySection, Saved == SavedPlacesSection
 {
     /// The sheet with each slot showing its feature. `nearby` is the board
@@ -70,8 +66,6 @@ extension HomeSheetContent where Departures == NearbySection, Alert == AlertChip
     init(nearby model: NearbyModel, isPeeking: Bool = false, onSearch: @escaping () -> Void) {
         self.init(isPeeking: isPeeking, onSearch: onSearch) {
             NearbySection(model: model, part: .next)
-        } alert: {
-            AlertChip(model: model)
         } places: {
             HomeWorkChips()
         } nearby: {
