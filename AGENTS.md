@@ -75,7 +75,7 @@ What each job runs:
 | `changes` | `ubuntu-latest` | none | Reads `ci-config.env` and evaluates `ci-filters.yml`. |
 | `swift` | `SWIFT_IMAGE` container | `ci-swift` | `scripts/ci/lint.sh` (pinned SwiftFormat `--lint` and SwiftLint `--strict`), then TransitKit's `swift test` (directly: the container has no Node). |
 | `server` | `ubuntu-latest` | `ci-server` | `scripts/ci/node.sh` (pinned pnpm via Corepack, `pnpm install --frozen-lockfile`, then `pnpm turbo run lint typecheck build test` over every non-Swift workspace), then the API checks (`scripts/ci/server.sh`, owned by the server tasks). |
-| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj` and fails if the tracked `project.pbxproj` or `Express.xcscheme` differ from the generated ones, fails if the committed `Package.resolved` doesn't match the resolved packages (see [TestFlight](#testflight)), runs the `Express` scheme's tests on the newest standard iPhone Pro simulator (see [Screenshot harness](#screenshot-harness)), writes `build/Express.xcresult`. |
+| `ios` | `IOS_RUNNER` | `ci-ios` | `scripts/ci/ios.sh test`: selects `XCODE_VERSION`, installs pinned XcodeGen 2.46.0, generates `apps/ios/Express.xcodeproj` and fails if the tracked `project.pbxproj` or `Express.xcscheme` differ from the generated ones, fails if the committed `Package.resolved` doesn't match the resolved packages (see [TestFlight](#testflight)), runs only the app's unit tests (`-only-testing:ExpressTests`: no screenshot sweeps) on the newest standard iPhone Pro simulator, writes `build/Express.xcresult`. `make ci-ios-snapshots` (`ios.sh snapshots`) runs the full scheme with the screenshot harness; it is not in CI. |
 | `testflight` (own workflow) | `IOS_RUNNER` | `testflight` | Dormant: `scripts/ci/testflight.sh` skips with a notice without the App Store Connect secrets, which aren't set; Xcode Cloud ships TestFlight builds instead (see [TestFlight](#testflight)). Not part of `ci-ok`. |
 | `ci-ok` | `ubuntu-latest` | none | `re-actors/alls-green` over every job: failed or cancelled fails it, skipped is fine. |
 
@@ -134,7 +134,8 @@ One-time setup, by the developer in Xcode (needs the app record for `com.charles
 
 ### Screenshot harness
 
-You can't open a simulator, so judge your UI from the screenshots CI takes. The `ios` job runs the
+You can't open a simulator, so judge your UI from screenshots. CI's `ios` job skips the sweeps; run them explicitly
+with `make ci-ios-snapshots` on a Mac (the `snapshots` mode below). That mode runs the
 `ExpressUITests` target (`apps/ios/UITests/`), which launches the app once per screen and variant and attaches
 a screenshot of each. `scripts/ci/screenshots.sh` then exports those attachments to `build/screenshots/` with
 Xcode's `xcrun xcresulttool export attachments`. Every screen is captured in three variants: `light`, `dark`, and
@@ -165,16 +166,10 @@ The app reads these launch arguments (`apps/ios/App/Harness/`):
 3. Add a test to `UITests/ScreenshotTests.swift` that calls `capture("<screen>", fixtures: "<set>")`. Name a
    screen and its fixtures in lowercase with hyphens. Each test writes `<screen>-<fixtures>-<variant>.png`.
 
-**Look at the screenshots** once the `ios` job has finished. Its run summary lists the PNGs.
+**Look at the screenshots** after `make ci-ios-snapshots` (PNGs in `build/screenshots/`; CI no longer produces them).
 
-```sh
-gh run list --branch <your-branch> --workflow CI                  # find the run id
-gh run download <run-id> -n ios-1 -D /tmp/ci-artifacts            # ios-<attempt>; the PNGs are in screenshots/
-ls /tmp/ci-artifacts/screenshots                                  # then open each PNG with your Read tool
-```
-
-The frozen workflow uploads the PNGs inside the `ios-<attempt>` artifact (next to `Express.xcresult`), not in an
-artifact of their own. The PNGs are exported even when a test fails.
+The PNGs are exported even when a test fails. Xcode Cloud and CI don't take screenshots; to have CI do it, point
+`make ci-ios` at `ios.sh snapshots` (the workflow uploads `build/screenshots/**` and `build/*.xcresult` either way).
 
 ## Conventions
 
