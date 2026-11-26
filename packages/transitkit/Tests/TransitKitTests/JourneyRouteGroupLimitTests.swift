@@ -9,7 +9,8 @@ struct JourneyRouteGroupLimitTests {
         var itineraries = (0 ..< 7).map { index in
             JourneyRouteGroupTests.later(planned, by: index + 1) { $0.routeId = "route-\(index)" }
         }
-        itineraries.insert(contentsOf: [JourneyRouteGroupTests.later(itineraries[0], by: 10), JourneyRouteGroupTests.later(itineraries[0], by: 20)], at: 1)
+        let extra = [10, 20].map { JourneyRouteGroupTests.later(itineraries[0], by: $0) }
+        itineraries.insert(contentsOf: extra, at: 1)
         let options = itineraries.map(JourneyOption.init)
         let groups = JourneyOptions.groups(of: options)
 
