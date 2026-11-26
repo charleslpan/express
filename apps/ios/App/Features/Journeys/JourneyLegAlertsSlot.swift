@@ -94,26 +94,17 @@ enum JourneyAlertText {
     }
 }
 
-/// A journey option's alert flag (``TransitKit/JourneyAlertFlag``): the icon and colour of its most severe alert, and
-/// which lines it's on, as a small tinted label under the option's legs. Part of the option's one VoiceOver element.
+/// A journey option's alert flag (``TransitKit/JourneyAlertFlag``) as a compact indicator: just the icon and colour of
+/// its most severe alert, beside the option's duration. The words stay out of the list; the opened journey shows the
+/// full alerts. Hidden from VoiceOver, since the option's one element reads ``JourneyAlertText/flag(_:)``.
 struct JourneyAlertFlagLabel: View {
     let flag: JourneyAlertFlag
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     var body: some View {
         let level = ServiceAlertBanner.Level(flag.level)
-        Label {
-            Text(JourneyAlertText.flag(flag))
-                .foregroundStyle(.textPrimary)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
-        } icon: {
-            Image(systemName: level.systemImage)
-                .foregroundStyle(level.color)
-        }
-        .typography(.caption)
-        .padding(.horizontal, Spacing.xs)
-        .padding(.vertical, Spacing.xxs)
-        .background(level.color.opacity(reduceTransparency ? 0.22 : 0.14), in: Radius.shape(Radius.sm))
+        Image(systemName: level.systemImage)
+            .foregroundStyle(level.color)
+            .typography(.secondary)
+            .accessibilityHidden(true)
     }
 }
