@@ -102,14 +102,10 @@ enum ScreenshotScreen: String, CaseIterable {
     case tripFull = "trip-full"
     case tripEnded = "trip-ended"
     case tripError = "trip-error"
-    /// Service alerts (A3), with `-fixtures nyc-alerts`: banners on Nearby's rows at full height, the alert chip at
-    /// half height, and an alert's full text, which the UI test opens by tapping a banner.
+    /// Service alerts (A3), with `-fixtures nyc-alerts`: banners on Nearby's rows at full height, and an alert's
+    /// full text, which the UI test opens by tapping a banner.
     case alertsNearby = "alerts-nearby"
-    case alertsChip = "alerts-chip"
     case alertDetail = "alert-detail"
-    /// Line status (A3), pushed onto the home sheet: mixed lines (`nyc-alerts`), all good service (`nyc-evening`),
-    /// loading (`slow-network`), and offline (`offline`).
-    case lineStatus = "line-status"
     /// Union Square's board (N2) with `-fixtures nyc-alerts`: the stop's alerts under its name, and a banner on each
     /// line and direction they apply to (A3).
     case stopAlerts = "stop-alerts"
@@ -141,7 +137,7 @@ enum ScreenshotScreen: String, CaseIterable {
              .tripError, .journeysPeek, .journeysHalf, .journeysFull, .journeysRoute, .journeysArriveBy,
              .journeysLoading, .journeysNoResults, .journeysOutsideNYC, .journeysLocationOff, .journeysError,
              .journeysStale, .journeySubway, .journeyBus, .journeyTight, .journeyCancelled, .journeyStale,
-             .journeyStops, .journeyDepartures, .alertsNearby, .alertsChip, .alertDetail, .lineStatus, .stopAlerts,
+             .journeyStops, .journeyDepartures, .alertsNearby, .alertDetail, .stopAlerts,
              .journeysAlerts, .journeyAlertSuspension, .journeyAlertSkipped, .journeyAlertOutside:
             RootView()
         case .mapGlass: MapGlassScreen()
@@ -167,9 +163,9 @@ enum ScreenshotScreen: String, CaseIterable {
         switch self {
         case .homeHalf, .homePlaces, .homePlacesUnset, .nearbyHalf, .nearbyStale, .nearbyDenied, .nearbyOutsideNYC,
              .nearbyLoading, .nearbyError, .nearbyEmpty, .stopHalf, .stopStale, .stopError, .stopEmpty, .trip,
-             .tripEnded, .tripError, .alertsChip, .alertDetail: .half
+             .tripEnded, .tripError, .alertDetail: .half
         case .homeFull, .homeSaved, .homeSavedLoading, .homeSavedEmpty, .nearbyFull, .stopFull, .tripFull,
-             .journeysFull, .journeysArriveBy, .journeyBus, .journeyTight, .journeyStops, .alertsNearby, .lineStatus,
+             .journeysFull, .journeysArriveBy, .journeyBus, .journeyTight, .journeyStops, .alertsNearby,
              .stopAlerts, .journeysAlerts, .journeyAlertSuspension: .full
         case .journeysPeek: .peek
         case _ where isJourneys || isJourneyDetail: .half
@@ -207,9 +203,7 @@ enum ScreenshotScreen: String, CaseIterable {
     /// or trip pushed. A journey comes from the launch's `fixtures` where they carry alerts.
     @MainActor
     func prepare(_ router: AppRouter, fixtures: FixtureSet? = nil) {
-        if self == .lineStatus {
-            router.showLineStatus(nearbyBuses: FixtureSet.unionSquareBuses)
-        } else if searchQuery != nil {
+        if searchQuery != nil {
             router.showPlaceSearch()
         } else if [.searchPlace, .placeSaved].contains(self) {
             router.showPlace(FixturePlaceSearchService.places[0])
@@ -304,7 +298,7 @@ enum ScreenshotScreen: String, CaseIterable {
     var locationAuthorization: LocationService.Authorization {
         switch self {
         case .homeOutsideNYC, .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyOutsideNYC, .nearbyLoading,
-             .nearbyError, .nearbyEmpty, .alertsNearby, .alertsChip, .alertDetail: .authorized
+             .nearbyError, .nearbyEmpty, .alertsNearby, .alertDetail: .authorized
         case .nearbyDenied, .journeysLocationOff: .denied
         case _ where isJourneys || isJourneyDetail: .authorized
         default: .notDetermined
@@ -359,7 +353,7 @@ extension ScreenshotScreen {
         switch self {
         case .homeOutsideNYC, .nearbyOutsideNYC, .journeysOutsideNYC: Coordinate(latitude: 39.9526, longitude: -75.1652)
         case .nearbyPeek, .nearbyHalf, .nearbyFull, .nearbyStale, .nearbyLoading, .nearbyError, .nearbyEmpty,
-             .alertsNearby, .alertsChip, .alertDetail:
+             .alertsNearby, .alertDetail:
             FixtureSet.unionSquare
         case .journeysLocationOff: nil
         case _ where isJourneys || isJourneyDetail: FixtureSet.unionSquare

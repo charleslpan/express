@@ -43,26 +43,7 @@ enum FixtureSet: String, CaseIterable, Sendable {
     /// Where the rider stands in the fixtures: the south-east corner of Union Square, by the 4, 5, and 6.
     static let unionSquare = Coordinate(latitude: 40.7343, longitude: -73.9895)
 
-    /// The bus routes at the stops around ``unionSquare``, as Nearby finds them, for line status.
-    static let unionSquareBuses: [LineStatusLine] = [
-        ("M14A+", "M14A-SBS", "6CBE45"),
-        ("M14D+", "M14D-SBS", "6CBE45"),
-        ("M1", "M1", "0039A6"),
-        ("M2", "M2", "0039A6"),
-    ].map { id, name, color in
-        LineStatusLine(
-            id: id,
-            bullet: LineBullet(
-                text: name,
-                shape: .label,
-                color: RGBColor(hex: color),
-                textColor: RGBColor(hex: "FFFFFF")
-            ),
-            name: nil
-        )
-    }
-
-    /// Whether the set carries service alerts, on departures, journeys, and line status.
+    /// Whether the set carries service alerts, on departures and journeys.
     var hasAlerts: Bool {
         [.nycAlerts, .nycAlertsMixed].contains(self)
     }

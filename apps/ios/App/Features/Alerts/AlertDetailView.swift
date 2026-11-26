@@ -95,8 +95,26 @@ struct AlertsDestinationView: View {
 
     var body: some View {
         switch destination {
-        case let .lineStatus(nearbyBuses): LineStatusView(nearbyBuses: nearbyBuses)
         case let .alerts(alerts, line): AlertDetailView(alerts: alerts, line: line)
         }
+    }
+}
+
+/// A line's bullet, with its name where the bullet doesn't say it ("42 St Shuttle").
+struct LineName: View {
+    let line: LineStatusLine
+
+    var body: some View {
+        HStack(spacing: Spacing.xs) {
+            LinePill(TransitLine(line))
+            if let name = line.name {
+                Text(name)
+                    .typography(.cardTitle)
+                    .foregroundStyle(.textPrimary)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(TransitLine(line).accessibilityName)
+        .accessibilityAddTraits(.isHeader)
     }
 }
