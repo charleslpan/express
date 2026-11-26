@@ -143,11 +143,12 @@ final class JourneyPlanner {
     /// The option to draw on the map after the options change: `current` where it's still offered (by id, or by
     /// the trips it rides, since a refresh can change an itinerary's id), else the first.
     func selection(keeping current: Itinerary?) -> Itinerary? {
-        guard let first = options.first else { return nil }
+        let shown = groups.flatMap(\.options)
+        guard let first = shown.first else { return nil }
         guard let current else { return first.itinerary }
         let trips = JourneySummary(current).tripIDs
-        let kept = options.first { $0.id == current.id }
-            ?? options.first { !trips.isEmpty && $0.summary.tripIDs == trips }
+        let kept = shown.first { $0.id == current.id }
+            ?? shown.first { !trips.isEmpty && $0.summary.tripIDs == trips }
         return (kept ?? first).itinerary
     }
 }
