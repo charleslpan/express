@@ -47,6 +47,12 @@ final class JourneyPlanner {
         }
     }
 
+    /// The options as the list shows them: one row per route, the later trips of a route folded into its row
+    /// (``JourneyOptions/groups(of:)``).
+    var groups: [JourneyRouteGroup] {
+        JourneyOptions.groups(of: options)
+    }
+
     /// Whether the list must say its times may not be real time, as the MTA's terms require: the options are more
     /// than a minute old, or the server's realtime data is (or its age is unknown).
     func mayNotBeRealTime(at now: Date) -> Bool {

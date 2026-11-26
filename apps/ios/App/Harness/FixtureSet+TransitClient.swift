@@ -16,7 +16,10 @@ extension FixtureSet {
     /// Nearby lists, `fixture-6-0-4`), and the trips the journeys ride (`fixture-trip-6` and the rest, which journey
     /// detail refreshes from; `nyc-evening-cancelled` cancels the 6, from `trip-fixture-trip-6-cancelled.json`).
     /// Journeys plan from Union Square to Grand Central Terminal (`Fixtures/plan-nyc-evening.json`: the 4, the 6
-    /// running late, the Q and the shuttle, the M101, and a walk), except in `no-journeys`, which finds none.
+    /// running late, the Q and the shuttle, the M101, and a walk, with later trips of the 4 and the 6 that journey
+    /// options fold into their routes' rows), except in `no-journeys`, which finds none. The 6's boarding platform
+    /// lists its next four trains (`Fixtures/nearby-stoptimes-635N.json`), whose trips journey detail checks
+    /// (`fixture-trip-6-b` to `-d`).
     /// Line status (`/api/alerts`) answers every requested line with no alerts, but in `nyc-alerts`, which answers from
     /// `Fixtures/line-status-nyc-alerts.json` (the MTA's alerts recorded that evening, with the set's own) and adds
     /// `Fixtures/nearby-alerts.json` to the departures and `Fixtures/journey-alerts.json` to the journeys' legs and
@@ -43,7 +46,7 @@ extension FixtureSet {
             case .slowNetwork:
                 try await Task.sleep(for: .seconds(24 * 60 * 60))
                 throw CancellationError()
-            case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .nycEveningBusesStale, .noKey,
+            case .nycEvening, .nycEveningStale, .nycNoService, .nycEveningBuses, .noKey,
                  .noJourneys, .nycEveningCancelled, .nycAlerts, .nycAlertsMixed:
                 return try Self.response(to: request, fixtures: fixtures)
             }

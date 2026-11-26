@@ -2,11 +2,17 @@ import GlassUI
 import SwiftUI
 import TransitKit
 
-/// One journey option: how long it takes, when it leaves and arrives, its legs on a segment bar, its walking and
-/// transfers, and when the first ride leaves, live where realtime data stands behind it. The selected option (the one
-/// on the map) is tinted, and an option with an alert on one of its legs is flagged. VoiceOver reads it as one button.
+/// One journey option: how long it takes, when it leaves and arrives, its legs on a segment bar, its walking, and
+/// when the first ride leaves, live where realtime data stands behind it. The route's later trips (the same way there
+/// on the next trains) follow as "Also at" times. The selected option (the one on the map) is tinted,
+/// and an option with an alert on one of its legs is flagged. VoiceOver reads it as one button.
 struct JourneyOptionRow: View {
+    /// How many later departures the row names before it says how many more there are.
+    static let visibleLater = 3
+
     let summary: JourneySummary
+    /// The route's other planned departures, soonest first; empty where only one trip was planned.
+    var later: [JourneySummary] = []
     let now: Date
     let isSelected: Bool
     /// Whether the list says its times may not be real time, which mutes the live badge.
@@ -17,7 +23,7 @@ struct JourneyOptionRow: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: Spacing.xs) {
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
                 AdaptiveStack(spacing: Spacing.xs) {
                     VStack(alignment: .leading, spacing: Spacing.xxxs) {
                         Text(summary.formattedDuration)
@@ -46,6 +52,12 @@ struct JourneyOptionRow: View {
                 Label(details, systemImage: "figure.walk")
                     .typography(.caption)
                     .foregroundStyle(.textSecondary)
+                if let laterText {
+                    Label(laterText, systemImage: "clock")
+                        .typography(.caption)
+                        .foregroundStyle(.textSecondary)
+                        .accessibilityIdentifier("journeys.later")
+                }
             }
             .multilineTextAlignment(.leading)
             .fixedSize(horizontal: false, vertical: true)
@@ -65,7 +77,9 @@ struct JourneyOptionRow: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
-        .accessibilityHint("Shows this journey step by step, and on the map")
+        .accessibilityHint(later.isEmpty
+            ? "Shows this journey step by step, and on the map"
+            : "Shows this journey step by step, and on the map, with its other departures")
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 
@@ -84,16 +98,20 @@ struct JourneyOptionRow: View {
         return DepartureTime(minutes: summary.minutesUntilDeparture(from: now), status: status)
     }
 
-    /// "7 min walk · 1 transfer".
+    /// "7 min walk".
     private var details: String {
-        let walk = String(localized: "\(summary.formattedWalking) walk")
-        guard !summary.isWalkOnly else { return walk }
-        let transfers = switch summary.transfers {
-        case 0: String(localized: "no transfers")
-        case 1: String(localized: "1 transfer")
-        default: String(localized: "\(summary.transfers) transfers")
+        String(localized: "\(summary.formattedWalking) walk")
+    }
+
+    /// "Also at 6:52 PM · 6:58 PM · 7:05 PM", then how many more where there are several; nil without later trips.
+    private var laterText: String? {
+        guard !later.isEmpty else { return nil }
+        let times = later.prefix(Self.visibleLater).map { JourneyClock.time($0.firstRideDeparture ?? $0.departure) }
+        var text = times.joined(separator: " · ")
+        if later.count > Self.visibleLater {
+            text += String(localized: " · +\(later.count - Self.visibleLater) more")
         }
-        return "\(walk) · \(transfers)"
+        return String(localized: "Also at \(text)")
     }
 
     private var accessibilityLabel: String {
@@ -106,6 +124,9 @@ struct JourneyOptionRow: View {
         ]
         if let departure {
             parts.append(String(localized: "leaves in \(departure.accessibilityLabel)"))
+        }
+        if let laterText {
+            parts.append(laterText)
         }
         if let alertFlag {
             parts.append(JourneyAlertText.flag(alertFlag))
