@@ -29,7 +29,7 @@ struct HomeSheet: View {
                 if router.isSearchingPlaces {
                     PlaceSearchPanel()
                 } else if let place = router.selectedPlace {
-                    PlaceCard(place: place) {
+                    PlaceCard(place: place, height: $router.placeCardHeight) {
                         router.closePlace()
                     }
                 } else {

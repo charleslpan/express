@@ -113,10 +113,7 @@ struct GoView: View {
                 sheetTop = top
                 scheduleSettle()
             }
-            .presentationDetents(
-                Set(HomeSheetDetent.allCases.map { $0.presentationDetent(peekHeight: peekHeight) }),
-                selection: detent
-            )
+            .presentationDetents(detents, selection: detent)
             .presentationBackgroundInteraction(.enabled(upThrough: .medium))
             .presentationDragIndicator(.visible)
             .interactiveDismissDisabled()
@@ -133,11 +130,28 @@ struct GoView: View {
             }
     }
 
+    /// The sheet's detents: the three of the home sheet, or while the place card alone is showing, one that fits it.
+    private var detents: Set<PresentationDetent> {
+        if router.isShowingPlaceCard {
+            return [placeCardDetent]
+        }
+        return Set(HomeSheetDetent.allCases.map { $0.presentationDetent(peekHeight: peekHeight) })
+    }
+
+    /// The place card's own height, or half the screen for the moment before the card has measured itself.
+    private var placeCardDetent: PresentationDetent {
+        router.placeCardHeight.map { .height($0) } ?? .medium
+    }
+
     /// The sheet's detent, through ``AppRouter/homeDetent`` so features can raise and lower it.
     private var detent: Binding<PresentationDetent> {
         Binding {
-            router.homeDetent.presentationDetent(peekHeight: peekHeight)
+            router.isShowingPlaceCard
+                ? placeCardDetent
+                : router.homeDetent.presentationDetent(peekHeight: peekHeight)
         } set: { detent in
+            // The place card's one detent isn't one of the home sheet's three.
+            guard !router.isShowingPlaceCard else { return }
             router.homeDetent = HomeSheetDetent(detent)
         }
     }

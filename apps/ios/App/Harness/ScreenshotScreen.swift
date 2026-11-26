@@ -40,8 +40,6 @@ enum ScreenshotScreen: String, CaseIterable {
     case searchRecents = "search-recents"
     /// The place card for a saved place (P1).
     case placeSaved = "place-saved"
-    /// The place card's Home or Work menu, open, for the place that's Work (P1); the UI test opens it.
-    case placeHomeWork = "place-home-work"
     /// The home sheet at half height with the Home and Work chips, set and not set (P2).
     case homePlaces = "home-places"
     case homePlacesUnset = "home-places-unset"
@@ -138,7 +136,7 @@ enum ScreenshotScreen: String, CaseIterable {
         case .homePeek, .homeHalf, .homeFull, .homeOutsideNYC, .about, .nearbyPeek, .nearbyHalf, .nearbyFull,
              .nearbyStale, .nearbyDenied, .nearbyOutsideNYC, .nearbyLoading, .nearbyError, .nearbyEmpty, .searchEmpty,
              .searchTyping, .searchResults, .searchNoResults, .searchError, .searchNoKey, .searchPlace, .searchRecents,
-             .placeSaved, .placeHomeWork, .homePlaces, .homePlacesUnset, .homeSaved, .homeSavedLoading,
+             .placeSaved, .homePlaces, .homePlacesUnset, .homeSaved, .homeSavedLoading,
              .homeSavedEmpty, .stopHalf, .stopFull, .stopStale, .stopError, .stopEmpty, .trip, .tripFull, .tripEnded,
              .tripError, .journeysPeek, .journeysHalf, .journeysFull, .journeysRoute, .journeysArriveBy,
              .journeysLoading, .journeysNoResults, .journeysOutsideNYC, .journeysLocationOff, .journeysError,
@@ -213,7 +211,7 @@ enum ScreenshotScreen: String, CaseIterable {
             router.showLineStatus(nearbyBuses: FixtureSet.unionSquareBuses)
         } else if searchQuery != nil {
             router.showPlaceSearch()
-        } else if [.searchPlace, .placeSaved, .placeHomeWork].contains(self) {
+        } else if [.searchPlace, .placeSaved].contains(self) {
             router.showPlace(FixturePlaceSearchService.places[0])
         } else if isJourneys {
             let place = FixturePlaceSearchService.places[0]
@@ -271,7 +269,7 @@ enum ScreenshotScreen: String, CaseIterable {
     }
 
     /// Fills the in-memory place store with what this screen shows: recents picked over the past day, or the
-    /// card's place saved, or Work with another place as Home, or Home and Work set, or several saved places whose
+    /// card's place saved, or Home and Work set, or several saved places whose
     /// details are fetched again as at launch (one of them never arriving on `slow-network`).
     @MainActor
     func prepare(_ places: PlaceStore) {
@@ -284,7 +282,7 @@ enum ScreenshotScreen: String, CaseIterable {
             }
         case .placeSaved:
             places.save(fixtures[0])
-        case .placeHomeWork, .homePlaces:
+        case .homePlaces:
             places.set(.home, to: fixtures[2])
             places.set(.work, to: fixtures[0])
         case .homeSaved:
