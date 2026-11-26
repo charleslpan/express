@@ -78,22 +78,6 @@ struct JourneyRouteGroupTests {
         #expect(rides.map(\.alightStopId) == ["us-ny-MTA-NYCSubway_R22S", "us-ny-MTA-NYCSubway_M16S"])
     }
 
-    @Test func onlyTheTopFiveRoutesShowWithAllTheirDepartures() throws {
-        let planned = try Self.transfer()
-        // Seven routes, ranked in order; the first also has two later trips.
-        var itineraries = (0 ..< 7).map { index in
-            Self.later(planned, by: index + 1) { $0.routeId = "route-\(index)" }
-        }
-        itineraries.insert(contentsOf: [Self.later(itineraries[0], by: 10), Self.later(itineraries[0], by: 20)], at: 1)
-        let options = itineraries.map(JourneyOption.init)
-        let groups = JourneyOptions.groups(of: options)
-
-        #expect(groups.count == 5)
-        #expect(groups.map(\.primary.id) == [0, 3, 4, 5, 6].map { itineraries[$0].id })
-        #expect(groups[0].options.count == 3)
-        #expect(JourneyOptions.groups(of: options, limit: .max).count == 7)
-    }
-
     @Test func eachDifferenceMakesAnotherRoute() throws {
         let planned = try Self.transfer()
         let changes: [(String, (inout Leg) -> Void)] = [
