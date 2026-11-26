@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 # The `ios` CI job (macOS runner, IOS_RUNNER in .github/ci-config.env): select Xcode, install the pinned XcodeGen,
-# generate apps/ios/Express.xcodeproj, and run the Express scheme's tests on an iOS simulator.
-# Writes build/Express.xcresult and, in test mode, the screenshot harness's PNGs in build/screenshots/ (exported from
-# the result bundle by scripts/ci/screenshots.sh); the workflow uploads both in the ios-<attempt> artifact.
-# Usage: ios.sh [test|build] (default test). Outside CI it keeps the selected Xcode instead of switching to
+# generate apps/ios/Express.xcodeproj, and run tests on an iOS simulator.
+# Modes: `test` (default, what CI runs) runs only the app's unit tests (ExpressTests); `snapshots` runs the whole
+# Express scheme, including the ExpressUITests screenshot harness, fixes the status bar, and exports the PNGs to
+# build/screenshots/ (via scripts/ci/screenshots.sh); `build` only builds. Every mode writes build/Express.xcresult;
+# the workflow uploads build/ results in the ios-<attempt> artifact.
+# Usage: ios.sh [test|snapshots|build] (default test). Outside CI it keeps the selected Xcode instead of switching to
 # XCODE_VERSION, so `pnpm turbo run test` works on a Mac without sudo.
 set -euo pipefail
 
 MODE="${1:-test}"
 case $MODE in
-    test | build) ;;
-    *) echo "usage: $0 [test|build]" >&2 && exit 2 ;;
+    test | snapshots | build) ;;
+    *) echo "usage: $0 [test|snapshots|build]" >&2 && exit 2 ;;
 esac
 
 XCODEGEN_VERSION=2.46.0
@@ -103,7 +105,7 @@ if [[ -z ${udid:-} ]]; then
     exit 1
 fi
 echo "Simulator: $name on $runtime, $udid"
-if [[ $MODE == test ]]; then
+if [[ $MODE == snapshots ]]; then
     # Boot it now to give screenshots a fixed status bar (9:41, full signal and battery).
     xcrun simctl bootstatus "$udid" -b >/dev/null
     xcrun simctl status_bar "$udid" override --time 9:41 --dataNetwork wifi --wifiMode active --wifiBars 3 \
@@ -117,7 +119,15 @@ rm -rf build/Express.xcresult build/screenshots
 # -skipPackagePluginValidation trusts TransitKit's OpenAPI generator build plugin, which CI cannot click through.
 # Export screenshots even when a test fails, so a broken screen can still be seen.
 status=0
-xcodebuild "$MODE" \
+xcb_mode=$MODE
+extra=()
+if [[ $MODE == test ]]; then
+    extra=(-only-testing:ExpressTests)
+elif [[ $MODE == snapshots ]]; then
+    xcb_mode=test
+fi
+xcodebuild "$xcb_mode" \
+    ${extra[@]+"${extra[@]}"} \
     -quiet \
     -project apps/ios/Express.xcodeproj \
     -scheme Express \
@@ -127,7 +137,7 @@ xcodebuild "$MODE" \
     -skipPackagePluginValidation \
     CODE_SIGNING_ALLOWED=NO || status=$?
 
-if [[ $MODE == test && -d build/Express.xcresult ]]; then
+if [[ $MODE == snapshots && -d build/Express.xcresult ]]; then
     if ! scripts/ci/screenshots.sh build/Express.xcresult build/screenshots && [[ $status -eq 0 ]]; then
         status=1
     fi

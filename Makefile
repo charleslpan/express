@@ -1,4 +1,4 @@
-.PHONY: help install generate format lint test ci-swift ci-server ci-ios testflight
+.PHONY: help install generate format lint test ci-swift ci-server ci-ios ci-ios-snapshots testflight
 
 help:
 	@echo "make install   Install the pnpm workspace (pnpm install)"
@@ -37,6 +37,10 @@ ci-server:
 
 ci-ios:
 	scripts/ci/ios.sh test
+
+# The full Express scheme plus the screenshot sweeps (ExpressUITests, GlassUI and TransitKit package tests); not in CI.
+ci-ios-snapshots:
+	scripts/ci/ios.sh snapshots
 
 testflight:
 	scripts/ci/testflight.sh
